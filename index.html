@@ -833,13 +833,23 @@ function enterApp(){C.view='app';C.err='';SAVEKEY=cacheKey(C.hid);ONSAVE=cloudSc
 
 /* --- entrada e saída --- */
 async function cloudInit(){
- C.mode=true;const f=SBF();
+ C.mode=true;const f=SBF();C.back=/[?&]code=|[#&]access_token=/.test(location.search+location.hash);
  try{C.sb=f.lib.createClient(f.cfg.url,f.cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}})}catch(e){C.view='login';C.err='Não foi possível iniciar a conexão com a conta.';render();return}
  const ue=oauthUrlError();if(ue)C.err=ue;
  window.addEventListener('online',()=>{paintSync();if(C.uid&&C.view==='app'){pullAll().catch(()=>{});cloudSchedule()}});window.addEventListener('offline',paintSync);
  document.addEventListener('visibilitychange',()=>{if(C.view!=='app')return;if(document.visibilityState==='hidden'&&C.dirty){clearTimeout(C.timer);cloudPush()}else if(document.visibilityState==='visible'&&C.ready&&navigator.onLine)pullAll().catch(()=>{})});
- C.sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(ev==='SIGNED_OUT')onNoUser();else if(session&&session.user&&(ev==='INITIAL_SESSION'||ev==='SIGNED_IN'))onUser(session.user);else if(ev==='INITIAL_SESSION'&&!session)onNoUser()},0)});
+ C.sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(ev==='SIGNED_OUT')onNoUser();else if(session&&session.user&&(ev==='INITIAL_SESSION'||ev==='SIGNED_IN'))onUser(session.user);else if(ev==='INITIAL_SESSION'&&!session)loginBack().then(onNoUser,onNoUser)},0)});
  setTimeout(()=>{if(C.view==='boot'){C.view='login';render()}},9000)}
+/* Se o usuário voltou do Google mas não há sessão, mostra o motivo em vez de só reabrir o login */
+async function loginBack(){
+ let st=false;try{localStorage.setItem('hth-t','1');st=localStorage.getItem('hth-t')==='1';localStorage.removeItem('hth-t')}catch(e){}
+ const t=+(lsg('minha-casa-login-t')||0),recent=t&&Date.now()-t<15*60*1000;
+ if(!C.back&&!recent)return;try{localStorage.removeItem('minha-casa-login-t')}catch(e){}
+ if(C.err)return;let det='';
+ if(C.back){try{const r=C.sb.auth.initialize?await C.sb.auth.initialize():null;det=r&&r.error?String(r.error.message||r.error):''}catch(e){det=String((e&&e.message)||e)}}
+ const ua=navigator.userAgent,nav=/Instagram|FBAN|FBAV|WhatsApp|Line\/|GSA\//.test(ua)?'navegador dentro de outro app':/CriOS/.test(ua)?'Chrome (iPhone)':/FxiOS/.test(ua)?'Firefox (iPhone)':/Safari/.test(ua)&&!/Chrome|Android/.test(ua)?'Safari':'outro navegador';
+ C.err=C.back?'O Google confirmou o login, mas o navegador não conseguiu concluir a entrada no app. Toque em “Entrar com o Google” para tentar de novo.':'Você voltou do Google, mas o endereço de retorno não trouxe a confirmação do login. Toque em “Entrar com o Google” para tentar de novo.';
+ C.diag=`Detalhe técnico: ${nav} · confirmação no endereço: ${C.back?'sim':'não'} · armazenamento do navegador: ${st?'ok':'bloqueado'}${det?' · '+det:''}`}
 function onNoUser(){stopSync();clearTimeout(C.timer);C.user=null;C.uid=null;C.hid=null;C.info=null;C.joined=false;C.confirmRm=null;C.confirmLeave=false;C.invErr='';C.invMsg='';C.ready=false;C.sy=null;SAVEKEY=null;ONSAVE=null;S=EMPTY();C.view='login';C.confirmOut=false;C.busy=false;render()}
 async function onUser(u){
  if(C.uid===u.id&&C.view!=='login'&&C.view!=='boot')return;
@@ -868,7 +878,7 @@ async function cloudInfo(){if(!C.mode||!C.uid||!C.hid)return;const hid=C.hid;try
 function lostHouse(joined){const u=C.user;if(!u)return;stopSync();clearTimeout(C.timer);C.ready=false;C.dirty=false;C.pushing=false;C.pushErr='';lss(hidKey(u.id),'');SAVEKEY=null;ONSAVE=null;
  U.msg=joined?'Você entrou na casa compartilhada. Tudo o que você e as outras pessoas fizerem aparece para todos.':'Você não faz mais parte da casa compartilhada que estava aberta aqui. Agora você está em uma casa só sua.';
  Object.assign(U,{open:null,room:null,imp:null,pur:null,arm:null,wipe:false,wipeErr:'',tab:'home'});C.view='boot';onUser(u)}
-async function signIn(){C.err='';C.busy=true;render();
+async function signIn(){C.err='';C.diag='';C.busy=true;lss('minha-casa-login-t',String(Date.now()));render();
  try{const back=location.origin+location.pathname.replace(/index\.html$/,'');
   const {error}=await C.sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back,queryParams:{prompt:'select_account'}}});if(error)throw error}
  catch(e){C.err=authErr(e);C.busy=false;C.view='login';render()}}
@@ -927,7 +937,7 @@ function cloudAct(a){
 
 /* --- telas --- */
 const legCount=()=>{const n=countData(C.LEG||EMPTY());return `${n.items} item(ns), ${n.pays} pagamento(s), ${n.rooms} ambiente(s), ${n.sup} fornecedor(es) e ${n.notes} anotação(ões)`};
-const clErr=()=>C.err?`<p class="warn" role="alert">${esc(C.err)}</p>`:'';
+const clErr=()=>C.err?`<p class="warn" role="alert">${esc(C.err)}</p>${C.diag?`<p class="note" style="font-size:12px;word-break:break-word">${esc(C.diag)}</p>`:''}`:'';
 function cloudScreen(){const v=C.view,msg=U.bmsg||U.msg;
  const wrap=h=>`<section class="ob-s cl"><p class="appn">House to Home</p>${h}</section>`;
  if(v==='boot'||v==='gate'||v==='load'||v==='work')return wrap(`<h1>${v==='work'?esc(C.work):v==='gate'?'Verificando sua conta…':v==='load'?'Carregando seus dados…':'Abrindo…'}</h1><p class="note" role="status">Aguarde um instante. Não feche o app.</p><div class="spin" aria-hidden="true"></div>`);
