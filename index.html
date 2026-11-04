@@ -888,7 +888,7 @@ function cloudAct(a){
  if(a==='login')signIn();
  else if(a==='local'){lss(LOCALFLAG,'1');location.reload()}
  else if(a==='account'){try{localStorage.removeItem(LOCALFLAG)}catch(e){}location.reload()}
- else if(a==='retry'){C.err='';if(C.user){C.view='boot';onUser(C.user)}else{C.view='login';render()}}
+ else if(a==='retry'){C.err='';if(!C.sb){location.reload();return}if(C.user){C.view='boot';onUser(C.user)}else{C.view='login';render()}}
  else if(a==='signout'){C.confirmOut=true;render()}else if(a==='signout-x'){C.confirmOut=false;render()}else if(a==='signout-go')signOut();
  else if(a==='mig-send')doMigrate('send');else if(a==='ch-merge')doMigrate('merge');
  else if(a==='mig-bk')exportLeg();
@@ -905,7 +905,7 @@ function cloudScreen(){const v=C.view,msg=U.bmsg||U.msg;
 <button class="btn gbtn" data-cl="login" ${C.busy?'disabled':''}>${C.busy?'Abrindo o Google…':'Entrar com o Google'}</button>
 <p class="note">O app nunca vê sua senha: o login é feito pelo Google. Seus dados ficam separados dos de qualquer outra pessoa.</p>
 <button class="lk" data-cl="local">Usar só neste aparelho (sem conta)</button>`);
- if(v==='error')return wrap(`<h1>Não foi possível continuar</h1>${clErr()}<div class="two"><button class="btn" data-cl="retry">Tentar de novo</button>${C.uid?'<button class="btn alt" data-cl="signout-go">Sair da conta</button>':''}</div>`);
+ if(v==='error')return wrap(`<h1>Não foi possível continuar</h1>${clErr()}<div class="two"><button class="btn" data-cl="retry">Tentar de novo</button>${C.uid?'<button class="btn alt" data-cl="signout-go">Sair da conta</button>':''}</div>${C.uid?'':'<button class="lk" data-cl="local">Usar só neste aparelho (sem conta)</button>'}`);
  if(v==='migrate'||v==='choose'){const m=v==='migrate';
   return wrap(`<h1>${m?'Enviar os dados deste aparelho?':'Esta conta já tem dados'}</h1>
 <p class="lead">${m?'Encontramos dados salvos só neste aparelho:':'Esta conta já tem dados salvos, e este aparelho também tem dados próprios:'} <b>${esc(legCount())}</b>.</p>
