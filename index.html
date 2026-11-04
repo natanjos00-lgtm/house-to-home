@@ -142,6 +142,7 @@ details.bud{margin:8px 0}details.bud summary{font-size:14px;color:var(--brown);f
 .sync:empty::before{display:none}.sync.sync::before{background:var(--taupe)}.sync.off::before{background:var(--warn)}.sync.err{color:var(--bad)}.sync.err::before{background:var(--bad)}
 .cl .appn{font:600 13px/1 Figtree,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0}.cl .lead{font-size:17px;margin:14px 0}.cl .btn{width:100%;margin:10px 0}.cl .lk{display:block;margin:10px 0}
 .gbtn{background:var(--brown)}.spin{width:28px;height:28px;border:3px solid var(--sand);border-top-color:var(--olive);border-radius:50%;animation:sp 1s linear infinite;margin:18px 0}@keyframes sp{to{transform:rotate(360deg)}}
+.mem{list-style:none;padding:0;margin:0 0 8px}.mem li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.mem li .two{display:flex;gap:6px}.mem li .btn{width:auto;margin:0;min-height:36px;padding:6px 12px}
 .acct{margin:12px 0}.acct h2{margin:0 0 4px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="theme-color" content="#5b4636"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="House to Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -503,12 +504,12 @@ ${archive()}`}
 function dangerZone(){const n=act().length,p=S.pays.length;
  return `<section class="danger" id="dz" aria-labelledby="dzh"><h2 id="dzh">Ações destrutivas</h2><p class="note">Estas ações removem dados. Baixe ou copie um backup antes, na seção acima.</p>
 ${U.wipe?`<form class="wipe" data-wipef role="alertdialog" aria-labelledby="wt" aria-describedby="wd"><b id="wt">Apagar tudo?</b>
-<p id="wd" class="fin" style="margin:6px 0">${C.mode?'Todos os dados da sua conta serão removidos, <b>em todos os aparelhos</b>':'Todos os dados deste aparelho serão removidos'}: ${n} item(ns), ${p} pagamento(s), ambientes, fornecedores, histórico, anotações, fotos, o nome e a capa da casa. <b>Esta ação não pode ser desfeita.</b></p>
+<p id="wd" class="fin" style="margin:6px 0">${C.mode?'Todos os dados da casa serão removidos, <b>para todas as pessoas e em todos os aparelhos</b>':'Todos os dados deste aparelho serão removidos'}: ${n} item(ns), ${p} pagamento(s), ambientes, fornecedores, histórico, anotações, fotos, o nome e a capa da casa. <b>Esta ação não pode ser desfeita.</b></p>
 <div class="two" style="margin:8px 0"><button type="button" class="btn alt" data-exp="file">Baixar backup antes</button><button type="button" class="btn alt" data-exp="copy">Copiar texto</button></div>${U.bmsg?`<p class="warn ok" role="status">${esc(U.bmsg)}</p>`:''}
 <label>Para confirmar, digite APAGAR<input name="confirm" id="wipein" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="wd" data-wipein></label>
 ${U.wipeErr?`<p class="warn" role="alert">${esc(U.wipeErr)}</p>`:''}
 <div class="two" style="margin-top:10px"><button type="button" class="btn alt" data-wipex>Cancelar</button><button class="btn bad" id="wipego" disabled>Apagar tudo</button></div></form>`
-:`<button class="btn altbad" data-wipe style="width:100%">Apagar tudo…</button>`}</section>`}
+:(C.mode&&C.info&&C.info.role==='member')?`<p class="note">Só quem criou a casa pode apagar tudo.</p>`:`<button class="btn altbad" data-wipe style="width:100%">Apagar tudo…</button>`}</section>`}
 const budgetEdit=a=>{const o=a==='obra';return `<details class="bud" id="orc" ${U.orc?'open':''}><summary>Orçamento ${o?'da obra':'do enxoval'} (editar)</summary><div class="grid">${bin(a,o?'Orçamento da obra':'Orçamento do enxoval')}</div><p class="note">Valor opcional, só para ${o?'a obra/reforma':'o enxoval'}. Saldo = orçamento − comprometido. ${o?'O orçamento do enxoval fica na aba Enxoval.':'O orçamento da obra fica na aba Obra.'} Os dois nunca são somados.</p></details>`};
 const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+dangerZone()
 
@@ -688,6 +689,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
   addItem({area:U.tab,kind:T?d.get('kind'):'produto',name,cat:(d.get('cat')||'').trim(),roomId:d.get('room')||null,planned:parse(d.get('planned'))||0,qtyNeed:T?1:Math.max(1,qint(d.get('qty'))||1)})}
  else if(f.id==='rf'){const n=d.get('name').trim();if(n)mkRoom(n)}
  else if(f.dataset.wipef!==undefined){if(String(d.get('confirm')||'').trim()!=='APAGAR'){U.wipeErr='Digite APAGAR (em maiúsculas) para confirmar. Nada foi apagado.';render();return}if(C.mode&&C.uid)await wipeCloud();else await wipeAll();return}
+ else if(f.dataset.invf!==undefined){await inviteSend(String(d.get('email')||''));return}
  else if(f.dataset.hform!==undefined){const n=setHouseName(d.get('hname'));U.cfg=f.dataset.hform==='0';if(f.dataset.hform==='1'){if(!n){S.house.done=false;return}U.obErr='';U.ob=nextOb(1)}}
  else if(f.dataset.bform!==undefined){const k=f.dataset.bform,v=parse(d.get('budget'));
   if(!v){U.obErr=String(d.get('budget')||'').trim()?'Informe um valor válido maior que zero, por exemplo 80.000,00. Ou pule esta etapa.':'Digite o valor ou toque em “Pular esta etapa”.';render();return}
@@ -743,11 +745,11 @@ document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=(
 
 /* ---------- Conta Google + Supabase ----------
    Só liga quando o Supabase está configurado (site publicado, com config.js preenchido). Sem isso o app funciona como antes, só neste aparelho.
-   Dados: tabela records (user_id, coll, id, data, ord, del) e tabela photos (user_id, id, data). O banco só deixa cada pessoa ver as próprias linhas. */
+   Dados: tabela records (household_id, coll, id, data, ord, del) e tabela photos (household_id, id, data). Cada casa tem donos/participantes; o banco só deixa os membros da casa ver as linhas dela. */
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const SBF=()=>{const cfg=(window.__SBTEST&&window.__SBTEST.cfg)||window.HTH_CONFIG,lib=window.__SBTEST||window.supabase;return lib&&lib.createClient&&cfg&&/^https:\/\/.+/.test(cfg.url||'')&&(cfg.anonKey||'').length>20&&!/COLE|SEU/i.test((cfg.url||'')+(cfg.anonKey||''))?{lib,cfg}:null};
 const LOCALFLAG='minha-casa-modo-local';
-Object.assign(C,{mode:false,view:'boot',user:null,uid:null,sb:null,sy:null,LEG:null,ch:null,poll:null,ready:false,timer:null,pushing:false,again:false,dirty:false,err:'',pushErr:'',listenErr:'',busy:false,work:'',confirmOut:false,defer:false,retry:null,legHint:'',pushStart:0});
+Object.assign(C,{mode:false,view:'boot',user:null,uid:null,sb:null,sy:null,LEG:null,ch:null,poll:null,ready:false,timer:null,pushing:false,again:false,dirty:false,err:'',pushErr:'',listenErr:'',busy:false,work:'',confirmOut:false,defer:false,retry:null,legHint:'',pushStart:0,hid:null,info:null,joined:false,invBusy:false,invErr:'',invMsg:'',confirmRm:null,confirmLeave:false});
 const isNet=e=>{const m=String((e&&e.message)||''),c=String((e&&(e.code||e.status))||'');return /fetch|network|offline|Load failed|timeout/i.test(m)||(!c&&!navigator.onLine)};
 const authErr=e=>{const m=String((e&&e.message)||e||'');return /popup|cancel|access_denied/i.test(m)?'O login foi cancelado. Toque em “Entrar com o Google” para tentar de novo.'
  :isNet(e)?'Sem conexão com a internet. Confira o Wi‑Fi ou os dados móveis e tente de novo.'
@@ -756,13 +758,16 @@ const authErr=e=>{const m=String((e&&e.message)||e||'');return /popup|cancel|acc
  :/rate|too many|429/i.test(m)?'Muitas tentativas. Aguarde alguns minutos e tente de novo.':'Não foi possível entrar. Tente de novo.'};
 const sbErr=e=>{const c=String((e&&(e.code||e.status))||''),m=String((e&&e.message)||'');
  if(isNet(e))return'Sem conexão com o servidor. Suas alterações ficam salvas neste aparelho e serão enviadas quando a conexão voltar.';
+ if(c==='PGRST202'||c==='42883'||c==='42703'||/household|Could not find the function/i.test(m))return'O banco ainda não tem a atualização da casa compartilhada. Execute o script 02-casa-compartilhada.sql no Supabase e tente de novo.';
  if(c==='42P01'||c==='PGRST205'||/does not exist|schema cache/i.test(m))return'As tabelas do banco ainda não foram criadas no Supabase. Execute o script do banco (schema.sql) e tente de novo.';
  if(c==='42501'||c==='401'||c==='403'||c==='PGRST301'||c==='PGRST303'||/JWT|permission|policy|row-level/i.test(m))return'O servidor recusou o acesso. Entre de novo e confira se o script de segurança do banco foi executado no Supabase.';
  if(c==='23514'||c==='413')return'Um registro ou uma foto é grande demais para a conta.';
  if(c==='429')return'Limite do servidor atingido. Suas alterações ficam salvas neste aparelho.';
  return'Não foi possível sincronizar agora.'+(c?' ('+c+')':'')};
-const syKey=u=>'minha-casa-sync-'+u,cacheKey=u=>'minha-casa-u-'+u,migKey=u=>'minha-casa-mig-'+u;
-const persistSync=()=>{if(C.uid&&C.sy)lss(syKey(C.uid),JSON.stringify(C.sy))};
+const syKey=h=>'minha-casa-sync-'+h,cacheKey=h=>'minha-casa-u-'+h,migKey=u=>'minha-casa-mig-'+u,hidKey=u=>'minha-casa-hid-'+u;
+const persistSync=()=>{if(C.hid&&C.sy)lss(syKey(C.hid),JSON.stringify(C.sy))};
+const rpcErr=e=>(!isNet(e)&&e&&e.code==='P0001'&&e.message)?e.message:sbErr(e);
+async function rpc(n,a){const {data,error}=await C.sb.rpc(n,a||{});if(error)throw error;return data}
 const refPhotos=()=>[...allRefs()].filter(isCustom);
 const oauthUrlError=()=>{const s=location.search+location.hash,m=/error_description=([^&]+)/.exec(s);if(!m)return'';let d='';try{d=decodeURIComponent(m[1].replace(/\+/g,' '))}catch(e){}
  try{history.replaceState(null,'',location.pathname)}catch(e){}return/access_denied/.test(s)?'O login foi cancelado. Toque em “Entrar com o Google” para tentar de novo.':/redirect/i.test(d)?'Este endereço do app não está autorizado no Supabase (Authentication → URL Configuration → Redirect URLs).':'Não foi possível entrar: '+d};
@@ -777,18 +782,18 @@ function paintSync(){const el=document.getElementById('sync');if(!el)return;
  else if(C.dirty||C.pushing){t='Sincronizando…';k='sync'}
  else t='Salvo na conta';
  el.textContent=t;el.className='sync '+k;const a=document.getElementById('acs');if(a)a.textContent=t}
-function cloudSchedule(){if(!C.mode||!C.uid||C.view!=='app')return;C.dirty=true;clearTimeout(C.timer);C.timer=setTimeout(cloudPush,600);paintSync()}
+function cloudSchedule(){if(!C.mode||!C.uid||!C.hid||C.view!=='app')return;C.dirty=true;clearTimeout(C.timer);C.timer=setTimeout(cloudPush,600);paintSync()}
 const reshrink=(u,mx,q)=>new Promise(res=>{const im=new Image();im.onload=()=>{const k=Math.min(1,mx/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',q))};im.onerror=()=>res(null);im.src=u});
 async function uploadPhoto(pid){const d=await pget(pid);if(!d)return true;let u=d;
  for(let q=.75,m=1100;u.length>850000&&q>.3;q-=.15,m-=150)u=await reshrink(d,m,q)||u;
  if(u.length>=900000)return false;
- const {error}=await C.sb.from('photos').upsert({user_id:C.uid,id:pid,data:u},{onConflict:'user_id,id'});if(error)throw error;C.sy.ph[pid]=1;persistSync();return true}
+ const {error}=await C.sb.from('photos').upsert({household_id:C.hid,user_id:C.uid,id:pid,data:u},{onConflict:'household_id,id'});if(error)throw error;C.sy.ph[pid]=1;persistSync();return true}
 async function pushPhotos(){let bad=0;for(const pid of refPhotos()){if(C.sy.ph[pid])continue;if(!(await uploadPhoto(pid)))bad++}if(bad)C.pushErr=bad+' foto(s) são grandes demais para a conta e ficaram só neste aparelho.'}
-async function cloudPhoto(pid){if(!C.mode||!C.uid||!C.sb)return null;try{const {data}=await C.sb.from('photos').select('data').eq('user_id',C.uid).eq('id',pid).maybeSingle();if(data&&data.data){pdb('put',pid,data.data);C.sy&&(C.sy.ph[pid]=1);return data.data}}catch(e){}return null}
-const rowOf=u=>{const d=Object.assign({},u.data),o=d._o==null?null:d._o;delete d._o;return{user_id:C.uid,coll:u.c,id:u.id,data:d,ord:o,del:false}};
-const tombOf=x=>({user_id:C.uid,coll:x.c,id:x.id,data:{},ord:null,del:true});
+async function cloudPhoto(pid){if(!C.mode||!C.hid||!C.sb)return null;try{const {data}=await C.sb.from('photos').select('data').eq('household_id',C.hid).eq('id',pid).maybeSingle();if(data&&data.data){pdb('put',pid,data.data);C.sy&&(C.sy.ph[pid]=1);return data.data}}catch(e){}return null}
+const rowOf=u=>{const d=Object.assign({},u.data),o=d._o==null?null:d._o;delete d._o;return{household_id:C.hid,user_id:C.uid,coll:u.c,id:u.id,data:d,ord:o,del:false}};
+const tombOf=x=>({household_id:C.hid,user_id:C.uid,coll:x.c,id:x.id,data:{},ord:null,del:true});
 async function cloudPush(){
- if(!C.mode||!C.uid||!C.ready||C.view!=='app')return;
+ if(!C.mode||!C.uid||!C.hid||!C.ready||C.view!=='app')return;
  if(C.pushing){C.again=true;return}
  C.pushing=true;C.pushStart=Date.now();C.pushErr='';paintSync();setTimeout(paintSync,8200);
  try{
@@ -798,7 +803,7 @@ async function cloudPush(){
    if(!d.up.length&&!d.del.length){if(C.again)continue;C.dirty=false;break}
    const ops=[...d.up.map(u=>({t:'s',u})),...d.del.map(x=>({t:'d',x}))];
    for(let i=0;i<ops.length;i+=150){const part=ops.slice(i,i+150);
-    const {error}=await C.sb.from('records').upsert(part.map(o=>o.t==='s'?rowOf(o.u):tombOf(o.x)),{onConflict:'user_id,coll,id'});if(error)throw error;
+    const {error}=await C.sb.from('records').upsert(part.map(o=>o.t==='s'?rowOf(o.u):tombOf(o.x)),{onConflict:'household_id,coll,id'});if(error)throw error;
     markSynced(C.sy,{up:part.filter(o=>o.t==='s').map(o=>o.u),del:part.filter(o=>o.t==='d').map(o=>o.x)});persistSync()}
   }
  }catch(e){C.pushErr=sbErr(e);clearTimeout(C.retry);C.retry=setTimeout(cloudPush,15000)}
@@ -808,21 +813,23 @@ function softRender(){const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SEL
 document.addEventListener('focusout',()=>{if(C.defer)setTimeout(()=>{const a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)))softRender()},50)});
 
 /* --- leitura da conta: baixa tudo, aplica sem sobrescrever alterações locais ainda não enviadas, e acompanha em tempo real --- */
-async function fetchAll(){const out=[];for(let a=0;;a+=1000){const {data,error}=await C.sb.from('records').select('coll,id,data,ord,del').eq('user_id',C.uid).order('coll').order('id').range(a,a+999);if(error)throw error;out.push(...data);if(data.length<1000)break}return out}
+async function fetchAll(){const out=[];for(let a=0;;a+=1000){const {data,error}=await C.sb.from('records').select('coll,id,data,ord,del').eq('household_id',C.hid).order('coll').order('id').range(a,a+999);if(error)throw error;out.push(...data);if(data.length<1000)break}return out}
 function applyRow(r){if(r.coll==='_meta')return!r.del&&!isDirty(S,C.sy,'_meta')&&applyRemote(S,C.sy,'_meta','added','_meta',r.data);
  if(!COLLS.includes(r.coll))return false;const ty=r.del?'removed':'modified';if(isDirty(S,C.sy,r.coll,r.id,ty))return false;
  return applyRemote(S,C.sy,r.coll,ty,r.id,r.del?null:Object.assign({},r.data,r.ord!=null?{_o:r.ord}:{}))}
-async function pullAll(){const uid=C.uid,rows=await fetchAll();if(uid!==C.uid)return rows;let ch=false;const seen={};COLLS.forEach(c=>seen[c]=new Set());
+async function pullAll(){const hid=C.hid,rows=await fetchAll();if(hid!==C.hid)return rows;
+ if(!rows.length&&COLLS.some(c=>S[c].some(x=>(C.sy.rec[c]||{})[x.id]!==undefined&&C.sy.rec[c][x.id]!=='?'))){const i=await rpc('household_info');if(hid!==C.hid)return rows;if(i.household_id!==hid){lostHouse(false);return rows}}
+ let ch=false;const seen={};COLLS.forEach(c=>seen[c]=new Set());
  rows.forEach(r=>{if(seen[r.coll])seen[r.coll].add(r.id);if(applyRow(r))ch=true});
  COLLS.forEach(c=>S[c].filter(x=>(C.sy.rec[c]||{})[x.id]!==undefined&&C.sy.rec[c][x.id]!=='?'&&!seen[c].has(x.id)&&!isDirty(S,C.sy,c,x.id,'removed')).forEach(x=>{if(applyRemote(S,C.sy,c,'removed',x.id))ch=true}));
  C.listenErr='';if(ch){sortRemote(S,C.sy);localSave();softRender()}else paintSync();return rows}
 function stopSync(){clearInterval(C.poll);C.poll=null;if(C.ch){try{C.sb.removeChannel(C.ch)}catch(e){}C.ch=null}}
-function startSync(){stopSync();C.ready=false;C.listenErr='';const uid=C.uid;
- (async()=>{try{await pullAll();if(uid!==C.uid)return;C.listenErr='';setReady()}catch(e){if(uid!==C.uid)return;C.listenErr=isNet(e)?'':sbErr(e);if(C.view==='load'){C.view='error';C.err=C.listenErr;render()}else if(!C.ready&&C.view==='app'&&isNet(e)){setReady()}else paintSync()}})();
- try{C.ch=C.sb.channel('rec-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'records',filter:'user_id=eq.'+uid},p=>{const r=p&&p.new;if(!r||r.user_id!==C.uid||!C.ready)return;if(applyRow(r)){sortRemote(S,C.sy);localSave();softRender()}}).subscribe()}catch(e){}
+function startSync(){stopSync();C.ready=false;C.listenErr='';const hid=C.hid;
+ (async()=>{try{await pullAll();if(hid!==C.hid)return;C.listenErr='';setReady()}catch(e){if(hid!==C.hid)return;C.listenErr=isNet(e)?'':sbErr(e);if(C.view==='load'){C.view='error';C.err=C.listenErr;render()}else if(!C.ready&&C.view==='app'&&isNet(e)){setReady()}else paintSync()}})();
+ try{C.ch=C.sb.channel('rec-'+hid).on('postgres_changes',{event:'*',schema:'public',table:'records',filter:'household_id=eq.'+hid},p=>{const r=p&&p.new;if(!r||r.household_id!==C.hid||!C.ready)return;if(applyRow(r)){sortRemote(S,C.sy);localSave();softRender()}}).subscribe()}catch(e){}
  C.poll=setInterval(()=>{if(C.ready&&C.view==='app'&&document.visibilityState==='visible'&&navigator.onLine&&!C.pushing)pullAll().then(()=>{C.listenErr=''}).catch(()=>{})},45000)}
 function setReady(){C.ready=true;clearTimeout(C.rt);if(C.view==='load')enterApp();else{paintSync();cloudSchedule()}}
-function enterApp(){C.view='app';C.err='';SAVEKEY=cacheKey(C.uid);ONSAVE=cloudSchedule;sortRemote(S,C.sy);localSave();render();mig();cloudSchedule()}
+function enterApp(){C.view='app';C.err='';SAVEKEY=cacheKey(C.hid);ONSAVE=cloudSchedule;sortRemote(S,C.sy);localSave();render();mig();cloudSchedule();cloudInfo()}
 
 /* --- entrada e saída --- */
 async function cloudInit(){
@@ -833,22 +840,34 @@ async function cloudInit(){
  document.addEventListener('visibilitychange',()=>{if(C.view!=='app')return;if(document.visibilityState==='hidden'&&C.dirty){clearTimeout(C.timer);cloudPush()}else if(document.visibilityState==='visible'&&C.ready&&navigator.onLine)pullAll().catch(()=>{})});
  C.sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(ev==='SIGNED_OUT')onNoUser();else if(session&&session.user&&(ev==='INITIAL_SESSION'||ev==='SIGNED_IN'))onUser(session.user);else if(ev==='INITIAL_SESSION'&&!session)onNoUser()},0)});
  setTimeout(()=>{if(C.view==='boot'){C.view='login';render()}},9000)}
-function onNoUser(){stopSync();clearTimeout(C.timer);C.user=null;C.uid=null;C.ready=false;C.sy=null;SAVEKEY=null;ONSAVE=null;S=EMPTY();C.view='login';C.confirmOut=false;C.busy=false;render()}
+function onNoUser(){stopSync();clearTimeout(C.timer);C.user=null;C.uid=null;C.hid=null;C.info=null;C.joined=false;C.confirmRm=null;C.confirmLeave=false;C.invErr='';C.invMsg='';C.ready=false;C.sy=null;SAVEKEY=null;ONSAVE=null;S=EMPTY();C.view='login';C.confirmOut=false;C.busy=false;render()}
 async function onUser(u){
  if(C.uid===u.id&&C.view!=='login'&&C.view!=='boot')return;
- C.user=u;C.uid=u.id;C.busy=false;stopSync();SAVEKEY=null;ONSAVE=null;
- let cached=null,sy=null;try{const r=lsg(cacheKey(u.id));if(r)cached=migrate(JSON.parse(r));const q=lsg(syKey(u.id));if(q)sy=JSON.parse(q)}catch(e){cached=null}
- if(cached){C.err='';S=cached;C.sy=Object.assign(newSync(),sy||{});C.view='app';SAVEKEY=cacheKey(u.id);ONSAVE=cloudSchedule;render();mig();startSync();return}
+ C.user=u;C.uid=u.id;C.hid=null;C.info=null;C.joined=false;C.busy=false;stopSync();SAVEKEY=null;ONSAVE=null;
+ const hs=lsg(hidKey(u.id));
+ let cached=null,sy=null;try{if(hs){const r=lsg(cacheKey(hs));if(r)cached=migrate(JSON.parse(r));const q=lsg(syKey(hs));if(q)sy=JSON.parse(q)}}catch(e){cached=null}
+ if(cached){C.err='';C.hid=hs;S=cached;C.sy=Object.assign(newSync(),sy||{});C.view='app';SAVEKEY=cacheKey(hs);ONSAVE=cloudSchedule;render();mig();startSync();checkHouse();return}
  S=EMPTY();C.sy=newSync();C.view='gate';render();
+ let hh;
+ try{hh=await rpc('ensure_household');if(!hh||!hh.household_id)throw new Error('sem casa')}
+ catch(e){C.view='error';C.err=isNet(e)?'Sem conexão com a internet. Para entrar pela primeira vez neste aparelho é preciso estar online.':rpcErr(e);render();return}
+ C.hid=hh.household_id;C.joined=!!hh.joined;lss(hidKey(u.id),C.hid);
+ if(C.joined)U.msg='Você entrou na casa compartilhada. Tudo o que você e as outras pessoas fizerem aparece para todos.';
  let has=false;
- try{const {data,error}=await C.sb.from('records').select('id').eq('user_id',u.id).limit(1);if(error)throw error;has=data.length>0}
+ try{const {data,error}=await C.sb.from('records').select('id').eq('household_id',C.hid).limit(1);if(error)throw error;has=data.length>0}
  catch(e){C.view='error';C.err=isNet(e)?'Sem conexão com a internet. Para entrar pela primeira vez neste aparelho é preciso estar online.':sbErr(e);render();return}
  C.err='';
  const leg=C.LEG&&hasUserData(C.LEG)&&lsg(migKey(u.id))!=='1';C.cloudHas=has;
  const sent=lsg('minha-casa-legacy-sent');C.legHint=sent&&sent!==u.id?'Atenção: a cópia deste aparelho já foi enviada para outra conta Google. Envie para esta só se for realmente a mesma casa.':'';
  if(leg){C.view=has?'choose':'migrate';render();return}
  if(has){C.view='load';render();startSync();clearTimeout(C.rt);C.rt=setTimeout(()=>{if(C.view==='load'){C.ready=true;enterApp()}},15000);return}
- S=EMPTY();seedRooms();SAVEKEY=cacheKey(u.id);startSync();enterApp()}
+ S=EMPTY();seedRooms();SAVEKEY=cacheKey(C.hid);startSync();enterApp()}
+/* Casa compartilhada: confere em segundo plano se ainda estamos na mesma casa e carrega quem faz parte dela */
+async function checkHouse(){const hid=C.hid;try{const hh=await rpc('ensure_household');if(hid!==C.hid)return;if(hh.household_id!==hid){lostHouse(!!hh.joined);return}cloudInfo()}catch(e){}}
+async function cloudInfo(){if(!C.mode||!C.uid||!C.hid)return;const hid=C.hid;try{const i=await rpc('household_info');if(hid!==C.hid)return;if(i.household_id!==hid){lostHouse(false);return}C.info=i;softRender()}catch(e){}}
+function lostHouse(joined){const u=C.user;if(!u)return;stopSync();clearTimeout(C.timer);C.ready=false;C.dirty=false;C.pushing=false;C.pushErr='';lss(hidKey(u.id),'');SAVEKEY=null;ONSAVE=null;
+ U.msg=joined?'Você entrou na casa compartilhada. Tudo o que você e as outras pessoas fizerem aparece para todos.':'Você não faz mais parte da casa compartilhada que estava aberta aqui. Agora você está em uma casa só sua.';
+ Object.assign(U,{open:null,room:null,imp:null,pur:null,arm:null,wipe:false,wipeErr:'',tab:'home'});C.view='boot';onUser(u)}
 async function signIn(){C.err='';C.busy=true;render();
  try{const back=location.origin+location.pathname.replace(/index\.html$/,'');
   const {error}=await C.sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back,queryParams:{prompt:'select_account'}}});if(error)throw error}
@@ -858,32 +877,40 @@ async function signOut(){C.confirmOut=false;try{clearTimeout(C.timer);if(C.dirty
 /* --- migração dos dados deste aparelho (a cópia local nunca é apagada) --- */
 async function verifyCloud(){const want=countData(S),bad=[],rows=await fetchAll(),got={};COLLS.forEach(c=>got[c]=0);rows.forEach(r=>{if(!r.del&&got[r.coll]!==undefined)got[r.coll]++});
  COLLS.forEach(c=>{if(got[c]!==want[c])bad.push(`${c}: conta ${got[c]}, aparelho ${want[c]}`)});
- const {data,error}=await C.sb.from('photos').select('id').eq('user_id',C.uid);if(error)throw error;const have=new Set(data.map(x=>x.id));
+ const {data,error}=await C.sb.from('photos').select('id').eq('household_id',C.hid);if(error)throw error;const have=new Set(data.map(x=>x.id));
  for(const pid of refPhotos()){if(!have.has(pid)&&await pget(pid))bad.push('foto '+pid.slice(0,6)+' não enviada')}return bad}
 async function doMigrate(mode){
  try{C.view='work';C.work=mode==='merge'?'Juntando os dados deste aparelho com os da conta…':'Enviando seus dados para a conta…';render();
   const leg=migrate(JSON.parse(JSON.stringify(C.LEG)));
   if(mode==='merge'){S=EMPTY();C.sy=newSync();startSync();await new Promise((res,rej)=>{const t0=Date.now(),w=()=>C.ready?res():C.listenErr?rej(new Error(C.listenErr)):Date.now()-t0>25000?rej(new Error('Tempo esgotado ao ler a conta.')):setTimeout(w,100);w()});mergeData(S,leg)}
   else{S=leg;C.sy=newSync()}
-  SAVEKEY=cacheKey(C.uid);ONSAVE=null;C.ready=true;localSave();
+  SAVEKEY=cacheKey(C.hid);ONSAVE=null;C.ready=true;localSave();
   C.view='app';await cloudPush();C.view='work';
   if(C.pushErr)throw new Error(C.pushErr);
   const bad=await verifyCloud();if(bad.length)throw new Error('A conferência encontrou diferenças: '+bad.join('; ')+'. Nada foi apagado deste aparelho.');
   lss(migKey(C.uid),'1');lss('minha-casa-legacy-sent',C.uid);
   U.msg=`Pronto: ${S.items.length} item(ns), ${S.pays.length} pagamento(s) e ${S.rooms.length} ambiente(s) estão na sua conta. A cópia deste aparelho foi mantida.`;
   if(mode!=='merge')startSync();enterApp()}
- catch(e){C.view=C.cloudHas?'choose':'migrate';C.err=(e&&e.message&&!e.code&&!isNet(e))?e.message:sbErr(e);S=EMPTY();SAVEKEY=null;ONSAVE=null;stopSync();C.ready=false;C.dirty=false;C.pushing=false;try{localStorage.removeItem(cacheKey(C.uid));localStorage.removeItem(syKey(C.uid))}catch(x){}C.sy=newSync();render()}}
+ catch(e){C.view=C.cloudHas?'choose':'migrate';C.err=(e&&e.message&&!e.code&&!isNet(e))?e.message:sbErr(e);S=EMPTY();SAVEKEY=null;ONSAVE=null;stopSync();C.ready=false;C.dirty=false;C.pushing=false;try{localStorage.removeItem(cacheKey(C.hid));localStorage.removeItem(syKey(C.hid))}catch(x){}C.sy=newSync();render()}}
 function cloudSkipLegacy(){lss(migKey(C.uid),'1');onUserRestart()}
 function onUserRestart(){const u=C.user;C.view='boot';onUser(u)}
 async function exportLeg(){const keep=S;S=C.LEG;try{await doExport('file')}finally{S=keep}}
 async function wipeCloud(){
- try{C.view='work';C.work='Apagando os dados da conta…';render();clearTimeout(C.timer);stopSync();C.ready=false;
-  for(const t of ['records','photos']){const {error}=await C.sb.from(t).delete().eq('user_id',C.uid);if(error)throw error}
-  S=EMPTY();seedRooms();C.sy=newSync();lss(syKey(C.uid),JSON.stringify(C.sy));
-  Object.assign(U,{wipe:false,wipeErr:'',open:null,room:null,imp:null,pur:null,arm:null,ob:0,cfg:false,tab:'home',bmsg:'',msg:'Todos os dados da conta foram apagados.'});
+ try{const i=await rpc('household_info');if(!i||i.role!=='owner'||i.household_id!==C.hid){U.wipeErr='Só quem criou a casa pode apagar tudo. Nada foi apagado.';render();return}
+  C.view='work';C.work='Apagando os dados da casa…';render();clearTimeout(C.timer);stopSync();C.ready=false;
+  for(const t of ['records','photos']){const {error}=await C.sb.from(t).delete().eq('household_id',C.hid);if(error)throw error}
+  S=EMPTY();seedRooms();C.sy=newSync();lss(syKey(C.hid),JSON.stringify(C.sy));
+  Object.assign(U,{wipe:false,wipeErr:'',open:null,room:null,imp:null,pur:null,arm:null,ob:0,cfg:false,tab:'home',bmsg:'',msg:'Todos os dados da casa foram apagados.'});
   C.ready=true;startSync();enterApp()}
- catch(e){C.view='app';C.pushErr=sbErr(e);U.wipeErr='Não foi possível apagar agora: '+sbErr(e);render()}}
+ catch(e){C.view='app';C.pushErr=sbErr(e);U.wipeErr='Não foi possível apagar agora: '+rpcErr(e);render()}}
 
+async function inviteSend(email){if(C.invBusy)return;C.invBusy=true;C.invErr='';C.invMsg='';render();
+ try{const r=await rpc('invite_member',{p_email:email});C.invMsg='Convite criado para '+r.email+'. Peça para essa pessoa abrir o app e entrar com o Google usando exatamente esse e-mail.';C.invBusy=false;await cloudInfo()}
+ catch(e){C.invErr=rpcErr(e);C.invBusy=false;render()}}
+async function houseDo(fn,args){C.invErr='';C.invMsg='';C.confirmRm=null;
+ try{await rpc(fn,args);await cloudInfo()}catch(e){C.invErr=rpcErr(e);render()}}
+async function leaveHouse(){C.confirmLeave=false;
+ try{clearTimeout(C.timer);if(C.dirty&&navigator.onLine&&C.ready)await cloudPush();await rpc('leave_household');lostHouse(false)}catch(e){C.invErr=rpcErr(e);render()}}
 function cloudAct(a){
  if(a==='login')signIn();
  else if(a==='local'){lss(LOCALFLAG,'1');location.reload()}
@@ -892,6 +919,9 @@ function cloudAct(a){
  else if(a==='signout'){C.confirmOut=true;render()}else if(a==='signout-x'){C.confirmOut=false;render()}else if(a==='signout-go')signOut();
  else if(a==='mig-send')doMigrate('send');else if(a==='ch-merge')doMigrate('merge');
  else if(a==='mig-bk')exportLeg();
+ else if(a.startsWith('inv-x:'))houseDo('cancel_invite',{p_id:a.slice(6)});
+ else if(a.startsWith('rm:')){C.confirmRm=a.slice(3);render()}else if(a==='rm-no'){C.confirmRm=null;render()}else if(a.startsWith('rm-go:'))houseDo('remove_member',{p_user:a.slice(6)});
+ else if(a==='leave'){C.confirmLeave=true;render()}else if(a==='leave-no'){C.confirmLeave=false;render()}else if(a==='leave-go')leaveHouse();
  else if(a==='mig-skip'||a==='ch-cloud')cloudSkipLegacy();
  else if(a==='mig-review'){C.err='';stopSync();clearTimeout(C.timer);C.cloudHas=hasUserData(S);C.view=C.cloudHas?'choose':'migrate';S=EMPTY();SAVEKEY=null;ONSAVE=null;C.ready=false;C.sy=newSync();render()}}
 
@@ -903,24 +933,34 @@ function cloudScreen(){const v=C.view,msg=U.bmsg||U.msg;
  if(v==='boot'||v==='gate'||v==='load'||v==='work')return wrap(`<h1>${v==='work'?esc(C.work):v==='gate'?'Verificando sua conta…':v==='load'?'Carregando seus dados…':'Abrindo…'}</h1><p class="note" role="status">Aguarde um instante. Não feche o app.</p><div class="spin" aria-hidden="true"></div>`);
  if(v==='login')return wrap(`<h1>Sua casa, na sua conta</h1><p class="lead">Entre com o Google para guardar seus dados com segurança e usar o app em outros aparelhos.</p>${clErr()}
 <button class="btn gbtn" data-cl="login" ${C.busy?'disabled':''}>${C.busy?'Abrindo o Google…':'Entrar com o Google'}</button>
-<p class="note">O app nunca vê sua senha: o login é feito pelo Google. Seus dados ficam separados dos de qualquer outra pessoa.</p>
+<p class="note">O app nunca vê sua senha: o login é feito pelo Google. Só você e as pessoas que você convidar veem os dados da casa.</p>
 <button class="lk" data-cl="local">Usar só neste aparelho (sem conta)</button>`);
  if(v==='error')return wrap(`<h1>Não foi possível continuar</h1>${clErr()}<div class="two"><button class="btn" data-cl="retry">Tentar de novo</button>${C.uid?'<button class="btn alt" data-cl="signout-go">Sair da conta</button>':''}</div>${C.uid?'':'<button class="lk" data-cl="local">Usar só neste aparelho (sem conta)</button>'}`);
  if(v==='migrate'||v==='choose'){const m=v==='migrate';
-  return wrap(`<h1>${m?'Enviar os dados deste aparelho?':'Esta conta já tem dados'}</h1>
+  return wrap(`<h1>${m?'Enviar os dados deste aparelho?':(C.joined?'Esta casa já tem dados':'Esta conta já tem dados')}</h1>
 <p class="lead">${m?'Encontramos dados salvos só neste aparelho:':'Esta conta já tem dados salvos, e este aparelho também tem dados próprios:'} <b>${esc(legCount())}</b>.</p>
 <p class="note"><b>Nada será apagado deste aparelho.</b> A cópia local continua aqui, intacta, mesmo depois do envio. ${m?'Ao enviar, o app confere se tudo chegou antes de dizer “pronto”.':'Você escolhe como juntar.'}</p>
 ${C.legHint?`<p class="warn">${esc(C.legHint)}</p>`:''}${clErr()}${msg?`<p class="warn ok" role="status">${esc(msg)}</p>`:''}
 <button class="btn alt" data-cl="mig-bk" style="width:100%;margin:8px 0">Baixar um backup deste aparelho antes</button>
 ${m?`<button class="btn" data-cl="mig-send" style="width:100%;margin:8px 0">Enviar para minha conta</button><button class="btn alt" data-cl="mig-skip" style="width:100%;margin:8px 0">Não enviar; começar a conta vazia</button>`
 :`<button class="btn" data-cl="ch-merge" style="width:100%;margin:8px 0">Mesclar os dois (recomendado)</button><p class="note" style="margin-top:0">Junta tudo sem apagar nada: o que já existe na conta é mantido e só o que falta vem deste aparelho.</p><button class="btn alt" data-cl="mig-skip" style="width:100%;margin:8px 0">Usar só os dados da conta</button>`}
-<button class="lk" data-cl="signout-go">Sair da conta</button>${lsg(cacheKey(C.uid))?'<button class="lk" data-cl="retry">Decidir depois</button>':''}`)}
+<button class="lk" data-cl="signout-go">Sair da conta</button>${lsg(cacheKey(C.hid))?'<button class="lk" data-cl="retry">Decidir depois</button>':''}`)}
  return ''}
+function houseCard(){const i=C.info;if(!i||!i.household_id)return '';const own=i.role==='owner',me=C.uid,ms=i.members||[];
+ const mem=ms.map(m=>`<li><span>${esc(m.email||'(sem e-mail)')}${m.user_id===me?' <i>(você)</i>':''} · ${m.role==='owner'?'criou a casa':'participante'}</span>${own&&m.user_id!==me?(C.confirmRm===m.user_id?`<span class="two"><button class="btn alt" data-cl="rm-no">Cancelar</button><button class="btn bad" data-cl="rm-go:${esc(m.user_id)}">Remover</button></span>`:`<button class="lk" data-cl="rm:${esc(m.user_id)}">Remover</button>`):''}</li>`).join('');
+ const inv=(i.invites||[]).map(v=>`<li><span>${esc(v.email)} · convite pendente</span>${own?`<button class="lk" data-cl="inv-x:${esc(v.id)}">Cancelar convite</button>`:''}</li>`).join('');
+ const other=i.pending_elsewhere?`<p class="warn" role="alert">Você tem um convite para outra casa, mas esta casa já tem dados e não é trocada sozinha. ${ms.length>1?'Para aceitar, primeiro remova as outras pessoas desta casa.':'Para aceitar: 1) baixe um backup aqui em cima; 2) apague tudo (no fim desta página); 3) saia e entre de novo com o Google. Depois você pode restaurar o backup na casa nova.'}</p>`:'';
+ return `<h3 style="margin:14px 0 4px">Casa compartilhada</h3><p class="note" style="margin:0 0 6px">Quem está na casa vê e edita as mesmas informações, em tempo real.</p>
+<ul class="mem">${mem}${inv}</ul>${other}
+${own?`<form data-invf><label>Convidar por e-mail<input type="email" name="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="email@gmail.com" required></label><button class="btn" style="width:100%;margin:8px 0" ${C.invBusy?'disabled':''}>${C.invBusy?'Convidando…':'Convidar'}</button></form>`
+ :(C.confirmLeave?`<div class="two"><button class="btn alt" data-cl="leave-no">Cancelar</button><button class="btn bad" data-cl="leave-go">Sim, sair da casa</button></div><p class="note">Você deixa de ver estes dados e passa a ter uma casa só sua, vazia. Os dados continuam com quem criou a casa.</p>`:`<button class="btn alt" data-cl="leave" style="width:100%;margin:8px 0">Sair desta casa</button>`)}
+${C.invErr?`<p class="warn" role="alert">${esc(C.invErr)}</p>`:''}${C.invMsg?`<p class="warn ok" role="status">${esc(C.invMsg)}</p>`:''}`}
 function accountCard(){if(!C.mode||!C.uid)return '';
  const legLeft=C.LEG&&hasUserData(C.LEG)&&lsg(migKey(C.uid))!=='1';
  return `<section class="card acct" aria-labelledby="acth"><h2 id="acth">Conta</h2><p class="fin" style="margin:4px 0">Conectado como <b>${esc((C.user&&C.user.email)||'')}</b></p>
 <p class="note" id="acs" role="status">${esc(document.getElementById('sync')?document.getElementById('sync').textContent:'')}</p>
-<p class="note">Seus dados e fotos ficam salvos nesta conta e aparecem em qualquer aparelho em que você entrar. Restaurar um backup aqui também atualiza a conta.</p>
+<p class="note">Seus dados e fotos ficam salvos na casa e aparecem em qualquer aparelho em que você entrar. Restaurar um backup aqui também atualiza a casa para todos.</p>
+${houseCard()}
 ${legLeft?`<p class="warn">Há dados antigos neste aparelho que ainda não foram enviados à conta.</p><button class="btn alt" data-cl="mig-review" style="width:100%;margin:6px 0">Revisar e enviar</button>`:''}
 ${C.confirmOut?`<div class="two"><button class="btn alt" data-cl="signout-x">Cancelar</button><button class="btn" data-cl="signout-go">Sim, sair</button></div><p class="note">${C.dirty||!navigator.onLine?'Há alterações ainda não enviadas. Elas ficam guardadas neste aparelho e serão enviadas quando você entrar de novo com esta conta.':'Seus dados continuam na conta. Para voltar, entre de novo com o Google.'}</p>`:`<button class="btn alt" data-cl="signout" style="width:100%">Sair da conta</button>`}</section>`}
 const localAccountHint=()=>(!C.mode&&SBF())?`<section class="card"><h2>Conta</h2><p class="note">Você está usando o app só neste aparelho.</p><button class="btn alt" data-cl="account" style="width:100%">Entrar com o Google</button></section>`:'';
