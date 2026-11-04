@@ -833,8 +833,8 @@ function enterApp(){C.view='app';C.err='';SAVEKEY=cacheKey(C.hid);ONSAVE=cloudSc
 
 /* --- entrada e saída --- */
 async function cloudInit(){
- C.mode=true;const f=SBF();C.back=/[?&]code=|[#&]access_token=/.test(location.search+location.hash);
- try{C.sb=f.lib.createClient(f.cfg.url,f.cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}})}catch(e){C.view='login';C.err='Não foi possível iniciar a conexão com a conta.';render();return}
+ C.mode=true;const f=SBF();C.flow=lsg('minha-casa-fluxo')==='implicit'?'implicit':'pkce';if(lsg('minha-casa-fluxo-n')==='1'){lss('minha-casa-fluxo-n','');C.err='O login anterior não foi concluído neste navegador. Toque em “Entrar com o Google” para tentar de outro jeito.'}C.back=/[?&]code=|[#&]access_token=/.test(location.search+location.hash);
+ try{C.sb=f.lib.createClient(f.cfg.url,f.cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:C.flow}})}catch(e){C.view='login';C.err='Não foi possível iniciar a conexão com a conta.';render();return}
  const ue=oauthUrlError();if(ue)C.err=ue;
  window.addEventListener('online',()=>{paintSync();if(C.uid&&C.view==='app'){pullAll().catch(()=>{});cloudSchedule()}});window.addEventListener('offline',paintSync);
  document.addEventListener('visibilitychange',()=>{if(C.view!=='app')return;if(document.visibilityState==='hidden'&&C.dirty){clearTimeout(C.timer);cloudPush()}else if(document.visibilityState==='visible'&&C.ready&&navigator.onLine)pullAll().catch(()=>{})});
@@ -846,10 +846,11 @@ async function loginBack(){
  const t=+(lsg('minha-casa-login-t')||0),recent=t&&Date.now()-t<15*60*1000;
  if(!C.back&&!recent)return;try{localStorage.removeItem('minha-casa-login-t')}catch(e){}
  if(C.err)return;let det='';
+ if(C.back&&C.flow==='pkce'){lss('minha-casa-fluxo','implicit');lss('minha-casa-fluxo-n','1');try{history.replaceState(null,'',location.pathname)}catch(e){}location.reload();await new Promise(()=>{})}
  if(C.back){try{const r=C.sb.auth.initialize?await C.sb.auth.initialize():null;det=r&&r.error?String(r.error.message||r.error):''}catch(e){det=String((e&&e.message)||e)}}
  const ua=navigator.userAgent,nav=/Instagram|FBAN|FBAV|WhatsApp|Line\/|GSA\//.test(ua)?'navegador dentro de outro app':/CriOS/.test(ua)?'Chrome (iPhone)':/FxiOS/.test(ua)?'Firefox (iPhone)':/Safari/.test(ua)&&!/Chrome|Android/.test(ua)?'Safari':'outro navegador';
  C.err=C.back?'O Google confirmou o login, mas o navegador não conseguiu concluir a entrada no app. Toque em “Entrar com o Google” para tentar de novo.':'Você voltou do Google, mas o endereço de retorno não trouxe a confirmação do login. Toque em “Entrar com o Google” para tentar de novo.';
- C.diag=`Detalhe técnico: ${nav} · confirmação no endereço: ${C.back?'sim':'não'} · armazenamento do navegador: ${st?'ok':'bloqueado'}${det?' · '+det:''}`}
+ C.diag=`Detalhe técnico: ${nav} · confirmação no endereço: ${C.back?'sim':'não'} · armazenamento do navegador: ${st?'ok':'bloqueado'} · modo: ${C.flow==='implicit'?'alternativo':'padrão'}${det?' · '+det:''}`}
 function onNoUser(){stopSync();clearTimeout(C.timer);C.user=null;C.uid=null;C.hid=null;C.info=null;C.joined=false;C.confirmRm=null;C.confirmLeave=false;C.invErr='';C.invMsg='';C.ready=false;C.sy=null;SAVEKEY=null;ONSAVE=null;S=EMPTY();C.view='login';C.confirmOut=false;C.busy=false;render()}
 async function onUser(u){
  if(C.uid===u.id&&C.view!=='login'&&C.view!=='boot')return;
