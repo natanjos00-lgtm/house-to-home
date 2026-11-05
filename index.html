@@ -157,7 +157,7 @@ details.more{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}de
 details.addbox{margin:14px 0 6px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 14px}
 details.addbox>summary{list-style:none;cursor:pointer;font-weight:700;color:var(--brown);padding:14px 0;font-size:15px;display:flex;align-items:center;gap:8px}
 details.addbox>summary::-webkit-details-marker{display:none}details.addbox>summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--brown);color:var(--off);font-size:17px;line-height:1}
-details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
+details.gonebox>summary::before,details.gonebox[open]>summary::before{display:none}.gonebox{margin:14px 0}.grow{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}.gl{flex:1;min-width:0}.gn{display:block;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gl small{color:var(--mute);font-size:12px}.grow .st{flex:none;min-height:36px;padding:6px 12px;font-size:13px}.grow .lk{flex:none;font-size:13px}.gh{padding:2px 0 10px}details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
 .chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
 .pill.bought{background:var(--olive);color:var(--off)}.pill.partial,.pill.researching{background:transparent;border:1px solid var(--warn);color:var(--warn)}.pill.returned{background:transparent;border:1px solid var(--taupe);color:var(--mute)}
@@ -503,11 +503,10 @@ function pend(){const today=todayStr(),open=act().filter(i=>i.status!=='done'),
  return rows.join('')||'<p class="empty">Nada pendente. Cadastre serviços na aba Obra.</p>'}
 
 function histHtml(id){const lg=S.log.filter(l=>l.itemId===id).slice().reverse();return lg.map(l=>`<div class="lg"><small>${dt(l.ts)}</small>${esc(l.txt)}</div>`).join('')}
-function archive(){const g=S.items.filter(i=>i.deleted);if(!g.length)return '';
- return `<h2>Itens excluídos</h2><p class="note">Ficam arquivados com pagamentos e histórico. Não entram nos totais.</p>`+g.map(i=>{const c=ic(i),ps=pd(i.id);
- return `<div class="item gone"><div class="top"><div><div class="nm">${esc(i.name)}</div><small>${i.area==='obra'?'Obra':'Enxoval'} · excluído em ${dt(i.deleted)}</small></div><button class="st" data-rs="${i.id}">Restaurar</button></div>
-<div class="fin">Previsto ${R(i.planned)} · ${c.hasC?'Contratado '+R(i.contracted):'Não contratado'} · Pago ${R(c.paid)} · ${ps.length} pagamento(s)</div>
-<button class="lk" data-arc="${i.id}">${U.arc===i.id?'Ocultar histórico':'Ver histórico'}</button>${U.arc===i.id?ps.map(p=>`<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><b>${p.kind==='refund'?'−':''}${R(p.amount)}</b><span>${p.kind==='refund'?(p.paid?'Estornado':'Estorno pendente'):(p.paid?'Pago':'Agendado')}</span></div>`).join('')+histHtml(i.id):''}</div>`}).join('')}
+function archive(){const g=S.items.filter(i=>i.deleted).sort((x,y)=>String(y.deleted).localeCompare(String(x.deleted)));if(!g.length)return '';
+ const o=!!U.goneOpen;
+ return `<details class="addbox gonebox" data-gone ${o?'open':''}><summary>Itens excluídos (${g.length})</summary><p class="note">Ficam guardados com pagamentos e histórico e não entram nos totais.</p>`+g.map(i=>{const c=ic(i),ps=pd(i.id);
+ return `<div class="grow"><div class="gl"><span class="gn">${esc(i.name)}</span><small>${i.area==='obra'?'Obra':'Enxoval'} · ${dt(i.deleted)}${c.paid?' · pago '+R(c.paid):''}</small></div><button class="lk" data-arc="${i.id}" aria-expanded="${U.arc===i.id}">Histórico</button><button class="st" data-rs="${i.id}">Restaurar</button></div>`+(U.arc===i.id?`<div class="gh"><div class="fin">Previsto ${R(i.planned)} · ${c.hasC?'Contratado '+R(i.contracted):'Não contratado'} · Pago ${R(c.paid)}</div>`+ps.map(p=>`<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><b>${p.kind==='refund'?'−':''}${R(p.amount)}</b><span>${p.kind==='refund'?(p.paid?'Estornado':'Estorno pendente'):(p.paid?'Pago':'Agendado')}</span></div>`).join('')+histHtml(i.id)+'</div>':'')}).join('')+'</details>'}
 
 function backupCard(){const imp=U.imp,o=imp&&imp.obj,d=o&&o.data;
  return `<div class="card"><p class="fin">Último backup: ${S.meta.lastExport?dt(S.meta.lastExport):'nunca'}.</p>
@@ -549,8 +548,7 @@ ${S.budget.total!=null&&!S.meta.legacyAck?`<div class="card" style="margin-top:1
 <h3>Obra</h3>${grid(tot('obra'),S.budget.obra,'Orçamento da obra')}<button class="lk" data-gobud="obra">${S.budget.obra==null?'Definir orçamento da obra':'Ver orçamento da obra'}</button>
 <h3>Enxoval</h3>${grid(tot('enxoval'),S.budget.enxoval,'Orçamento do enxoval')}<button class="lk" data-gobud="enxoval">${S.budget.enxoval==null?'Definir orçamento do enxoval':'Ver orçamento do enxoval'}</button>
 <p class="note">Saldo de cada área = orçamento da área − comprometido (valor contratado; enquanto o item não é contratado, vale o previsto). O que já foi pago não é somado de novo. Obra e enxoval são sempre mostrados separados.</p>
-<h2>Próximas pendências</h2>${pend()}
-${archive()}`}
+<h2>Próximas pendências</h2>${pend()}`}
 function dangerZone(){const n=act().length,p=S.pays.length;
  return `<section class="danger" id="dz" aria-labelledby="dzh"><h2 id="dzh">Ações destrutivas</h2><p class="note">Estas ações removem dados. Baixe ou copie um backup antes, na seção acima.</p>
 ${U.wipe?`<form class="wipe" data-wipef role="alertdialog" aria-labelledby="wt" aria-describedby="wd"><b id="wt">Apagar tudo?</b>
@@ -561,7 +559,7 @@ ${U.wipeErr?`<p class="warn" role="alert">${esc(U.wipeErr)}</p>`:''}
 <div class="two" style="margin-top:10px"><button type="button" class="btn alt" data-wipex>Cancelar</button><button class="btn bad" id="wipego" disabled>Apagar tudo</button></div></form>`
 :(C.mode&&C.info&&C.info.role==='member')?`<p class="note">Só quem criou a casa pode apagar tudo.</p>`:`<button class="btn altbad" data-wipe style="width:100%">Apagar tudo…</button>`}</section>`}
 const budgetEdit=a=>{const o=a==='obra';return `<details class="bud" id="orc" ${U.orc?'open':''}><summary>Orçamento ${o?'da obra':'do enxoval'} (editar)</summary><div class="grid">${bin(a,o?'Orçamento da obra':'Orçamento do enxoval')}</div><p class="note">Valor opcional, só para ${o?'a obra/reforma':'o enxoval'}. Saldo = orçamento − comprometido. ${o?'O orçamento do enxoval fica na aba Enxoval.':'O orçamento da obra fica na aba Obra.'} Os dois nunca são somados.</p></details>`};
-const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+dangerZone()
+const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+archive()+dangerZone()
 
 function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2><div class="rg">${S.rooms.map(r=>{const n=act().filter(i=>i.roomId===r.id).length;
  const pe=prog(r.id);return `<button class="rc${r.img[0]?'':' none'}" data-room="${r.id}">${r.img[0]?imgEl(r.img[0],''):''}<span><b>${esc(r.name)}</b><small>${n} ${n===1?'item':'itens'}${pe.n?' · enxoval '+pe.pct+'%':''}</small></span></button>`}).join('')}</div>
@@ -751,7 +749,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('#tema')){const r=document.documentElement;r.dataset.theme=getComputedStyle(r).colorScheme==='dark'?'light':'dark';return}
  else if(!was)return;
  save();render()});
-document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
+document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.wipe){U.wipe=false;U.wipeErr='';render()}});
 document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=new FormData(f);
  if(f.id==='af'){const name=d.get('name').trim();if(!name)return;const T=U.tab==='obra';
