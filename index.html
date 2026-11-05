@@ -84,7 +84,7 @@ form.add,.pf{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .mini small{display:block}
 .back{padding:14px 0 6px}
 details{margin:10px 0}summary{cursor:pointer;color:var(--mute);font-size:14px;padding:8px 0;min-height:36px}
-.vals{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:10px 0 2px;font-weight:500}.vals span{display:block;font-size:12px;color:var(--mute);font-weight:400}
+.vals{display:flex;flex-wrap:wrap;gap:6px 22px;margin:10px 0 2px;font-weight:500}.vals span{display:block;font-size:12px;color:var(--mute);font-weight:400}
 .rc.none::before{content:"Sem foto";position:absolute;top:44%;left:0;right:0;text-align:center;color:var(--mute);font-size:13px}
 input[type=file]{padding:6px;font-size:14px;color:var(--mute)}
 input[type=file]::file-selector-button{font:inherit;font-weight:700;font-size:13px;color:var(--brown);background:var(--sand);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-right:10px;cursor:pointer}
@@ -146,6 +146,26 @@ details.bud{margin:8px 0}details.bud summary{font-size:14px;color:var(--brown);f
 .quick{margin:6px 0}.quick .two{margin:6px 0}.fin.pos{color:var(--olive)}.qpay{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px}.qpay .btn{flex:1 1 28%;min-height:44px;padding:8px}
 .stp{display:flex;gap:6px;align-items:center}.stp input{order:2;text-align:center;min-width:0}.stp .m{order:1}.stp .p{order:3}.stp button{min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:700 20px/1 Figtree,sans-serif;cursor:pointer}
 details.more{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}details.more>summary{cursor:pointer;font-weight:700;color:var(--brown);padding:8px 0}
+.fin2{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 16px 6px;margin:8px 0;box-shadow:0 1px 2px rgba(60,40,20,.05)}
+.fin2 .fh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.fin2 .fh span{font-size:14px;color:var(--mute)}
+.fin2 .fh b{font:600 34px/1.05 "Cormorant Garamond",Georgia,serif;color:var(--brown);letter-spacing:-.01em}.fin2 .fh b.neg{color:var(--bad)}
+.stack{display:flex;height:8px;background:var(--sand);border-radius:4px;overflow:hidden;margin:12px 0 8px}.stack i{display:block;height:100%}
+.stack .p,.lg2 .p{background:var(--olive)}.stack .q,.lg2 .q{background:var(--taupe)}.lg2 .f{background:var(--sand);border:1px solid var(--line)}
+.lg2{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--mute);margin-bottom:8px}.lg2 b{color:var(--ink);font-weight:700}.lg2 span{display:flex;align-items:center;gap:6px}.lg2 i{display:inline-block;width:9px;height:9px;border-radius:3px}
+.fin2 dl{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;margin:6px 0 0}.fin2 dl>div{padding:9px 0;border-top:1px solid var(--line);min-width:0}
+.fin2 dt{font-size:12px;color:var(--mute)}.fin2 dd{margin:1px 0 0;font-weight:700;font-size:15px;overflow-wrap:anywhere}
+details.addbox{margin:14px 0 6px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 14px}
+details.addbox>summary{list-style:none;cursor:pointer;font-weight:700;color:var(--brown);padding:14px 0;font-size:15px;display:flex;align-items:center;gap:8px}
+details.addbox>summary::-webkit-details-marker{display:none}details.addbox>summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--brown);color:var(--off);font-size:17px;line-height:1}
+details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
+.chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
+.pill.bought{background:var(--olive);color:var(--off)}.pill.partial,.pill.researching{background:transparent;border:1px solid var(--warn);color:var(--warn)}.pill.returned{background:transparent;border:1px solid var(--taupe);color:var(--mute)}
+.card,.item,.mini{box-shadow:0 1px 2px rgba(60,40,20,.05)}.item{border-left-width:4px;border-radius:14px}
+.crumb{text-transform:none;letter-spacing:0;font:500 13px Figtree,sans-serif;color:var(--mute);margin:16px 0 -12px}
+.rc.none{border:1px solid var(--line);background:linear-gradient(155deg,var(--sand),var(--card) 80%)}.rc.none::before{content:"";position:absolute;top:14px;right:14px;width:34px;height:34px;opacity:.55;background:currentColor;color:var(--taupe);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'/%3E%3C/svg%3E") center/contain no-repeat}
+.rc{aspect-ratio:1/1}
+@media (min-width:760px){body{max-width:780px}#nv{max-width:780px}.rg{grid-template-columns:repeat(3,1fr)}.fin2 dl{grid-template-columns:repeat(3,1fr)}h2{font-size:32px}}
 .acct{margin:12px 0}.acct h2{margin:0 0 4px}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="theme-color" content="#5b4636"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="House to Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -439,7 +459,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,scw:false,orc:false,sco:false,obErr:''};
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
@@ -452,8 +472,15 @@ const CAL='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="c
 const dfield=(label,iso,attrs,cls)=>`<label${cls?` class="${cls}"`:''}>${label}<span class="df"><input class="dt" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" autocomplete="off" value="${toBR(iso)}" data-d ${attrs||''}><button type="button" class="cal" data-cal aria-label="Abrir calendário: ${label}">${CAL}</button><input class="nat" type="date" tabindex="-1" aria-hidden="true" data-nat></span><small class="derr" hidden>Data inválida. Use dd/mm/aaaa.</small></label>`;
 const crumb=()=>S.house.name?`<p class="crumb">${esc(S.house.name)}</p>`:'';
 const tile=(l,v,cls)=>`<div class="tile"><span>${l}</span><b class="${cls||''}">${v}</b></div>`;
-function grid(t,lim,label){const free=lim==null?null:lim-t.commit,L=lim==null?'':tile(label,R(lim)),F=lim==null?'':tile('Saldo disponível',R(free),free<0?'neg':'');
- return `<div class="grid">${L}${tile('Previsto nos itens',R(t.planned))}${tile('Contratado',R(t.contracted))}${tile('Pago',R(t.paid))}${tile('A pagar',R(t.pending))}${F}</div>`}
+function grid(t,lim,label,extra){const has=lim!=null,free=has?lim-t.commit:null,base=Math.max(has?lim:0,t.commit,1),pc=v=>Math.max(0,Math.min(100,v/base*100)),
+ pd0=pc(t.paid),pq=pc(Math.max(0,t.commit-t.paid)),over=has&&free<0,
+ head=has?['Saldo disponível',R(free),over?'neg':'']:['Comprometido',R(t.commit),''],
+ cell=(l,v)=>`<div><dt>${l}</dt><dd>${v}</dd></div>`,
+ txt=`Pago ${R(t.paid)}, a pagar ${R(t.pending)}${has?', saldo '+R(free):''}`;
+ return `<section class="fin2"><div class="fh"><span>${head[0]}</span><b class="${head[2]}">${head[1]}</b></div>
+<div class="stack" role="img" aria-label="${txt}"><i class="p" style="width:${pd0}%"></i><i class="q" style="width:${pq}%"></i></div>
+<div class="lg2"><span><i class="p"></i>Pago <b>${R(t.paid)}</b></span><span><i class="q"></i>A pagar <b>${R(t.pending)}</b></span>${has&&!over?'<span><i class="f"></i>Livre</span>':''}</div>
+<dl>${has?cell(label,R(lim)):''}${cell('Previsto nos itens',R(t.planned))}${cell('Contratado',R(t.contracted))}${(extra||[]).map(x=>cell(x[0],x[1])).join('')}</dl></section>`}
 function warns(a){const w=[],b=S.budget,A=act().filter(i=>!a||i.area===a),t=tot(a),nm={obra:'da obra',enxoval:'do enxoval'};
  if(!a){['obra','enxoval'].forEach(k=>{if(b[k]!=null&&tot(k).commit>b[k])w.push(`Os compromissos ${nm[k]} passam do orçamento definido.`)})}
  else if(b[a]!=null&&t.commit>b[a])w.push(`Os compromissos ${nm[a]} passam do orçamento definido.`);
@@ -606,9 +633,12 @@ function itemHtml(i){const c=ic(i),r=S.rooms.find(x=>x.id===i.roomId),meta=(i.ar
 <div class="vals"><div><span>Previsto</span>${R(i.planned)}</div><div><span>Contratado</span>${c.hasC?R(i.contracted):'—'}</div><div><span>Pago</span>${R(c.paid)}</div><div><span>A pagar</span>${c.hasC?R(c.pending):'—'}</div></div>${c.over?'<p class="fin neg">Pago acima do valor contratado</p>':c.excess?'<p class="fin neg">Parcelas agendadas acima do valor contratado</p>':''}
 <div class="acts"><button class="lk" data-op="${i.id}">${U.open===i.id?'Fechar detalhes':'Detalhes'}</button><button class="lk" data-del="${i.id}">${U.arm===i.id?'Toque de novo para excluir':'Excluir'}</button></div>${U.open===i.id?detail(i,c):''}</div>`}
 function shopHtml(i,mode){const c=ic(i),r=S.rooms.find(x=>x.id===i.roomId),ps=estat(i),up=unitPrice(i),fs=fstat(i),sm=paySummary(i);
- const chips=[`<b>${PS[ps]}</b>`,`Qtd ${i.qtyBought} de ${i.qtyNeed}`,(ps==='bought'||ps==='returned'||c.paid>0||c.refunded>0)?`${FS[fs]}${c.paid?' · '+R(c.paid):''}`:'',sm?esc(sm):'',c.refunded?`Estornado ${R(c.refunded)}`:'',i.contracted!=null&&!i.returned?`Total da compra ${R(i.contracted)}`:'',i.planned&&!i.returned?`Previsto ${R(i.planned)}${up?` (≈ ${R(up)}/un.)`:''}`:'',i.store?esc(i.store):'',i.buyDate?'Compra em '+fdate(i.buyDate):'',mode==='cat'&&r?esc(r.name):''].filter(Boolean);
+ const g1=[`<b class="pill ${ps}">${PS[ps]}</b>`,`Qtd ${i.qtyBought} de ${i.qtyNeed}`,((ps==='bought'||ps==='returned'||c.paid>0||c.refunded>0)?`${FS[fs]}${c.paid?' · '+R(c.paid):''}`:'')+(sm?((ps==='bought'||ps==='returned'||c.paid>0||c.refunded>0)?' · ':'')+esc(sm):''),c.refunded?`Estornado ${R(c.refunded)}`:''].filter(Boolean),
+ g2=[i.contracted!=null&&!i.returned?`Total da compra ${R(i.contracted)}`:'',i.planned&&!i.returned?`Previsto ${R(i.planned)}${up?` (≈ ${R(up)}/un.)`:''}`:''].filter(Boolean),
+ g3=[i.store?esc(i.store):'',i.buyDate?'Compra em '+fdate(i.buyDate):'',mode==='cat'&&r?esc(r.name):''].filter(Boolean),
+ chips=[g1,g2,g3].filter(g=>g.length).map(g=>`<div class="cr">${g.map(x=>`<span>${x}</span>`).join('')}</div>`).join('');
  return `<div class="item shop ${i.status}"><div class="top"><label class="ck"><input type="checkbox" data-bought="${i.id}" ${ps==='bought'?'checked':''} ${i.returned?'disabled':''} aria-label="Comprado: ${esc(i.name)}"></label><div class="grow"><div class="nm">${esc(i.name)}</div></div></div>
-<div class="chips">${chips.map(x=>`<span>${x}</span>`).join('')}</div>
+<div class="chips">${chips}</div>
 <div class="acts"><button class="lk" data-op="${i.id}">${U.open===i.id?'Fechar detalhes':'Detalhes'}</button><button class="lk" data-del="${i.id}">${U.arm===i.id?'Toque de novo para excluir':'Excluir'}</button></div>${U.open===i.id?detail(i,c):''}</div>`}
 function shopGroups(L,all,mode){const pr=p=>`${p.d} de ${p.n} comprados · ${p.pct}%`,bar=p=>`<div class="bar" aria-hidden="true"><i style="width:${p.pct}%"></i></div>`;
  if(mode==='room')return [...S.rooms.map(r=>({id:r.id,name:r.name})),{id:null,name:'Sem ambiente'}].map(r=>{const its=L.filter(i=>(i.roomId||null)===r.id);if(!its.length)return '';
@@ -616,19 +646,20 @@ function shopGroups(L,all,mode){const pr=p=>`${p.d} de ${p.n} comprados · ${p.p
   return `<div class="gh"><h3>${esc(r.name)}</h3><span>${pr(p)}</span></div>${bar(p)}`+cats.map(c=>(sub?`<div class="sh">${esc(c||'Sem categoria')}</div>`:'')+its.filter(i=>i.cat===c).map(i=>shopHtml(i,'room')).join('')).join('')}).join('');
  return [...new Set(L.map(i=>i.cat))].sort(catSort).map(c=>{const a=all.filter(i=>i.cat===c&&!i.returned),d=a.filter(i=>pstat(i)==='bought').length,p={n:a.length,d,pct:a.length?Math.round(d/a.length*100):0};
   return `<div class="gh"><h3>${esc(c||'Sem categoria')}</h3><span>${pr(p)}</span></div>${bar(p)}`+L.filter(i=>i.cat===c).map(i=>shopHtml(i,'cat')).join('')}).join('')}
+const addBox=(t,form,empty)=>{const o=U.addOpen[t]===undefined?empty:U.addOpen[t];return `<details class="addbox" data-addbox="${t}" ${o?'open':''}><summary>${t==='obra'?'Adicionar item da obra':'Adicionar item ao enxoval'}</summary>${form}</details>`};
 function area(t){const L=act().filter(i=>i.area===t),T=t==='obra',
  ro=`<option value="">${T?'Geral':'Sem ambiente'}</option>`+S.rooms.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join(''),
  sec=(n,a)=>a.length?`<h3>${esc(n)}</h3>`+a.map(itemHtml).join(''):'';
  const head=crumb()+`<h2 class="pt">${T?'Obra':'Enxoval'}</h2>${warns(t)}`;
  if(!T){const p=prog(),f=U.flt,cnt=k=>k==='all'?L.length:L.filter(i=>estat(i)===k).length,Lf=f==='all'?L:L.filter(i=>estat(i)===f),tt=tot(t),flts=FLT.filter(([k])=>k!=='returned'||cnt(k)>0||f==='returned');
-  const form=`<form class="add" id="af"><input class="full" name="name" required placeholder="Ex.: Sofá de 3 lugares" aria-label="Nome do item"><select name="room" aria-label="Ambiente">${ro}</select><select name="cat" aria-label="Categoria"><option value="">Categoria automática</option>${ENX_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input name="qty" inputmode="numeric" placeholder="Quantidade" aria-label="Quantidade necessária"><input name="planned" inputmode="decimal" placeholder="Previsto (R$)" aria-label="Valor previsto"><button class="btn full">Adicionar</button></form>`;
+  const form=`<form class="add" id="af"><input class="full" name="name" required placeholder="Ex.: Sofá de 3 lugares" aria-label="Nome do item"><select name="room" aria-label="Ambiente">${ro}</select><select name="cat" aria-label="Categoria"><option value="">Automática</option>${ENX_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input name="qty" inputmode="numeric" placeholder="Quantidade" aria-label="Quantidade necessária"><input name="planned" inputmode="decimal" placeholder="Previsto (R$)" aria-label="Valor previsto"><button class="btn full">Adicionar</button></form>`;
   const seg=(a,k,cur,w)=>`<div class="seg${w?' w':''}" role="group">${a.map(([v,l])=>`<button ${k}="${v}" aria-pressed="${cur===v}">${l}</button>`).join('')}</div>`;
   const body=!L.length?'<p class="empty">Nenhum item ainda. Adicione o primeiro acima.</p>':!Lf.length?`<p class="empty">Nenhum item com a situação “${(FLT.find(x=>x[0]===f)||[0,''])[1]}”.</p>`:shopGroups(Lf,L,U.view);
   return head+`<div class="card"><div class="prog"><b>${p.pct}%</b><span>${p.n?`${p.d} de ${p.n} itens comprados`:'Nenhum item na lista ainda'}</span></div><div class="bar" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${p.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p.pct}%"></i></div></div>`+
-   grid(tt,S.budget[t],'Orçamento do enxoval')+`<div class="grid">${tile('Total investido (pago, líquido de estornos)',R(tt.paid))}${tile('Estornado',R(tt.refunded))}</div>`+budgetEdit('enxoval')+form+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+body}
+   grid(tt,S.budget[t],'Orçamento do enxoval',[['Total investido (pago, líquido de estornos)',R(tt.paid)],['Estornado',R(tt.refunded)]])+budgetEdit('enxoval')+addBox(t,form,!L.length)+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+body}
  const form=`<form class="add" id="af"><select name="kind" aria-label="Tipo"><option value="servico">Serviço</option><option value="material">Material</option></select><select name="room" aria-label="Ambiente">${ro}</select><input class="full" name="name" required placeholder="Ex.: Assentar piso da sala" aria-label="Nome"><input name="cat" list="cl" placeholder="Categoria" aria-label="Categoria"><datalist id="cl">${[...new Set(L.map(i=>i.cat).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input name="planned" inputmode="decimal" placeholder="Estimado (R$)" aria-label="Valor estimado"><button class="btn full">Adicionar</button></form>`;
  const body=!L.length?'<p class="empty">Nenhum item ainda. Adicione o primeiro acima.</p>':sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
- return head+grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra')+form+body}
+ return head+grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra')+addBox(t,form,!L.length)+body}
 
 function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
@@ -720,7 +751,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('#tema')){const r=document.documentElement;r.dataset.theme=getComputedStyle(r).colorScheme==='dark'?'light':'dark';return}
  else if(!was)return;
  save();render()});
-document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
+document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.wipe){U.wipe=false;U.wipeErr='';render()}});
 document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=new FormData(f);
  if(f.id==='af'){const name=d.get('name').trim();if(!name)return;const T=U.tab==='obra';
