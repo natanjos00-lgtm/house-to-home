@@ -507,7 +507,8 @@ function pend(){const today=todayStr(),open=act().filter(i=>i.status!=='done'),
  ps=S.pays.filter(p=>!p.paid&&p.kind!=='refund'&&p.date&&item(p.itemId)&&!item(p.itemId).deleted&&!item(p.itemId).returned).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3),late=d=>d&&d<today;
  const rows=its.map(i=>`<button class="mini" data-go="${i.id}"><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'} · ${i.end?'prazo '+fdate(i.end):'sem prazo'}</small></span><span class="${late(i.end)?'neg':''}">${late(i.end)?'Atrasado':stLabel(i)}</span></button>`)
  .concat(ps.map(p=>{const i=item(p.itemId);return `<button class="mini" data-go="${i.id}"><span><b>Parcela de ${R(p.amount)}</b><small>${esc(i.name)} · vence ${fdate(p.date)}</small></span><span class="${late(p.date)?'neg':''}">${late(p.date)?'Vencida':'A pagar'}</span></button>`}));
- return rows.join('')||'<p class="empty">Nada pendente. Cadastre serviços na aba Obra.</p>'}
+ return rows}
+function pendBox(){const r=pend();if(!r.length)return '';return `<details class="addbox gonebox" data-pend ${U.pendOpen?'open':''}><summary>Próximas pendências (${r.length})</summary>${r.join('')}</details>`}
 
 function histHtml(id){const lg=S.log.filter(l=>l.itemId===id).slice().reverse();return lg.map(l=>`<div class="lg"><small>${dt(l.ts)}</small>${esc(l.txt)}</div>`).join('')}
 function archive(){const g=S.items.filter(i=>i.deleted).sort((x,y)=>String(y.deleted).localeCompare(String(x.deleted)));if(!g.length)return '';
@@ -555,7 +556,7 @@ ${S.budget.total!=null&&!S.meta.legacyAck?`<div class="card" style="margin-top:1
 <h3>Obra</h3>${grid(tot('obra'),S.budget.obra,'Orçamento da obra')}<button class="lk" data-gobud="obra">${S.budget.obra==null?'Definir orçamento da obra':'Ver orçamento da obra'}</button>
 <h3>Enxoval</h3>${grid(tot('enxoval'),S.budget.enxoval,'Orçamento do enxoval')}<button class="lk" data-gobud="enxoval">${S.budget.enxoval==null?'Definir orçamento do enxoval':'Ver orçamento do enxoval'}</button>
 <p class="note">Saldo de cada área = orçamento da área − comprometido (valor contratado; enquanto o item não é contratado, vale o previsto). O que já foi pago não é somado de novo. Obra e enxoval são sempre mostrados separados.</p>
-<h2>Próximas pendências</h2>${pend()}`}
+${pendBox()}`}
 function dangerZone(){const n=act().length,p=S.pays.length;
  return `<section class="danger" id="dz" aria-labelledby="dzh"><h2 id="dzh">Ações destrutivas</h2><p class="note">Estas ações removem dados. Baixe ou copie um backup antes, na seção acima.</p>
 ${U.wipe?`<form class="wipe" data-wipef role="alertdialog" aria-labelledby="wt" aria-describedby="wd"><b id="wt">Apagar tudo?</b>
@@ -766,7 +767,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('.addph,.cam'))return;
  else if(!was)return;
  save();render()});
-document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
+document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.pend!==undefined)U.pendOpen=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.wipe){U.wipe=false;U.wipeErr='';render()}});
 document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=new FormData(f);
  if(f.id==='af'){const name=d.get('name').trim();if(!name)return;const T=U.tab==='obra';
