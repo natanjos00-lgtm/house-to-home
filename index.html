@@ -162,6 +162,8 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .addph,.lk.cam{position:relative;display:inline-flex;align-items:center;gap:6px;cursor:pointer}.addph{border:1px dashed var(--taupe);border-radius:10px;padding:0 14px;height:64px;font-size:13px;font-weight:700;color:var(--brown)}.lk.cam{font-size:14px;color:var(--mute)}.lk.cam svg{display:none}
 .addph input,.lk.cam input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .pbig{margin:10px 0 2px}.pbig img{width:100%;max-height:420px;object-fit:contain;border-radius:12px;background:var(--sand);display:block}
+.rfbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:6px 14px;margin:8px 0;font-size:14px}.rfbar b{color:var(--brown)}
+.rsum{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}.rsum>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.rsum span{font-size:13px;color:var(--mute)}.rsum .bar{margin:6px 0 2px}
 details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
 .chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
@@ -464,7 +466,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,scw:false,orc:false,sco:false,obErr:''};
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
@@ -579,7 +581,7 @@ ${r.img.length?'<label style="margin-top:6px">Substituir esta foto<input type="f
 <input class="rn" value="${esc(r.name)}" data-rn aria-label="Nome do ambiente">
 <h3>Medidas</h3><div class="three">${[['w','Largura (m)'],['l','Comprimento (m)'],['h','Pé-direito (m)']].map(([k,l])=>`<label>${l}<input inputmode="decimal" value="${fvm(r[k])}" data-rm="${k}"></label>`).join('')}</div><p class="fin">Área: ${ar}</p>
 <h3>Referências e decisões</h3><textarea rows="4" data-rd placeholder="Cores, materiais, móveis desejados, decisões tomadas…">${esc(r.decor)}</textarea>
-<h3>Neste ambiente</h3>${pr.n?`<p class="fin">Enxoval deste ambiente: ${pr.d} de ${pr.n} comprados (${pr.pct}%)</p>`:''}${its.length?its.map(mini).join(''):'<p class="empty">Nenhum item vinculado a este ambiente.</p>'}
+<h3>Itens deste ambiente</h3>${[['enxoval','Enxoval'],['obra','Obra']].map(([ar,nm])=>{const li=its.filter(i=>i.area===ar);if(!li.length)return '';const d=li.filter(i=>ar==='enxoval'?pstat(i)==='bought':i.status==='done').length,pc=Math.round(d/li.length*100);return `<div class="rsum"><div><b>${nm}</b><span>${d} de ${li.length} ${ar==='enxoval'?'comprados':'concluídos'} · ${pc}%</span></div><div class="bar" aria-hidden="true"><i style="width:${pc}%"></i></div><button class="lk" data-rfgo="${ar}:${r.id}">Ver itens do ${nm.toLowerCase()} deste ambiente</button></div>`}).join('')||'<p class="empty">Nenhum item vinculado a este ambiente. Escolha o ambiente ao adicionar um item no Enxoval ou na Obra.</p>'}
 <button class="lk" data-delroom="${r.id}" style="margin-top:14px">${U.arm==='room:'+r.id?'Toque de novo para excluir o ambiente':'Excluir ambiente'}</button>${its.length?'<p class="note">Os itens vinculados continuam cadastrados, apenas sem ambiente.</p>':''}`}
 
 const catRank=c=>c===''?999:(ENX_CATS.includes(c)?ENX_CATS.indexOf(c):500);
@@ -655,19 +657,19 @@ function shopGroups(L,all,mode){const pr=p=>`${p.d} de ${p.n} comprados · ${p.p
  return [...new Set(L.map(i=>i.cat))].sort(catSort).map(c=>{const a=all.filter(i=>i.cat===c&&!i.returned),d=a.filter(i=>pstat(i)==='bought').length,p={n:a.length,d,pct:a.length?Math.round(d/a.length*100):0};
   return `<div class="gh"><h3>${esc(c||'Sem categoria')}</h3><span>${pr(p)}</span></div>${bar(p)}`+L.filter(i=>i.cat===c).map(i=>shopHtml(i,'cat')).join('')}).join('')}
 const addBox=(t,form,empty)=>{const o=U.addOpen[t]===undefined?empty:U.addOpen[t];return `<details class="addbox" data-addbox="${t}" ${o?'open':''}><summary>${t==='obra'?'Adicionar item da obra':'Adicionar item ao enxoval'}</summary>${form}</details>`};
-function area(t){const L=act().filter(i=>i.area===t),T=t==='obra',
- ro=`<option value="">${T?'Geral':'Sem ambiente'}</option>`+S.rooms.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join(''),
+function area(t){const RR=U.rf&&S.rooms.find(r=>r.id===U.rf),L=act().filter(i=>i.area===t&&(!RR||i.roomId===RR.id)),T=t==='obra',
+ ro=`<option value="">${T?'Geral':'Sem ambiente'}</option>`+S.rooms.map(r=>`<option value="${r.id}"${RR&&RR.id===r.id?' selected':''}>${esc(r.name)}</option>`).join(''),
  sec=(n,a)=>a.length?`<h3>${esc(n)}</h3>`+a.map(itemHtml).join(''):'';
- const head=crumb()+`<h2 class="pt">${T?'Obra':'Enxoval'}</h2>${warns(t)}`;
+ const head=crumb()+`<h2 class="pt">${T?'Obra':'Enxoval'}</h2>${warns(t)}${RR?`<div class="rfbar"><span>Só itens de <b>${esc(RR.name)}</b></span><button class="lk" data-rfclear>Ver tudo</button></div>`:''}`;
  if(!T){const p=prog(),f=U.flt,cnt=k=>k==='all'?L.length:L.filter(i=>estat(i)===k).length,Lf=f==='all'?L:L.filter(i=>estat(i)===f),tt=tot(t),flts=FLT.filter(([k])=>k!=='returned'||cnt(k)>0||f==='returned');
   const form=`<form class="add" id="af"><input class="full" name="name" required placeholder="Ex.: Sofá de 3 lugares" aria-label="Nome do item"><select name="room" aria-label="Ambiente">${ro}</select><select name="cat" aria-label="Categoria"><option value="">Automática</option>${ENX_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input name="qty" inputmode="numeric" placeholder="Quantidade" aria-label="Quantidade necessária"><input name="planned" inputmode="decimal" placeholder="Previsto (R$)" aria-label="Valor previsto"><button class="btn full">Adicionar</button></form>`;
   const seg=(a,k,cur,w)=>`<div class="seg${w?' w':''}" role="group">${a.map(([v,l])=>`<button ${k}="${v}" aria-pressed="${cur===v}">${l}</button>`).join('')}</div>`;
-  const body=!L.length?'<p class="empty">Nenhum item ainda. Adicione o primeiro acima.</p>':!Lf.length?`<p class="empty">Nenhum item com a situação “${(FLT.find(x=>x[0]===f)||[0,''])[1]}”.</p>`:shopGroups(Lf,L,U.view);
-  return head+`<div class="card"><div class="prog"><b>${p.pct}%</b><span>${p.n?`${p.d} de ${p.n} itens comprados`:'Nenhum item na lista ainda'}</span></div><div class="bar" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${p.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p.pct}%"></i></div></div>`+
-   grid(tt,S.budget[t],'Orçamento do enxoval',[['Total investido (pago, líquido de estornos)',R(tt.paid)],['Estornado',R(tt.refunded)]])+budgetEdit('enxoval')+addBox(t,form,!L.length)+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+body}
+  const body=!L.length?`<p class="empty">${RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:!Lf.length?`<p class="empty">Nenhum item com a situação “${(FLT.find(x=>x[0]===f)||[0,''])[1]}”.</p>`:shopGroups(Lf,L,U.view);
+  return head+(RR?'':`<div class="card"><div class="prog"><b>${p.pct}%</b><span>${p.n?`${p.d} de ${p.n} itens comprados`:'Nenhum item na lista ainda'}</span></div><div class="bar" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${p.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p.pct}%"></i></div></div>`+
+   grid(tt,S.budget[t],'Orçamento do enxoval',[['Total investido (pago, líquido de estornos)',R(tt.paid)],['Estornado',R(tt.refunded)]])+budgetEdit('enxoval'))+addBox(t,form,!L.length)+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+body}
  const form=`<form class="add" id="af"><select name="kind" aria-label="Tipo"><option value="servico">Serviço</option><option value="material">Material</option></select><select name="room" aria-label="Ambiente">${ro}</select><input class="full" name="name" required placeholder="Ex.: Assentar piso da sala" aria-label="Nome"><input name="cat" list="cl" placeholder="Categoria" aria-label="Categoria"><datalist id="cl">${[...new Set(L.map(i=>i.cat).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input name="planned" inputmode="decimal" placeholder="Estimado (R$)" aria-label="Valor estimado"><button class="btn full">Adicionar</button></form>`;
- const body=!L.length?'<p class="empty">Nenhum item ainda. Adicione o primeiro acima.</p>':sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
- return head+grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra')+addBox(t,form,!L.length)+body}
+ const body=!L.length?`<p class="empty">${RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
+ return head+(RR?'':grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra'))+addBox(t,form,!L.length)+body}
 
 function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
@@ -703,7 +705,7 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
  else if(b=q('[data-room]')){U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
@@ -744,6 +746,8 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-st]')){const i=item(b.dataset.st);setField(i.id,'status',ST[(ST.indexOf(i.status)+1)%3])}
  else if(b=q('[data-op]'))U.open=U.open===b.dataset.op?null:b.dataset.op;
  else if(b=q('[data-del]')){const id=b.dataset.del;if(was===id){delItem(id);if(U.open===id)U.open=null}else U.arm=id}
+ else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
+ else if(q('[data-rfclear]'))U.rf=null;
  else if(b=q('[data-pvi]')){const v=b.dataset.pvi;U.pv=v&&U.pv!==v?v:null}
  else if(b=q('[data-rmiimg]')){const v=b.dataset.rmiimg,[id,x]=v.split(':'),it=item(id);if(was==='pi:'+v){if(it&&it.img&&it.img[+x]){const k=it.img.splice(+x,1)[0];log(id,'Foto removida');gc(k)}U.pv=null}else U.arm='pi:'+v}
  else if(b=q('[data-rs]'))restoreItem(b.dataset.rs);
