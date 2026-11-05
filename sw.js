@@ -20,6 +20,7 @@ self.addEventListener('fetch', e => {
   if (r.method !== 'GET') return;
   const mine = u.origin === location.origin, cdn = CDN.includes(r.url);
   if (!mine && !cdn) return; // Supabase, Google, fontes: direto na rede
+  if (mine && u.search) return; // verificação de versão: sempre direto na rede
   if (r.mode === 'navigate') {
     e.respondWith((async () => {
       try { const n = await fetch(r); const c = await caches.open(VER); c.put('index.html', n.clone()); return n }

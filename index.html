@@ -466,7 +466,10 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,scw:false,orc:false,sco:false,obErr:''};
+const APP_VER='20261105-1009';
+const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
+const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
@@ -567,7 +570,15 @@ ${U.wipeErr?`<p class="warn" role="alert">${esc(U.wipeErr)}</p>`:''}
 <div class="two" style="margin-top:10px"><button type="button" class="btn alt" data-wipex>Cancelar</button><button class="btn bad" id="wipego" disabled>Apagar tudo</button></div></form>`
 :(C.mode&&C.info&&C.info.role==='member')?`<p class="note">Só quem criou a casa pode apagar tudo.</p>`:`<button class="btn altbad" data-wipe style="width:100%">Apagar tudo…</button>`}</section>`}
 const budgetEdit=a=>{const o=a==='obra';return `<details class="bud" id="orc" ${U.orc?'open':''}><summary>Orçamento ${o?'da obra':'do enxoval'} (editar)</summary><div class="grid">${bin(a,o?'Orçamento da obra':'Orçamento do enxoval')}</div><p class="note">Valor opcional, só para ${o?'a obra/reforma':'o enxoval'}. Saldo = orçamento − comprometido. ${o?'O orçamento do enxoval fica na aba Enxoval.':'O orçamento da obra fica na aba Obra.'} Os dois nunca são somados.</p></details>`};
-const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+archive()+dangerZone()
+function aboutCard(){const u=U.upd,nv=typeof u==='string'&&u.startsWith('new:');
+ return `<section class="card about" aria-labelledby="abh"><h3 id="abh" style="margin-top:0">Sobre o app</h3><p class="fin" style="margin:0 0 8px">Versão de <b>${verTxt(APP_VER)}</b></p>`+(canUpd()?(
+  u==='checking'?'<p class="note" role="status">Procurando atualização…</p>'
+  :nv?`<p class="warn ok" role="status">Há uma versão nova (${verTxt(u.slice(4))}). Seus dados não são apagados.</p><button class="btn" data-updgo style="width:100%">Atualizar agora</button>`
+  :`${u==='ok'?'<p class="warn ok" role="status">Você já está na versão mais recente.</p>':u==='err'?'<p class="warn" role="alert">Não foi possível verificar. Confira a internet e tente de novo.</p>':''}<button class="btn alt" data-updchk style="width:100%">Procurar atualização</button>`
+ ):'<p class="note">A atualização automática funciona no app instalado a partir do endereço da internet.</p>')+'</section>'}
+async function updCheck(){U.upd='checking';render();try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const m=/APP_VER=.(\d{8}-\d{4}).;/.exec(await r.text());U.upd=!r.ok||!m?'err':m[1]===APP_VER?'ok':'new:'+m[1]}catch(e){U.upd='err'}render()}
+async function updGo(){try{const rs=await navigator.serviceWorker.getRegistrations();for(const g of rs)await g.unregister();for(const k of await caches.keys())if(k.startsWith('hth'))await caches.delete(k)}catch(e){}location.reload()}
+const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+archive()+aboutCard()+dangerZone()
 
 function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2><div class="rg">${S.rooms.map(r=>{const n=act().filter(i=>i.roomId===r.id).length;
  const pe=prog(r.id);return `<button class="rc${r.img[0]?'':' none'}" data-room="${r.id}">${r.img[0]?imgEl(r.img[0],''):''}<span><b>${esc(r.name)}</b><small>${n} ${n===1?'item':'itens'}${pe.n?' · enxoval '+pe.pct+'%':''}</small></span></button>`}).join('')}</div>
@@ -749,6 +760,8 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-del]')){const id=b.dataset.del;if(was===id){delItem(id);if(U.open===id)U.open=null}else U.arm=id}
  else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
  else if(q('[data-rfclear]'))U.rf=null;
+ else if(q('[data-updchk]')){updCheck();return}
+ else if(q('[data-updgo]')){updGo();return}
  else if(b=q('[data-pvi]')){const v=b.dataset.pvi;U.pv=v&&U.pv!==v?v:null}
  else if(b=q('[data-rmiimg]')){const v=b.dataset.rmiimg,[id,x]=v.split(':'),it=item(id);if(was==='pi:'+v){if(it&&it.img&&it.img[+x]){const k=it.img.splice(+x,1)[0];log(id,'Foto removida');gc(k)}U.pv=null}else U.arm='pi:'+v}
  else if(b=q('[data-rs]'))restoreItem(b.dataset.rs);
