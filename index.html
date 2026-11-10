@@ -312,6 +312,14 @@ function planParse(txt){let t=String(txt==null?'':txt).trim();if(!t)return{ok:fa
  if(bad.length)return{ok:false,err:'Medidas inválidas em: '+bad.slice(0,6).join(', ')+'. Largura e comprimento devem ficar entre 0,5 e 40 metros.'};
  const seen=new Set();for(const o of out){const k=_nm(o.name).trim();if(seen.has(k))return{ok:false,err:'O ambiente “'+o.name+'” aparece duas vezes.'};seen.add(k)}
  return{ok:true,rooms:out}}
+function aiToPlan(txt){let j=null;try{j=JSON.parse(String(txt==null?'':txt).trim().replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim())}catch(e){return{ok:false,err:'A IA respondeu num formato que não consegui ler. Tente de novo, com uma foto mais nítida.'}}
+ const a=j&&(j.ambientes||j.rooms);if(!Array.isArray(a)||!a.length)return{ok:false,err:'Não encontrei ambientes no desenho. Tente uma foto mais nítida, com as medidas escritas.'};
+ const keep=[],skipped=[],seen=new Set();a.slice(0,40).forEach((o,i)=>{const nm=o&&typeof o==='object'?String(o.nome!=null?o.nome:o.name!=null?o.name:'').replace(/\s+/g,' ').trim().slice(0,60):'';const r=o&&typeof o==='object'?planParse(JSON.stringify({ambientes:[o]})):{ok:false};
+  if(!r.ok){skipped.push(nm||'ambiente '+(i+1));return}const n=r.rooms[0],base=n.name;let k=2;while(seen.has(_nm(n.name).trim()))n.name=base+' '+k++;seen.add(_nm(n.name).trim());keep.push(n)});
+ if(!keep.length)return{ok:false,err:'Não consegui ler as medidas do desenho. Confira se as medidas estão escritas e legíveis.'};
+ return{ok:true,rooms:keep,skipped,duvidas:Array.isArray(j.duvidas)?j.duvidas.map(x=>String(x).slice(0,160)).filter(Boolean).slice(0,6):[],ai:true}}
+function aiText(resp){if(!resp||typeof resp!=='object')return{ok:false,err:'A IA não respondeu.'};if(resp.promptFeedback&&resp.promptFeedback.blockReason)return{ok:false,err:'A IA não aceitou analisar esta imagem. Tente outra foto.'};
+ const c=Array.isArray(resp.candidates)?resp.candidates[0]:null,p=c&&c.content&&Array.isArray(c.content.parts)?c.content.parts:[],t=p.map(x=>x&&typeof x.text==='string'?x.text:'').join('').trim();return t?{ok:true,text:t}:{ok:false,err:'A IA não devolveu nada. Tente de novo.'}}
 function planPreview(list){return list.map(o=>({o,r:S.rooms.find(r=>_nm(r.name).trim()===_nm(o.name).trim())||null}))}
 function planApply(list){let upd=0,nw=0;planPreview(list).forEach(({o,r})=>{if(r)upd++;else{r=mkRoom(o.name,[],null,roomKinds(o.name)[0]||null);nw++}r.w=o.w;r.l=o.l;if(o.h!=null)r.h=o.h;if(o.x!=null&&o.y!=null){r.px=o.x;r.py=o.y}else{delete r.px;delete r.py}});planAuto(S.rooms,true);return{upd,nw}}
 function setHouseName(n){n=String(n==null?'':n).replace(/\s+/g,' ').trim().slice(0,60);S.house.name=n;S.house.done=true;return n}
@@ -545,7 +553,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1612';
+const APP_VER='20261110-1621';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -849,6 +857,31 @@ function planBind(){const svg=document.getElementById('plsvg');if(!svg||!U.pl)re
   svg.addEventListener('pointerdown',e=>{const g=e.target.closest('[data-plr]');if(!g)return;const r=S.rooms.find(x=>x.id===g.dataset.plr);if(!r)return;const p=pt(e);d={g,r,sx:p.x,sy:p.y,ox:r.px||0,oy:r.py||0,moved:false};try{svg.setPointerCapture(e.pointerId)}catch(x){}});
   svg.addEventListener('pointermove',e=>{if(!d)return;const p=pt(e),dx=p.x-d.sx,dy=p.y-d.sy;if(!d.moved&&Math.hypot(dx,dy)<.15)return;d.moved=true;d.r.px=r1(d.ox+dx);d.r.py=r1(d.oy+dy);d.g.setAttribute('transform',`translate(${d.r.px} ${d.r.py})`)});
   const end=()=>{if(!d)return;const r=d.r;P.sel=r.id;if(d.moved)save();d=null;render()};svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}}
+/* ---- Ler o rascunho com IA gratuita (Gemini). A chave é da própria pessoa, fica só neste aparelho e nunca entra em backup, sincronização ou código. ---- */
+const AI_KEY='hth-ai-key';
+const aiKey=()=>{try{return localStorage.getItem(AI_KEY)||''}catch(e){return ''}};
+const aiSet=k=>{try{if(k)localStorage.setItem(AI_KEY,k);else localStorage.removeItem(AI_KEY)}catch(e){}};
+const AI_PROMPT='Você lê rascunhos de plantas de casas desenhados à mão. Devolva SOMENTE JSON neste formato: {"ambientes":[{"nome":"texto","largura":número,"comprimento":número,"pe_direito":número ou null,"x":número ou null,"y":número ou null}],"duvidas":["texto"]}. Regras: (1) medidas em metros; converta cm e mm. (2) largura é o lado horizontal do desenho e comprimento é o lado vertical. (3) Use SOMENTE medidas escritas no desenho. NUNCA invente nem estime medidas. Se um ambiente não tiver as duas medidas legíveis, não o inclua e descreva o problema em "duvidas". (4) x e y são a posição do canto superior esquerdo de cada ambiente, em metros, a partir do canto superior esquerdo da casa (0,0), deduzida de como os ambientes se encostam no desenho; use null se não der para saber. (5) Escreva os nomes em português, como estão no desenho.';
+async function aiRead(file){const P=U.pl;if(!P)return;P.ai={busy:true,err:''};render();
+ try{const url=await shrink(file,1600,.85);if(!url)throw{msg:'Não consegui abrir esta foto. Tente outra.'};
+  const body=JSON.stringify({contents:[{parts:[{text:AI_PROMPT},{inline_data:{mime_type:'image/jpeg',data:url.split(',')[1]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json'}});
+  let r=null;for(const m of ['gemini-flash-latest','gemini-2.5-flash']){const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),60000);
+   try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':aiKey()},body,signal:ac.signal})}finally{clearTimeout(tm)}
+   if(r.status!==404)break}
+  if(!r.ok){let m='';try{m=((await r.json()).error||{}).message||''}catch(e){}
+   throw{msg:r.status===429?'O limite gratuito foi atingido. Tente de novo daqui a alguns minutos ou amanhã.':(r.status===400&&/api key/i.test(m))||r.status===401||r.status===403?'A chave não foi aceita. Confira se copiou inteira, ou crie outra.':r.status>=500?'O serviço da IA está instável agora. Tente mais tarde.':'A IA não conseguiu usar esta foto. Tente outra, mais nítida.'}}
+  const tx=aiText(await r.json());if(!tx.ok)throw{msg:tx.err};const pl=aiToPlan(tx.text);if(!pl.ok)throw{msg:pl.err};P.imp=pl;P.ai={busy:false,err:''};U.addOpen.plimp=true}
+ catch(e){P.ai={busy:false,err:e&&e.msg?e.msg:'Não consegui falar com a IA. Confira a internet e tente de novo.'}}
+ if(U.pl===P)render()}
+function aiBlock(P){const ai=P.ai||{};
+ if(aiKey())return `<div class="rsum"><b>Ler o desenho com IA</b><p class="note">Escolha a foto do rascunho. A IA lê os nomes e as medidas escritas e você confere tudo antes de aplicar.</p>
+${ai.busy?'<div class="spin" role="status" aria-label="Lendo"></div><p>Lendo o rascunho… pode levar até 30 segundos.</p>':'<label>Foto do rascunho<input type="file" accept="image/*" data-aifile></label>'}
+${ai.err?`<p class="warn" role="alert">${esc(ai.err)}</p>`:''}<button class="lk" data-aidel>${U.arm==='aidel'?'Toque de novo para remover a chave':'Remover a chave deste aparelho'}</button></div>`;
+ return `<div class="rsum"><b>Ler o desenho com IA gratuita (opcional)</b><p class="note">O app pode ler a foto por você, usando o Gemini, do Google. É grátis, e cada pessoa usa a própria chave.</p>
+<details><summary>Como pegar a chave (cerca de 2 minutos)</summary><ol class="note" style="padding-left:18px;margin:8px 0"><li>Abra <a class="lk" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> e entre com a sua conta Google.</li><li>Toque em “Criar chave de API” (Create API key).</li><li>Copie a chave e cole abaixo.</li></ol></details>
+<form class="add" data-aiform>${ai.err?`<p class="warn full" role="alert">${esc(ai.err)}</p>`:''}<label class="full">Cole a chave aqui<input name="k" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required></label>
+<label class="chk full"><input type="checkbox" name="ok" required> Entendi que a foto do rascunho será enviada ao Google para ser lida. Pelas regras do plano gratuito do Google, o conteúdo enviado pode ser usado para melhorar os produtos deles.</label><button class="btn full">Salvar a chave neste aparelho</button></form>
+<p class="note">A chave fica só neste aparelho. Ela não vai para o backup, nem para o outro aparelho, nem para o GitHub.</p></div>`}
 function planPage(){const P=U.pl,back='<button class="lk back" data-plx>← Ambientes</button>';
  if(!S.rooms.length)return back+'<h2 class="pt">Planta da casa</h2><p class="empty">Adicione ambientes primeiro. Depois você monta a planta aqui.</p>';
  const st=planStats(S.rooms),ov=planOverlaps(S.rooms),sel=S.rooms.find(r=>r.id===P.sel),nm=id=>{const r=S.rooms.find(x=>x.id===id);return r?esc(r.name):''};
@@ -864,9 +897,10 @@ ${ov.length?`<p class="warn">Há ambientes sobrepostos: ${ov.slice(0,3).map(([a,
 <button class="btn alt" data-plauto style="width:100%">${U.arm==='plauto'?'Toque de novo para reorganizar tudo':'Organizar automaticamente'}</button>`}
 <div class="rsum"><b>Resumo</b><p class="fin" style="margin:6px 0 0">Piso: <b>${st.area.toFixed(1).replace('.',',')} m²</b> em ${st.n} ambiente(s). Paredes: <b>${st.paredes.toFixed(0)} m²</b> (sem descontar portas e janelas; útil para estimar tinta).</p>${st.sem.length?`<p class="note">Sem medidas (desenhados como 3 × 3 m): ${st.sem.slice(0,8).map(r=>`<button class="lk" data-room="${r.id}">${esc(r.name)}</button>`).join(', ')}.</p>`:''}</div>
 <details class="addbox" data-addbox="plimp" ${U.addOpen.plimp?'open':''}><summary>Tenho um rascunho no papel</summary>
+${aiBlock(P)}<p class="cap">Ou peça para o Claude converter no chat</p>
 <ol class="note" style="padding-left:18px;margin:8px 0"><li>Tire uma foto do rascunho, com as medidas escritas.</li><li>Envie para o Claude no chat e peça: “converta em planta do app”.</li><li>Cole aqui o texto que ele devolver e toque em Ver o que será importado.</li></ol>
 <textarea id="plimp" rows="5" placeholder='Cole aqui o texto da planta' aria-label="Texto da planta">${esc(P.txt||'')}</textarea><button class="btn alt" data-plprev style="width:100%;margin-top:8px">Ver o que será importado</button>
-${imp?(imp.ok?`<div class="rsum"><b>Vai ser feito</b><ul class="note" style="margin:6px 0;padding-left:18px">${planPreview(imp.rooms).map(({o,r})=>`<li>${esc(o.name)}: ${fvm(o.w)} × ${fvm(o.l)} m — ${r?'atualiza o ambiente existente (fotos e itens ficam)':'cria um ambiente novo'}</li>`).join('')}</ul><button class="btn" data-plapply style="width:100%">Aplicar na planta</button></div>`:`<p class="warn" role="alert">${esc(imp.err)}</p>`):''}</details>`}
+${imp?(imp.ok?`<div class="rsum"><b>Vai ser feito</b>${imp.ai?`<p class="warn">Lido por IA: ela pode errar. Confira cada medida antes de aplicar; depois você ajusta na planta.</p>${imp.skipped&&imp.skipped.length?`<p class="note">Não consegui ler as medidas de: ${imp.skipped.map(esc).join(', ')}.</p>`:''}${imp.duvidas&&imp.duvidas.length?`<p class="note">Dúvidas da IA: ${imp.duvidas.map(esc).join(' · ')}</p>`:''}`:''}<ul class="note" style="margin:6px 0;padding-left:18px">${planPreview(imp.rooms).map(({o,r})=>`<li>${esc(o.name)}: ${fvm(o.w)} × ${fvm(o.l)} m — ${r?'atualiza o ambiente existente (fotos e itens ficam)':'cria um ambiente novo'}</li>`).join('')}</ul><button class="btn" data-plapply style="width:100%">Aplicar na planta</button></div>`:`<p class="warn" role="alert">${esc(imp.err)}</p>`):''}</details>`}
 
 const roomsOf=k=>roomsOfKind(S.rooms,k);
 
@@ -1111,7 +1145,7 @@ async function doImport(mode){const o=U.imp.obj;keepPrev();let fail=0;
  U.imp=null;U.arm=null;U.open=null;U.room=null;save();render();mig()}
 async function pclear(){try{const d=await idb();await new Promise((res,rej)=>{const q=d.transaction('p','readwrite').objectStore('p').clear();q.onsuccess=()=>res();q.onerror=()=>rej(q.error)});for(const k of Object.keys(PC))delete PC[k]}catch(e){}}
 async function wipeAll(){try{['minha-casa-v3','minha-casa-v2',PREV,BAD].forEach(k=>localStorage.removeItem(k))}catch(e){}
- await pclear();S=EMPTY();seedRooms();Object.assign(U,{wipe:false,wipeErr:'',open:null,room:null,imp:null,pur:null,arm:null,ob:0,cfg:false,tab:'home',bmsg:'',msg:'Todos os dados foram apagados deste aparelho.'});save();render();scrollTo(0,0)}
+ await pclear();aiSet('');S=EMPTY();seedRooms();Object.assign(U,{wipe:false,wipeErr:'',open:null,room:null,imp:null,pur:null,arm:null,ob:0,cfg:false,tab:'home',bmsg:'',msg:'Todos os dados foram apagados deste aparelho.'});save();render();scrollTo(0,0)}
 function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSON.parse(p));localStorage.removeItem(PREV);U.bmsg='Dados anteriores restaurados.';save()}}catch(e){}U.open=null;U.room=null;render();mig()}
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
@@ -1178,6 +1212,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('[data-plspin]')){if(U.pl){U.pl.spin=!U.pl.spin;const b2=document.querySelector('[data-plspin]');if(b2)b2.textContent=U.pl.spin?'Pausar giro':'Girar sozinha';return}}
  else if(q('[data-plauto]')){if(was==='plauto'){planAuto(S.rooms,false);U.pl.sel=null}else U.arm='plauto'}
  else if(q('[data-plrot]')){const r=U.pl&&S.rooms.find(x=>x.id===U.pl.sel);if(r&&r.w>0&&r.l>0){const t=r.w;r.w=r.l;r.l=t}}
+ else if(q('[data-aidel]')){if(was==='aidel')aiSet('');else U.arm='aidel'}
  else if(q('[data-plprev]')){const ta=document.getElementById('plimp');U.pl.txt=ta?ta.value:'';U.pl.imp=planParse(U.pl.txt);U.addOpen.plimp=true}
  else if(q('[data-plapply]')){const im=U.pl.imp;if(im&&im.ok){const r=planApply(im.rooms);U.pl.imp=null;U.pl.txt='';U.pl.sel=null;U.msg=r.upd+' ambiente(s) atualizado(s) e '+r.nw+' criado(s).'}}
  else if(b=q('[data-qzopen]')){U.qz=b.dataset.qzopen==='r'?{step:QZ.length,ans:[],who:''}:{step:-1,ans:[],who:''};scrollTo(0,0)}
@@ -1244,6 +1279,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
    p.amount=amt;p.date=iso||'';p.paid=pd2;if(mt&&METHODS[mt])p.method=mt;else delete p.method;
    log(p.itemId,`${rf?'Estorno':'Pagamento'} alterado: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}${p.method?' · '+METHOD_SHORT[p.method]:''}${pd2?'':' (agendado)'}`);U.pe=null;U.dmk=''}
   else{const o=`${R(p.amount)}${p.date?' em '+fdate(p.date):''}`;p.amount=amt;p.date=iso||'';log(p.itemId,`Parcela alterada: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}`);U.pe=null;U.dmk=''}}
+ else if(f.dataset.aiform!==undefined){const k=String(d.get('k')||'').trim();if(!U.pl)return;if(d.get('ok')!=='on')U.pl.ai={busy:false,err:'Marque a confirmação para continuar.'};else if(k.length<20||/\s/.test(k))U.pl.ai={busy:false,err:'Essa chave parece incompleta. Copie de novo, inteira, sem espaços.'};else{aiSet(k);U.pl.ai={busy:false,err:''}}}
  else if(f.dataset.qzstart!==undefined){if(!U.qz)return;U.qz.who=String(d.get('who')||'').replace(/\s+/g,' ').trim().slice(0,30);U.qz.ans=[];U.qz.step=0;scrollTo(0,0)}
  else if(f.dataset.nf){const text=d.get('text').trim();U.msg='';
   const ph=await storePhotos(f.querySelector('input[type=file]').files);
@@ -1271,6 +1307,7 @@ document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=(
  else if(d.sup)setSupplier(d.sup,el.value);
  else if(d.ct)setContact(d.ct,el.value);
  else if(d.rm)rm()[d.rm]=num(el.value);
+ else if(d.aifile!==undefined){const f=el.files&&el.files[0];el.value='';if(f)aiRead(f);return}
  else if(d.plf){const r=U.pl&&S.rooms.find(x=>x.id===U.pl.sel);if(!r)return;const v=num(el.value);if(d.plf==='px'||d.plf==='py'){if(v!=null&&v>=-100&&v<=300)r[d.plf]=r1(v)}else if(v==null)r[d.plf]=null;else if(d.plf==='h'?(v>=2&&v<=6):(v>=PL_MIN&&v<=PL_MAX))r[d.plf]=v}
  else if(d.rd!==undefined)rm().decor=el.value;
  else if(d.rn!==undefined){const n=el.value.trim();if(n)rm().name=n}
