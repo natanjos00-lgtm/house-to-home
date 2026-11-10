@@ -183,6 +183,8 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .cc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cc-b{position:absolute;inset:0;width:100%;height:100%;border:0;background:none;padding:0;cursor:pointer;z-index:1}.cc .ct{z-index:2;pointer-events:none}.cc-x{position:absolute;top:10px;right:10px;z-index:3;min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(30,26,22,.62);color:#f7f3ec;font:600 18px/1 Figtree,sans-serif;padding:0 10px;cursor:pointer}.cc-x:hover{background:rgba(30,26,22,.85)}
 .dedup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:14px 0}.dedup h3{margin:0 0 6px}.dedup p{margin:6px 0}
 .stc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:16px 0}.stc h3{margin:2px 0 2px;font-size:26px}.stc p{margin:4px 0}.stc .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.stc>.btn{margin-top:10px}
+.gdp{margin:12px 0 4px}.gdp b{font:700 14px Figtree,sans-serif}.gdg{margin:20px 0}.gdi{display:grid;grid-template-columns:40px 1fr;gap:6px;padding:10px 0;border-top:1px solid var(--line)}.gdi p{margin:3px 0 0;font-size:14px;color:var(--mute);line-height:1.4}.gdi b{font-weight:600;font-size:16px;line-height:1.3}.gdi .gdd{color:var(--gold2);font-weight:600}.gdi .acts{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px}.gdi.ok b{color:var(--mute)}.gdi.na{opacity:.6}
+.gdk{width:44px;height:44px;margin:-6px 0 0 -6px;background:none;border:0;padding:0;display:grid;place-items:center;cursor:pointer;color:transparent}.gdk i{width:26px;height:26px;border:2px solid var(--gold);border-radius:8px;display:grid;place-items:center}.gdi.ok .gdk i{background:var(--gold);color:var(--card)}.gdk:focus-visible i{outline:2px solid var(--gold2);outline-offset:3px}.gdk:disabled{cursor:default}.gdk:disabled i{border-color:var(--line)}
 .pal{display:inline-flex;border-radius:8px;overflow:hidden;margin:6px 0;vertical-align:middle}.pal i{display:block;width:34px;height:22px}.pal.sm i{width:22px;height:14px}.pal.big{display:flex;border-radius:12px;margin:12px 0}.pal.big i{flex:1;height:44px;width:auto}
 .qq{font-size:30px;line-height:1.1;margin:14px 0 14px}.qg{display:grid;gap:10px}.qg.vis{grid-template-columns:1fr 1fr}
 .qo{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-height:56px;color:var(--ink);font:inherit;cursor:pointer}.qo:active,.qo:hover{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.qo b{font-weight:600;font-size:16px;line-height:1.3}.qo .pal{margin:0}
@@ -289,6 +291,51 @@ const estat=i=>i.returned?'returned':pstat(i);
 const FLT=[['all','Todos'],['pending','Pendente'],['partial','Parcialmente comprado'],['researching','Pesquisando'],['bought','Comprado'],['returned','Devolvido']];
 const STY_IDS=['escandinavo','industrial','contemporaneo','minimalista','rustico','classico','boho','japandi'];
 function cleanStyle(o){if(!o||typeof o!=='object'||!Array.isArray(o.profiles))return null;const ps=o.profiles.slice(0,2).map(p=>{if(!p||typeof p!=='object')return null;const sc={};STY_IDS.forEach(k=>{const v=Number(p.sc&&p.sc[k]);sc[k]=isFinite(v)&&v>0?Math.min(Math.round(v),999):0});return{name:String(p.name==null?'':p.name).replace(/\s+/g,' ').trim().slice(0,30),sc,ts:typeof p.ts==='string'?p.ts.slice(0,30):''}}).filter(Boolean);return ps.length?{profiles:ps}:null}
+/* Guia da primeira casa: lembretes gerais (sem prazos nem valores). Cada item tem id fixo, porque o progresso é salvo por id. */
+const GUIDE=[
+{id:'doc',t:'Papéis e chaves',items:[
+ {id:'doc-guardar',t:'Reunir os documentos da compra em uma pasta',d:'Contrato, matrícula, comprovantes de pagamento e do financiamento. Guarde uma cópia digital e outra no papel.'},
+ {id:'doc-matricula',t:'Acompanhar a matrícula do imóvel no seu nome',d:'O registro é feito no cartório de imóveis e o prazo varia. Com financiamento, o banco costuma pedir a matrícula atualizada. Pergunte ao banco ou ao cartório o que falta.'},
+ {id:'doc-promessa',t:'Reler o que o contrato promete entregar',d:'Se houver memorial descritivo, deixe à mão. Ele é a referência na hora da vistoria.'},
+ {id:'doc-chaves',t:'Combinar data e local da entrega das chaves',d:'Peça por escrito, para não haver dúvida sobre a partir de quando contas e condomínio passam a ser seus.'}]},
+{id:'vis',t:'Vistoria e entrega',items:[
+ {id:'vis-fazer',t:'Fazer a vistoria com calma, sem pressa',d:'Se quiser, leve um engenheiro ou arquiteto de confiança. Conferir tudo em um dia só costuma ser cansativo; peça mais tempo se precisar.'},
+ {id:'vis-testar',t:'Testar o que dá para testar',d:'Tomadas, interruptores, torneiras, descargas, chuveiro, ralos, portas, janelas, fechaduras e ar-condicionado, se houver. Olhe também cantos do teto e paredes à procura de manchas.'},
+ {id:'vis-registro',t:'Fotografar e anotar tudo que estiver errado',d:'Fotos e vídeos com data, e uma lista escrita dos defeitos. Evite assinar o termo de entrega com pendências sem registrá-las no próprio termo.'},
+ {id:'vis-medidores',t:'Fotografar os medidores de luz, água e gás',d:'Assim fica registrado o ponto de partida do seu consumo.'},
+ {id:'vis-garantia',t:'Guardar manuais, notas fiscais e termos de garantia',d:'Segundo o Código Civil (art. 618), problemas na solidez e segurança da obra têm garantia de 5 anos. Para o restante, confira os prazos no contrato e reclame por escrito logo que notar.'}]},
+{id:'ctas',t:'Contas e serviços',items:[
+ {id:'ctas-luz',t:'Pedir a ligação ou a troca de titularidade da luz',d:'É feito com a distribuidora de energia da sua região. Tenha em mãos documento, CPF e comprovante de que o imóvel é seu.'},
+ {id:'ctas-agua',t:'Pedir a ligação ou a troca de titularidade da água e esgoto',d:'Cada cidade tem a sua companhia. Veja no site ou no telefone dela o que pedem.'},
+ {id:'ctas-gas',t:'Resolver o gás, se a casa usa',d:'Botijão, gás encanado ou nenhum. Em prédio, pergunte à administração como funciona.'},
+ {id:'ctas-net',t:'Agendar a internet antes da mudança',d:'A instalação costuma ter fila. Combine o dia com a operadora e veja se o prédio tem restrições.'},
+ {id:'ctas-cond',t:'Se for condomínio: cadastro de morador, regras e taxas',d:'Peça o regimento interno e o contato da administração. Pergunte sobre horários de mudança e uso do elevador.'},
+ {id:'ctas-iptu',t:'Conferir o IPTU',d:'Veja em nome de quem o carnê está e se há algo em aberto. A prefeitura informa como atualizar o cadastro.'}]},
+{id:'seg',t:'Seguros e cadastros',items:[
+ {id:'seg-fin',t:'Entender os seguros do financiamento',d:'Eles costumam proteger a dívida e o imóvel em si, e geralmente entram na parcela. Confira no contrato o que cobrem.'},
+ {id:'seg-res',t:'Pensar em um seguro residencial para os seus bens',d:'Móveis e eletrodomésticos normalmente não estão nos seguros do financiamento. Compare coberturas e preços antes de contratar.'},
+ {id:'seg-endereco',t:'Atualizar o endereço',d:'Bancos, trabalho, planos, cartões, documentos e apps de entrega. Faça uma lista e vá riscando.'}]},
+{id:'casa',t:'Primeiros dias na casa',items:[
+ {id:'casa-medidas',t:'Medir os cômodos antes de comprar móveis',d:'Com largura e comprimento no app, você vê a planta em 3D e confere se o sofá, a cama e a mesa cabem.',go:'plan'},
+ {id:'casa-registros',t:'Descobrir onde ficam o registro de água, o quadro de luz e o gás',d:'Todos que moram na casa precisam saber desligar em caso de vazamento ou curto.'},
+ {id:'casa-chaves',t:'Fazer cópias das chaves e conferir as fechaduras',d:'Se tiver dúvida sobre quem já teve cópia, considere trocar o miolo da fechadura.'},
+ {id:'casa-limpeza',t:'Fazer uma limpeza pesada antes de entrar os móveis',d:'É bem mais fácil com a casa vazia.'},
+ {id:'casa-contatos',t:'Guardar contatos úteis',d:'Síndico ou administração, eletricista, encanador e chaveiro de confiança.'}]},
+{id:'mud',t:'Mudança',items:[
+ {id:'mud-data',t:'Escolher a data e o jeito da mudança',d:'Peça mais de um orçamento se for contratar. Em prédio, reserve o elevador ou o horário com a administração.'},
+ {id:'mud-caixa',t:'Separar uma caixa com o essencial',d:'Documentos, remédios, carregadores, ferramentas básicas, produtos de limpeza e papel higiênico. Leve com você, e não no caminhão.'},
+ {id:'mud-noite',t:'Montar o kit da primeira noite',d:'Roupa de cama, toalhas, itens de higiene, luz de apoio e algo para comer.'},
+ {id:'mud-eletros',t:'Preparar os eletrodomésticos',d:'Geladeira e máquina de lavar precisam ser esvaziadas e secas antes de transportar. Veja no manual de cada um.'}]}
+];
+
+const GD_IDS=GUIDE.reduce((a,g)=>a.concat(g.items.map(i=>i.id)),[]);
+function cleanGuide(o){if(!o||typeof o!=='object')return null;const ok={},na={},re=/^\d{4}-\d{2}-\d{2}$/;
+ GD_IDS.forEach(id=>{const v=o.ok&&typeof o.ok==='object'?o.ok[id]:null;if(typeof v==='string'&&re.test(v))ok[id]=v});
+ GD_IDS.forEach(id=>{if(o.na&&typeof o.na==='object'&&o.na[id]===1&&!ok[id])na[id]=1});
+ return Object.keys(ok).length||Object.keys(na).length?{ok,na}:null}
+function guideStats(g){const c=cleanGuide(g)||{ok:{},na:{}},n=GD_IDS.filter(id=>!c.na[id]).length,d=GD_IDS.filter(id=>c.ok[id]).length;return{n,d,pct:n?Math.round(d/n*100):0,na:GD_IDS.length-n}}
+function guideSet(id,st,today){if(GD_IDS.indexOf(id)<0)return false;const g=cleanGuide(S.house.guide)||{ok:{},na:{}};delete g.ok[id];delete g.na[id];
+ if(st==='ok')g.ok[id]=today;else if(st==='na')g.na[id]=1;const c=cleanGuide(g);if(c)S.house.guide=c;else delete S.house.guide;return true}
 function styleTotals(st){const t={};STY_IDS.forEach(k=>t[k]=0);((st&&st.profiles)||[]).forEach(p=>{const m=Math.max(1,...STY_IDS.map(k=>p.sc[k]||0));STY_IDS.forEach(k=>t[k]+=(p.sc[k]||0)/m)});return t}
 function styleRank(st){const t=styleTotals(st);return STY_IDS.slice().sort((a,b)=>t[b]-t[a]||STY_IDS.indexOf(a)-STY_IDS.indexOf(b))}
 function saveProfile(name,sc){const nm=String(name||'').replace(/\s+/g,' ').trim().slice(0,30),st=cleanStyle(S.house.style)||{profiles:[]},ts=new Date().toISOString(),p={name:nm,sc,ts},ix=st.profiles.findIndex(x=>_nm(x.name)===_nm(nm));
@@ -454,7 +501,7 @@ function migrate(o){const s=Object.assign(EMPTY(),o);
   return n});
  s.rooms=s.rooms.map(r=>{const o=Object.assign({img:[],w:null,l:null,h:null,decor:'',kind:null},r);if(o.px!==undefined&&!(Number.isFinite(o.px)&&Number.isFinite(o.py))){delete o.px;delete o.py}return o});
  const h=o.house||{},hasData=s.items.length>0||s.notes.length>0||!!o.cover||Object.values(s.budget).some(v=>v!=null),nm=typeof h.name==='string'?h.name.slice(0,60):'';
- s.house={name:nm,cover:(typeof h.cover==='string'&&h.cover)?h.cover:((typeof o.cover==='string'&&o.cover)?o.cover:null),done:o.house?(!!h.done||!!nm||hasData):hasData};{const sy=cleanStyle(h.style);if(sy)s.house.style=sy}delete s.cover;
+ s.house={name:nm,cover:(typeof h.cover==='string'&&h.cover)?h.cover:((typeof o.cover==='string'&&o.cover)?o.cover:null),done:o.house?(!!h.done||!!nm||hasData):hasData};{const sy=cleanStyle(h.style);if(sy)s.house.style=sy}{const gy=cleanGuide(h.guide);if(gy)s.house.guide=gy}delete s.cover;
  s.v=4;return s}
 function fromV2(o){S=EMPTY();S.budget=Object.assign(S.budget,o.budget||{});seedRooms();
  (o.items||[]).forEach(i=>{const E=i.area==='enxoval';
@@ -510,7 +557,7 @@ function unmarkSynced(sy,d){d.up.forEach(u=>{if(u.c==='_meta'){sy.meta=null;retu
  d.del.forEach(x=>{(sy.rec[x.c]=sy.rec[x.c]||{})[x.id]='?'})}
 function applyRemote(s,sy,c,type,id,data){
  if(c==='_meta'){if(type==='removed'||!data)return false;const b=ck(metaRec(s));
-  s.house=Object.assign({name:'',cover:null,done:false},data.house||{});if(s.house.style!==undefined){const sy=cleanStyle(s.house.style);if(sy)s.house.style=sy;else delete s.house.style}s.budget=Object.assign({total:null,obra:null,enxoval:null},data.budget||{});s.meta=s.meta||{lastExport:null};s.meta.legacyAck=!!data.legacyAck;
+  s.house=Object.assign({name:'',cover:null,done:false},data.house||{});if(s.house.style!==undefined){const sy=cleanStyle(s.house.style);if(sy)s.house.style=sy;else delete s.house.style}if(s.house.guide!==undefined){const gy=cleanGuide(s.house.guide);if(gy)s.house.guide=gy;else delete s.house.guide}s.budget=Object.assign({total:null,obra:null,enxoval:null},data.budget||{});s.meta=s.meta||{lastExport:null};s.meta.legacyAck=!!data.legacyAck;
   sy.meta=ck(metaRec(s));return sy.meta!==b}
  if(!COLLS.includes(c))return false;const arr=s[c],ix=arr.findIndex(x=>x.id===id);sy.rec[c]=sy.rec[c]||{};sy.ord[c]=sy.ord[c]||{};
  if(type==='removed'){delete sy.rec[c][id];delete sy.ord[c][id];if(ix<0)return false;arr.splice(ix,1);return true}
@@ -553,7 +600,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1641';
+const APP_VER='20261110-1659';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -638,7 +685,7 @@ function home(){const h=S.house,ob=act().filter(i=>i.area==='obra'),dn=ob.filter
  hero=h.cover?`<header class="hero">${imgEl(h.cover,'Foto de capa da casa')}${pick}<div><h1>${ttl}</h1><p class="mt">${sub}</p></div></header>`
   :`<header class="hero none">${ROOF}<div><h1>${ttl}</h1><p class="mt">${sub}</p>${pick}</div></header>`,
  inv=h.name?'':`<form class="hnf" data-hform="0" style="margin:12px 0 0"><label class="inv">Como você quer chamar a sua casa?<input name="hname" maxlength="60" placeholder="Ex.: Casa dos Sonhos" autocomplete="off"></label><p class="note">Dê um nome à sua casa. Você pode mudar quando quiser.</p><button class="btn alt" style="padding:8px 16px;min-height:40px">Salvar nome</button></form>`;
- return hero+inv+settings()+styleCard()+
+ return hero+inv+settings()+styleCard()+guideCard()+
 `<div class="pg" role="group" aria-label="Andamento"><b>Obra</b><span>${ob.length?dn+' de '+ob.length+' itens concluídos · '+pct+'%':'Nenhum item de obra ainda'}</span><div class="bar full" style="grid-column:1/-1" role="progressbar" aria-label="Andamento da obra" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
 <b>Enxoval</b><span>${pe.n?pe.d+' de '+pe.n+' itens comprados · '+pe.pct+'%':'Nenhum item de enxoval ainda'}</span><div class="bar full" style="grid-column:1/-1" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${pe.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pe.pct}%"></i></div></div>
 ${S.budget.total!=null&&!S.meta.legacyAck?`<div class="card" style="margin-top:14px"><p class="fin" style="margin:0 0 8px">Você tinha um <b>orçamento total de ${R(S.budget.total)}</b> cadastrado. O app agora trabalha só com orçamentos separados de obra e enxoval, e esse valor antigo não entra mais nos cálculos. Ele foi mantido nos seus dados e no backup. Defina o orçamento de cada área nas abas Obra e Enxoval.</p><button class="btn alt" data-legack style="padding:8px 16px;min-height:40px">Entendi</button></div>`:''}
@@ -937,6 +984,18 @@ const palRow=(a,cls)=>`<span class="pal${cls?' '+cls:''}" aria-hidden="true">${a
 function styleCard(){const si=styleInfo();
  return `<section class="stc" aria-label="Estilo da casa">${si?`<p class="cap">${si.st.profiles.length>1?'Estilo do casal':'Estilo da casa'}</p><h3>${esc(STY[si.top].n)}</h3><p>${esc(STY[si.top].tag)}.</p>${palRow(STY[si.top].pal)}<div class="acts"><button class="btn alt" data-qzopen="r">Ver dicas do meu estilo</button>${si.st.profiles.length<2?'<button class="lk" data-qzopen="s">Outra pessoa responder</button>':''}</div>`
  :`<h3>Descubra o estilo da casa</h3><p>8 perguntas rápidas, sem resposta certa. No fim você recebe dicas de decoração para cada ambiente.</p><button class="btn" data-qzopen="s">Descobrir o estilo</button>`}</section>`}
+const gdToday=()=>{const d=new Date(),z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())};
+const gdDate=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return m?m[3]+'/'+m[2]+'/'+m[1]:''};
+const GDCHK='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function guideCard(){const st=guideStats(S.house.guide);
+ return `<section class="stc" aria-label="Guia da primeira casa"><p class="cap">Guia da primeira casa</p><h3>${st.d?st.d+' de '+st.n+' passos feitos':'Do recebimento das chaves à mudança'}</h3><p>${st.d?'Continue de onde parou.':'Vistoria, contas, seguros e mudança em uma lista para marcar, junto com a outra pessoa.'}</p><div class="bar full" role="progressbar" aria-label="Andamento do guia" aria-valuenow="${st.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${st.pct}%"></i></div><button class="btn${st.d?' alt':''}" data-gdopen>${st.d?'Abrir o guia':'Ver o guia'}</button></section>`}
+function guidePage(){const g=cleanGuide(S.house.guide)||{ok:{},na:{}},st=guideStats(g),back='<button class="lk back" data-gdx>← Início</button>';
+ const row=i=>{const ok=!!g.ok[i.id],na=!!g.na[i.id];
+  return `<div class="gdi${ok?' ok':''}${na?' na':''}"><button class="gdk" role="checkbox" aria-checked="${ok}" aria-label="${esc(i.t)}" data-gdt="${i.id}" ${na?'disabled':''}><i>${GDCHK}</i></button><div><b>${esc(i.t)}</b><p>${esc(i.d)}</p>${ok?`<p class="gdd">Feito em ${gdDate(g.ok[i.id])}</p>`:''}<div class="acts">${i.go==='plan'&&!ok&&!na?'<button class="lk" data-plopen>Abrir a planta da casa</button>':''}${na?`<button class="lk" data-gdn="${i.id}" data-m="in">Não se aplica. Voltar a incluir</button>`:ok?'':`<button class="lk" data-gdn="${i.id}" data-m="na">Não se aplica a mim</button>`}</div></div></div>`};
+ return back+`<h2 class="pt">Guia da primeira casa</h2><p class="note">Lembretes gerais, sem prazos nem valores. Regras e prazos mudam por cidade, banco e construtora: confira sempre no seu contrato e com cada empresa.</p>
+<div class="gdp"><b>${st.d} de ${st.n} passos feitos · ${st.pct}%</b><div class="bar full" role="progressbar" aria-label="Andamento do guia" aria-valuenow="${st.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${st.pct}%"></i></div></div>`
+ +GUIDE.map(gr=>{const n=gr.items.filter(i=>!g.na[i.id]).length,d=gr.items.filter(i=>g.ok[i.id]).length;
+  return `<section class="gdg" aria-labelledby="gh-${gr.id}"><div class="gh"><h3 id="gh-${gr.id}" style="margin:0">${esc(gr.t)}</h3><span>${d} de ${n}</span></div>${gr.items.map(row).join('')}</section>`}).join('')}
 function qOpt(o,i,vis){const pal=o.pal||(o.k?STY[o.k].pal.slice(0,3):null),p=o.k?rpGet('st_'+o.k):null;
  return `<button class="qo${vis?' v':''}" data-qa="${i}">${vis?`<span class="qimg" data-k="st_${o.k}" style="background:linear-gradient(135deg,${pal.join(',')})">${p?`<img src="${esc(p[0].u)}" alt="" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()">`:''}</span>`:(pal?palRow(pal,'sm'):'')}<b>${esc(o.t)}</b></button>`}
 function resultPage(){const si=styleInfo(),back='<button class="lk back" data-qzx>← Voltar</button>';if(!si)return back+'<p class="empty">Ainda não há resultado. Responda o quiz para descobrir o estilo.</p><button class="btn" data-qzopen="s">Começar o quiz</button>';
@@ -1120,7 +1179,7 @@ function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
  const ob=!S.house.done||U.ob>=2;document.body.classList.toggle('ob',ob);
- document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.pl?planPage():U.qz?quizPage():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
+ document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.pl?planPage():U.qz?quizPage():U.gd?guidePage():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
  czBind();if(U.addOpen.tips)tipsBind();quizBind();planBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
 
 /* ---------- Exportar e restaurar ---------- */
@@ -1150,7 +1209,7 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){if(U.pl)cancelAnimationFrame(U.pl.raf);U.pl=null;U.qz=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){if(U.pl)cancelAnimationFrame(U.pl.raf);U.pl=null;U.qz=null;U.gd=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
  else if(b=q('[data-room]')){if(U.pl){cancelAnimationFrame(U.pl.raf);U.pl=null;U.tab='rooms'}U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
@@ -1206,7 +1265,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-arc]'))U.arc=U.arc===b.dataset.arc?null:b.dataset.arc;
  else if(b=q('[data-tp]'))togglePay(b.dataset.tp);
  else if(b=q('[data-dp]')){const id=b.dataset.dp;if(was==='dp:'+id)delPay(id);else U.arm='dp:'+id}
- else if(q('[data-plopen]')){U.pl={mode:'3d',az:.7,el:.85,spin:!plReduced(),sel:null,imp:null,txt:''};if(planAuto(S.rooms,true))save();scrollTo(0,0)}
+ else if(q('[data-plopen]')){U.gd=null;U.pl={mode:'3d',az:.7,el:.85,spin:!plReduced(),sel:null,imp:null,txt:''};if(planAuto(S.rooms,true))save();scrollTo(0,0)}
  else if(q('[data-plx]')){if(U.pl)cancelAnimationFrame(U.pl.raf);U.pl=null;scrollTo(0,0)}
  else if(b=q('[data-plmode]')){if(U.pl){cancelAnimationFrame(U.pl.raf);U.pl.mode=b.dataset.plmode;if(U.pl.mode==='3d'&&!plReduced())U.pl.spin=U.pl.spin}}
  else if(q('[data-plspin]')){if(U.pl){U.pl.spin=!U.pl.spin;const b2=document.querySelector('[data-plspin]');if(b2)b2.textContent=U.pl.spin?'Pausar giro':'Girar sozinha';return}}
@@ -1217,6 +1276,10 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('[data-plapply]')){const im=U.pl.imp;if(im&&im.ok){const r=planApply(im.rooms);U.pl.imp=null;U.pl.txt='';U.pl.sel=null;U.msg=r.upd+' ambiente(s) atualizado(s) e '+r.nw+' criado(s).'}}
  else if(b=q('[data-qzopen]')){U.qz=b.dataset.qzopen==='r'?{step:QZ.length,ans:[],who:''}:{step:-1,ans:[],who:''};scrollTo(0,0)}
  else if(q('[data-qzx]')){U.qz=null;scrollTo(0,0)}
+ else if(q('[data-gdopen]')){U.gd=true;scrollTo(0,0)}
+ else if(q('[data-gdx]')){U.gd=null;scrollTo(0,0)}
+ else if(b=q('[data-gdt]')){const c=cleanGuide(S.house.guide);guideSet(b.dataset.gdt,c&&c.ok[b.dataset.gdt]?'':'ok',gdToday())}
+ else if(b=q('[data-gdn]')){guideSet(b.dataset.gdn,b.dataset.m==='na'?'na':'',gdToday())}
  else if(q('[data-qzagain]')){U.qz={step:-1,ans:[],who:''};scrollTo(0,0)}
  else if(q('[data-qzprev]')){if(U.qz&&U.qz.step>0)U.qz.step--;scrollTo(0,0)}
  else if(b=q('[data-qa]')){const z=U.qz;if(!z||z.step<0||z.step>=QZ.length)return;z.ans[z.step]=+b.dataset.qa;z.step++;if(z.step>=QZ.length)saveProfile(z.who,qzScore(z.ans));scrollTo(0,0)}
