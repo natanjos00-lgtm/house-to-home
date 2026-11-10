@@ -165,6 +165,11 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .rfbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:6px 14px;margin:8px 0;font-size:14px}.rfbar b{color:var(--brown)}
 .rsum{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}.rsum>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.rsum span{font-size:13px;color:var(--mute)}.rsum .bar{margin:6px 0 2px}
 .srch{margin:12px 0 4px}.srch input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:0 14px;font:inherit;font-size:16px;-webkit-appearance:none}.srch input:focus-visible{outline:2px solid var(--olive);outline-offset:1px}
+.fin2 dd .sub{display:block;font-size:13px;font-weight:600;color:var(--mute)}.dn{margin:0 0 6px;font-size:22px}.deal .fh{margin-top:0}
+.gonebox.grp>summary{display:block}.grp>summary span{display:block;font-weight:700}.grp>summary small{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.pcl{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.pcl .pl{flex:1;min-width:0}.pcl .pl b{display:block;font-size:15px}.pcl .pl small{color:var(--mute);font-size:12px}.pcl .pv{font-weight:700;font-size:15px;white-space:nowrap}.pcl.late .pl small{color:var(--neg,#a33b2e);font-weight:700}
+.ck{flex:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--taupe);background:var(--card);color:var(--card);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}.pcl.ok .ck{background:var(--olive);border-color:var(--olive);color:#fff}
+.pedit{background:var(--sand);border-radius:12px;padding:10px;margin:2px 0 8px}.pedit .warn{grid-column:1/-1;margin:0}.pf .full{grid-column:1/-1}
 details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
 .chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
@@ -208,6 +213,12 @@ const toBR=iso=>iso&&/^\d{4}-\d{2}-\d{2}$/.test(iso)?iso.split('-').reverse().jo
 const isISO=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&parseBR(toBR(s))===s;
 function addMonths(iso,k){const [y,m,d]=iso.split('-').map(Number),t=m-1+k,Y=y+Math.floor(t/12),M=((t%12)+12)%12,last=new Date(Date.UTC(Y,M+1,0)).getUTCDate();
  return Y+'-'+String(M+1).padStart(2,'0')+'-'+String(Math.min(d,last)).padStart(2,'0')}
+const GRPS=[['entrada','Entrada'],['reforco','Reforços'],['saldo','Saldo com o vendedor']],GRP_OK=g=>GRPS.some(x=>x[0]===g);
+function planParcels(qty,amount,first,every,paidN){const out=[];for(let k=0;k<qty;k++)out.push({amount,date:first?addMonths(first,k*every):'',paid:k<(paidN||0)});return out}
+function dealStats(total,pays){const ps=pays.filter(p=>p.kind!=='refund'),sum=a=>a.reduce((s,p)=>s+p.amount,0),paid=sum(ps.filter(p=>p.paid)),sched=sum(ps.filter(p=>!p.paid)),g={};
+ GRPS.forEach(([k])=>{const a=ps.filter(p=>(p.seg||'saldo')===k);g[k]={n:a.length,nPaid:a.filter(p=>p.paid).length,sum:sum(a),paid:sum(a.filter(p=>p.paid))}});
+ const next=ps.filter(p=>!p.paid&&p.date).sort((a,b)=>a.date.localeCompare(b.date))[0]||null;
+ return{total,paid,sched,rest:total-paid-sched,left:Math.max(0,total-paid),n:ps.length,nPaid:ps.filter(p=>p.paid).length,g,next}}
 const splitAmount=(total,n)=>{const b=Math.floor(total/n),r=total-b*n;return Array.from({length:n},(_,k)=>k?b:b+r)};
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const LBL={obra:['A fazer','Em andamento','Concluído'],enxoval:['Falta comprar','Pesquisando','Comprado']};
@@ -219,7 +230,9 @@ const seedRooms=()=>DEF.forEach(([id,n])=>mkRoom(n,[],id));
 function roomFor(name){const n=String(name||'').trim().toLowerCase();if(!n)return null;
  return S.rooms.find(r=>{const m=r.name.toLowerCase();return m===n||m.includes(n)||n.includes(m)})||mkRoom(String(name).trim())}
 const item=id=>S.items.find(x=>x.id===id);
-const act=()=>S.items.filter(i=>!i.deleted);
+const act=()=>S.items.filter(i=>!i.deleted&&i.area!=='compra');
+const dealItems=()=>S.items.filter(i=>!i.deleted&&i.area==='compra');
+const AREA_NM={obra:'Obra',enxoval:'Enxoval',compra:'Compra'};
 const log=(id,txt)=>S.log.push({id:uid(),itemId:id,ts:new Date().toISOString(),txt});
 const FN={planned:'Previsto',contracted:'Contratado',status:'Status',start:'Início previsto',end:'Fim previsto',qtyNeed:'Quantidade necessária',qtyBought:'Quantidade comprada',store:'Loja',buyDate:'Data da compra',cat:'Categoria',roomId:'Ambiente'};
 const fmt=(i,f,v)=>f==='status'?LBL[i.area][ST.indexOf(v)]:(f==='start'||f==='end'||f==='buyDate')?fdate(v):f==='contracted'?(v==null?'não contratado':R(v)):f==='planned'?R(v):f==='roomId'?((S.rooms.find(r=>r.id===v)||{}).name||'—'):(v==null||v==='')?'—':String(v);
@@ -351,7 +364,7 @@ function checkData(d){const e=[],ids=new Set(d.items.map(i=>i.id));
   if(!Number.isInteger(i.qtyNeed)||i.qtyNeed<1||!Number.isInteger(i.qtyBought)||i.qtyBought<0)e.push('quantidade '+i.id);
   if(!Number.isInteger(i.planned)||i.planned<0||(i.contracted!=null&&(!Number.isInteger(i.contracted)||i.contracted<0)))e.push('valor '+i.id)});
  d.pays.forEach(p=>{if(!Number.isInteger(p.amount)||p.amount<=0)e.push('valor do pagamento '+p.id);
-  if(p.kind!==undefined&&p.kind!=='pay'&&p.kind!=='refund')e.push('tipo do pagamento '+p.id);if(p.method&&!METHODS[p.method])e.push('modalidade '+p.id)});
+  if(p.kind!==undefined&&p.kind!=='pay'&&p.kind!=='refund')e.push('tipo do pagamento '+p.id);if(p.seg!==undefined&&!GRP_OK(p.seg))e.push('tipo da parcela '+p.id);if(p.method&&!METHODS[p.method])e.push('modalidade '+p.id)});
  const gi=new Set();d.pays.forEach(p=>{if(p.grp&&p.inst){const k=p.itemId+'|'+p.grp+'|'+p.inst;if(gi.has(k))e.push('parcela duplicada '+p.id);gi.add(k)}});
  return e}
 const check=()=>checkData(S);
@@ -467,14 +480,14 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1442';
+const APP_VER='20261110-1501';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',scw:false,orc:false,sco:false,obErr:''};
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
-const TABS=[['home','Início','M3 11l9-8 9 8M5 10v10h14V10'],['rooms','Ambientes','M4 4h16v16H4zM4 12h16M12 4v16'],['obra','Obra','M12 3l9 5-9 5-9-5zM3 13l9 5 9-5'],['enxoval','Enxoval','M5 8h14l-1 12H6zM9 8a3 3 0 016 0'],['backup','Backup','M4 6h16v4H4zM5.5 10v9h13v-9M10 14h4']];
+const TABS=[['home','Início','M3 11l9-8 9 8M5 10v10h14V10'],['rooms','Ambientes','M4 4h16v16H4zM4 12h16M12 4v16'],['obra','Obra','M12 3l9 5-9 5-9-5zM3 13l9 5 9-5'],['enxoval','Enxoval','M5 8h14l-1 12H6zM9 8a3 3 0 016 0'],['compra','Compra','M7 3h8l4 4v14H7zM14 3v5h5M10 13h6M10 17h6'],['backup','Backup','M4 6h16v4H4zM5.5 10v9h13v-9M10 14h4']];
 document.getElementById('nv').innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${ico(t[2])}${t[1]}</button>`).join('');
 const hasPrev=()=>{try{return !!localStorage.getItem(PREV)}catch(e){return false}};
 const keepPrev=()=>{try{localStorage.setItem(PREV,JSON.stringify(S))}catch(e){}};
@@ -510,7 +523,7 @@ function pend(){const today=todayStr(),open=act().filter(i=>i.status!=='done'),
  its=[...open.filter(i=>i.end).sort((a,b)=>a.end.localeCompare(b.end)),...open.filter(i=>!i.end)].slice(0,4),
  ps=S.pays.filter(p=>!p.paid&&p.kind!=='refund'&&p.date&&item(p.itemId)&&!item(p.itemId).deleted&&!item(p.itemId).returned).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3),late=d=>d&&d<today;
  const rows=its.map(i=>`<button class="mini" data-go="${i.id}"><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'} · ${i.end?'prazo '+fdate(i.end):'sem prazo'}</small></span><span class="${late(i.end)?'neg':''}">${late(i.end)?'Atrasado':stLabel(i)}</span></button>`)
- .concat(ps.map(p=>{const i=item(p.itemId);return `<button class="mini" data-go="${i.id}"><span><b>Parcela de ${R(p.amount)}</b><small>${esc(i.name)} · vence ${fdate(p.date)}</small></span><span class="${late(p.date)?'neg':''}">${late(p.date)?'Vencida':'A pagar'}</span></button>`}));
+ .concat(ps.map(p=>{const i=item(p.itemId);return `<button class="mini" data-go="${i.id}"><span><b>Parcela de ${R(p.amount)}</b><small>${esc(i.name)}${p.seg?' · '+esc((GRPS.find(x=>x[0]===p.seg)||[0,''])[1]):''} · vence ${fdate(p.date)}</small></span><span class="${late(p.date)?'neg':''}">${late(p.date)?'Vencida':'A pagar'}</span></button>`}));
  return rows}
 function pendBox(){const r=pend();if(!r.length)return '';return `<details class="addbox gonebox" data-pend ${U.pendOpen?'open':''}><summary>Próximas pendências (${r.length})</summary>${r.join('')}</details>`}
 
@@ -518,7 +531,7 @@ function histHtml(id){const lg=S.log.filter(l=>l.itemId===id).slice().reverse();
 function archive(){const g=S.items.filter(i=>i.deleted).sort((x,y)=>String(y.deleted).localeCompare(String(x.deleted)));if(!g.length)return '';
  const o=!!U.goneOpen;
  return `<details class="addbox gonebox" data-gone ${o?'open':''}><summary>Itens excluídos (${g.length})</summary><p class="note">Ficam guardados com pagamentos e histórico e não entram nos totais.</p>`+g.map(i=>{const c=ic(i),ps=pd(i.id);
- return `<div class="gr"><div class="gl2"><span class="gn2">${esc(i.name)}</span><small>${i.area==='obra'?'Obra':'Enxoval'} · ${dt(i.deleted)}${c.paid?' · pago '+R(c.paid):''}</small></div><button class="lk" data-arc="${i.id}" aria-expanded="${U.arc===i.id}">Histórico</button><button class="st" data-rs="${i.id}">Restaurar</button></div>`+(U.arc===i.id?`<div class="gh2"><div class="fin">Previsto ${R(i.planned)} · ${c.hasC?'Contratado '+R(i.contracted):'Não contratado'} · Pago ${R(c.paid)}</div>`+ps.map(p=>`<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><b>${p.kind==='refund'?'−':''}${R(p.amount)}</b><span>${p.kind==='refund'?(p.paid?'Estornado':'Estorno pendente'):(p.paid?'Pago':'Agendado')}</span></div>`).join('')+histHtml(i.id)+'</div>':'')}).join('')+'</details>'}
+ return `<div class="gr"><div class="gl2"><span class="gn2">${esc(i.name)}</span><small>${AREA_NM[i.area]||'Enxoval'} · ${dt(i.deleted)}${c.paid?' · pago '+R(c.paid):''}</small></div><button class="lk" data-arc="${i.id}" aria-expanded="${U.arc===i.id}">Histórico</button><button class="st" data-rs="${i.id}">Restaurar</button></div>`+(U.arc===i.id?`<div class="gh2"><div class="fin">Previsto ${R(i.planned)} · ${c.hasC?'Contratado '+R(i.contracted):'Não contratado'} · Pago ${R(c.paid)}</div>`+ps.map(p=>`<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><b>${p.kind==='refund'?'−':''}${R(p.amount)}</b><span>${p.kind==='refund'?(p.paid?'Estornado':'Estorno pendente'):(p.paid?'Pago':'Agendado')}</span></div>`).join('')+histHtml(i.id)+'</div>':'')}).join('')+'</details>'}
 
 function backupCard(){const imp=U.imp,o=imp&&imp.obj,d=o&&o.data;
  return `<div class="card"><p class="fin">Último backup: ${S.meta.lastExport?dt(S.meta.lastExport):'nunca'}.</p>
@@ -686,12 +699,44 @@ function area(t){const RR=U.rf&&S.rooms.find(r=>r.id===U.rf),Q=_nm(U.q).trim(),L
  const body=!L.length?`<p class="empty">${Q?'Nenhum item encontrado para “'+esc(U.q.trim())+'”.':RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
  return head+(RR?'':grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra'))+addBox(t,form,!Lb.length)+srchBox()+'<div id="lst">'+qn+body+'</div>'}
 
+
+/* ---------- Compra do imóvel: entrada, reforços e saldo em parcelas ---------- */
+const toIn=c=>(c/100).toFixed(2).replace('.',',');
+const dmsg=k=>U.dmk===k&&U.dm?`<p class="warn" role="alert">${esc(U.dm)}</p>`:'';
+const CK='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function parcelRow(p,idx,n){const late=!p.paid&&p.date&&p.date<todayStr();
+ return `<div class="pcl${p.paid?' ok':''}${late?' late':''}"><button class="ck" data-tp="${p.id}" role="checkbox" aria-checked="${!!p.paid}" aria-label="Parcela ${idx} de ${n}, ${p.date?fdate(p.date):'sem data'}: ${p.paid?'desmarcar como paga':'marcar como paga'}">${p.paid?CK:''}</button><div class="pl"><b>${p.date?fdate(p.date):'sem data'}</b><small>Parcela ${idx}/${n}${p.paid?' · paga':late?' · vencida':''}</small></div><span class="pv">${R(p.amount)}</span><button class="lk" data-pe="${p.id}" aria-expanded="${U.pe===p.id}">${U.pe===p.id?'Fechar':'Editar'}</button></div>`
+ +(U.pe===p.id?`<form class="pf pedit" data-pedit="${p.id}">${dmsg('pe:'+p.id)}<label>Valor (R$)<input name="amount" inputmode="decimal" required value="${toIn(p.amount)}"></label>${dfield('Vencimento',p.date,'name="date"')}<button class="btn">Salvar</button><button type="button" class="lk" data-dp="${p.id}">${U.arm==='dp:'+p.id?'Toque de novo para excluir':'Excluir parcela'}</button></form>`:'')}
+function grpBlock(i,k,label,all){const a=all.filter(p=>(p.seg||'saldo')===k).sort((x,y)=>(x.date||'9').localeCompare(y.date||'9')||0),n=a.length,key=i.id+':'+k,st=dealStats(0,a).g[k],open=!!U.gop[key];
+ return `<details class="addbox gonebox grp" data-gk="${key}" ${open?'open':''}><summary><span>${label}</span><small>${n?`${st.nPaid} de ${n} pagas · ${R(st.paid)} de ${R(st.sum)}`:'Nenhuma parcela ainda'}</small></summary>${n?a.map((p,x)=>parcelRow(p,x+1,n)).join(''):'<p class="note">Use “Adicionar parcelas” abaixo para criar a sequência.</p>'}</details>`}
+function dealCard(i){const all=pd(i.id).filter(p=>p.kind!=='refund'),st=dealStats(i.planned,all),base=Math.max(st.total,st.paid+st.sched,1),pc=v=>Math.max(0,Math.min(100,v/base*100)),cell=(l,v)=>`<div><dt>${l}</dt><dd>${v}</dd></div>`,k='par:'+i.id,
+ head=st.total?['Falta pagar',R(st.left)]:['Pago até agora',R(st.paid)];
+ return `<section class="fin2 deal"><h3 class="dn">${esc(i.name)}</h3><div class="fh"><span>${head[0]}</span><b>${head[1]}</b></div>
+<div class="stack" role="img" aria-label="Pago ${R(st.paid)}, parcelas agendadas ${R(st.sched)}${st.rest>0?', sem parcela definida '+R(st.rest):''}"><i class="p" style="width:${pc(st.paid)}%"></i><i class="q" style="width:${pc(st.sched)}%"></i></div>
+<div class="lg2"><span><i class="p"></i>Pago <b>${R(st.paid)}</b></span><span><i class="q"></i>Agendado <b>${R(st.sched)}</b></span>${st.rest>0&&st.total?`<span><i class="f"></i>Sem parcela <b>${R(st.rest)}</b></span>`:''}</div>
+<dl>${cell('Valor do imóvel',st.total?R(st.total):'—')}${cell('Parcelas pagas',`${st.nPaid} de ${st.n}`)}${cell('Próxima parcela',st.next?`${fdate(st.next.date)}<small class="sub">${R(st.next.amount)}</small>`:'—')}${cell('Entrega prevista',i.end?fdate(i.end):'—')}${i.store?cell('Vendedor',esc(i.store)):''}</dl>
+${st.rest<0?`<p class="warn">As parcelas somam ${R(-st.rest)} a mais que o valor do imóvel. Se houve reajuste, atualize o valor em “Dados da compra”.</p>`:''}</section>
+${GRPS.map(([g,l])=>grpBlock(i,g,l,all)).join('')}
+<details class="addbox" data-pa="${i.id}" ${U.dpa===i.id||!all.length?'open':''}><summary>Adicionar parcelas</summary><form class="pf dpar" data-dealpar="${i.id}">${dmsg(k)}
+<label>Tipo<select name="grp">${GRPS.map(([g,l])=>`<option value="${g}">${l}</option>`).join('')}</select></label>
+<label>Quantidade<input name="qty" inputmode="numeric" required placeholder="Ex.: 10"></label>
+<label>Valor de cada (R$)<input name="amount" inputmode="decimal" required placeholder="Ex.: 3.000,00"></label>
+${dfield('Primeira data','','name="first"')}
+<label>Repetir a cada<select name="every"><option value="1">1 mês</option><option value="2">2 meses</option><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select></label>
+<label>Já pagas<input name="paidn" inputmode="numeric" placeholder="0"></label>
+<button class="btn full">Adicionar parcelas</button><small class="full">Os valores são os do seu contrato: o app não calcula juros nem reajuste. Se uma parcela mudar, toque em “Editar” nela.</small></form></details>
+<details class="addbox" data-pd><summary>Dados da compra</summary><form class="pf" data-dealedit="${i.id}">${dmsg('de:'+i.id)}<label class="full">Nome<input name="name" required value="${esc(i.name)}"></label><label>Valor do imóvel (R$)<input name="total" inputmode="decimal" required value="${toIn(i.planned)}"></label><label>Vendedor ou construtora<input name="seller" value="${esc(i.store||'')}"></label>${dfield('Entrega prevista',i.end||'','name="end"')}<label class="full">Observações<textarea name="notes" rows="2" placeholder="Contrato, índice de reajuste, contatos…">${esc(i.notes||'')}</textarea></label><button class="btn full">Salvar dados</button></form></details>
+<p style="margin:14px 0"><button class="lk" data-del="${i.id}">${U.arm===i.id?'Toque de novo para excluir esta compra':'Excluir esta compra'}</button><small class="note" style="display:block">Ela vai para Backup › Itens excluídos, com todas as parcelas, e pode ser restaurada.</small></p>`}
+function dealTab(){const D=dealItems(),head=crumb()+'<h2 class="pt">Compra do imóvel</h2>',
+ form=`<form class="pf" data-dealnew>${dmsg('new')}<label class="full">Nome<input name="name" required placeholder="Ex.: Apartamento Vila Nova"></label><label>Valor do imóvel (R$)<input name="total" inputmode="decimal" required placeholder="Ex.: 450.000,00"></label><label>Vendedor ou construtora<input name="seller" placeholder="Opcional"></label>${dfield('Entrega prevista','','name="end"')}<button class="btn full">Registrar compra</button></form>`;
+ if(!D.length)return head+`<p class="note">Registre o imóvel e depois as parcelas: entrada, reforços e o saldo com o vendedor. Isso fica separado da Obra e do Enxoval.</p>`+form;
+ return head+D.map(dealCard).join('')+`<details class="addbox" data-pn><summary>Registrar outra compra</summary>${form}</details>`}
 function updList(){const o=document.getElementById('lst');if(!o)return;const d=document.createElement('div');d.innerHTML=area(U.tab);const n=d.querySelector('#lst');if(n){o.innerHTML=n.innerHTML;hydrate()}}
 function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
  const ob=!S.house.done||U.ob>=2;document.body.classList.toggle('ob',ob);
- document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():area(U.tab));
+ document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
  hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
 
 /* ---------- Exportar e restaurar ---------- */
@@ -764,6 +809,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-del]')){const id=b.dataset.del;if(was===id){delItem(id);if(U.open===id)U.open=null}else U.arm=id}
  else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.q='';U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
  else if(q('[data-rfclear]'))U.rf=null;
+ else if(b=q('[data-pe]')){U.pe=U.pe===b.dataset.pe?null:b.dataset.pe;U.dm=''}
  else if(q('[data-updchk]')){updCheck();return}
  else if(q('[data-updgo]')){updGo();return}
  else if(b=q('[data-pvi]')){const v=b.dataset.pvi;U.pv=v&&U.pv!==v?v:null}
@@ -784,7 +830,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('.addph,.cam'))return;
  else if(!was)return;
  save();render()});
-document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.pend!==undefined)U.pendOpen=t.open;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
+document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.pend!==undefined)U.pendOpen=t.open;if(t&&t.dataset&&t.dataset.gk!==undefined)U.gop[t.dataset.gk]=t.open;if(t&&t.dataset&&t.dataset.pa!==undefined)U.dpa=t.open?t.dataset.pa:null;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.wipe){U.wipe=false;U.wipeErr='';render()}});
 document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=new FormData(f);
  if(f.id==='af'){const name=d.get('name').trim();if(!name)return;const T=U.tab==='obra';
@@ -810,6 +856,23 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
   if(bd===null){P.err='A data da compra é inválida. Use dd/mm/aaaa.';render();return}
   const err=registerPurchase(id,{method:P.f.method,total:parse(d.get('total')),store:P.f.store.trim(),buyDate:bd||null,rows});
   if(err){P.err=err;render();return}U.pur=null}
+
+ else if(f.dataset.dealnew!==undefined){const name=(d.get('name')||'').trim(),tt=parse(d.get('total')),end=parseBR(d.get('end'));U.dm='';U.dmk='new';
+  if(!name||!tt)U.dm='Informe o nome e o valor do imóvel.';else if(end===null)U.dm='Data de entrega inválida. Use dd/mm/aaaa.';
+  else{const i=addItem({area:'compra',kind:'servico',name,planned:tt,store:(d.get('seller')||'').trim(),end:end||null});U.dpa=i.id;U.dmk=''}}
+ else if(f.dataset.dealedit){const id=f.dataset.dealedit,i=item(id),name=(d.get('name')||'').trim(),tt=parse(d.get('total')),end=parseBR(d.get('end'));U.dm='';U.dmk='de:'+id;
+  if(!i)return;if(!name||!tt)U.dm='Informe o nome e o valor do imóvel.';else if(end===null)U.dm='Data de entrega inválida. Use dd/mm/aaaa.';
+  else{setField(id,'name',name);setField(id,'planned',tt);setField(id,'store',(d.get('seller')||'').trim());setField(id,'end',end||null);setField(id,'notes',(d.get('notes')||'').trim());U.dmk='';U.msg='Dados da compra salvos.'}}
+ else if(f.dataset.dealpar){const id=f.dataset.dealpar,grp=d.get('grp'),qty=Math.floor(Number(String(d.get('qty')).replace(',','.'))),amt=parse(d.get('amount')),first=parseBR(d.get('first')),ev=Math.max(1,parseInt(d.get('every'),10)||1),pn=Math.floor(Number(d.get('paidn')||0));U.dm='';U.dmk='par:'+id;U.dpa=id;
+  if(!GRP_OK(grp)||!(qty>=1&&qty<=360))U.dm='Informe a quantidade de parcelas, de 1 a 360.';
+  else if(!amt)U.dm='Informe o valor de cada parcela.';
+  else if(!first)U.dm=first===null?'Data inválida. Use dd/mm/aaaa.':'Informe a data da primeira parcela.';
+  else if(!(pn>=0&&pn<=qty))U.dm='“Já pagas” não pode passar da quantidade de parcelas.';
+  else{planParcels(qty,amt,first,ev,pn).forEach(x=>S.pays.push({id:uid(),itemId:id,amount:x.amount,date:x.date,paid:x.paid,seg:grp}));
+   const lb=(GRPS.find(x=>x[0]===grp)||[0,''])[1];log(id,`${qty} parcela(s) de ${R(amt)} adicionada(s) em “${lb}”, a partir de ${fdate(first)}${pn?` (${pn} já paga(s))`:''}`);U.gop[id+':'+grp]=true;U.dmk='';U.dpa=null}}
+ else if(f.dataset.pedit){const id=f.dataset.pedit,p=S.pays.find(x=>x.id===id),amt=parse(d.get('amount')),iso=parseBR(d.get('date'));U.dm='';U.dmk='pe:'+id;
+  if(!p)return;if(!amt)U.dm='Informe o valor da parcela.';else if(iso===null)U.dm='Data inválida. Use dd/mm/aaaa.';
+  else{const o=`${R(p.amount)}${p.date?' em '+fdate(p.date):''}`;p.amount=amt;p.date=iso||'';log(p.itemId,`Parcela alterada: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}`);U.pe=null;U.dmk=''}}
  else if(f.dataset.nf){const text=d.get('text').trim();U.msg='';
   const ph=await storePhotos(f.querySelector('input[type=file]').files);
   if(!text&&!ph.length){render();return}addNote(f.dataset.nf,text,ph)}
