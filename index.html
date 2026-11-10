@@ -181,6 +181,7 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .cz-ar{display:none;position:absolute;top:calc(50% - 10px);transform:translateY(-50%);z-index:2;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:28px;line-height:1;padding:0 0 3px;cursor:pointer;box-shadow:0 4px 14px rgba(40,30,20,.15)}.cz-ar.l{left:12px}.cz-ar.r{right:12px}
 @media (hover:hover) and (min-width:560px){.cz-ar{display:block}}
 .cc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cc-b{position:absolute;inset:0;width:100%;height:100%;border:0;background:none;padding:0;cursor:pointer;z-index:1}.cc .ct{z-index:2;pointer-events:none}.cc-x{position:absolute;top:10px;right:10px;z-index:3;min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(30,26,22,.62);color:#f7f3ec;font:600 18px/1 Figtree,sans-serif;padding:0 10px;cursor:pointer}.cc-x:hover{background:rgba(30,26,22,.85)}
+.dedup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:14px 0}.dedup h3{margin:0 0 6px}.dedup p{margin:6px 0}
 .kch{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.kch .kb{border:1px solid var(--line);cursor:pointer;font:600 14px Figtree,sans-serif;padding:9px 14px;min-height:40px}.kch .kb:active{background:var(--sand)}
 #rptips p{margin:6px 0}#rptips .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
 .cz-info{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}.cz-info h4{font:600 26px/1.1 "Cormorant Garamond",Georgia,serif;margin:0 0 6px;color:var(--brown)}.cz-info p{margin:6px 0}.cz-info .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.cz-info .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.cz-info .btn{min-width:190px}
@@ -356,6 +357,13 @@ function unreturnItem(id){const i=item(id);if(i&&i.returned){i.returned=false;lo
 /* Excluir um item é arquivá-lo: pagamentos, histórico e anotações continuam guardados e o item pode ser restaurado. Ele só deixa de entrar nos totais. */
 function delItem(id){const i=item(id);if(!i||i.deleted)return;const c=ic(i);
  log(id,`Item excluído (arquivado) · previsto ${R(i.planned)}, contratado ${i.contracted==null?'não contratado':R(i.contracted)}, pago ${R(c.paid)}, ${pd(id).length} pagamento(s) preservado(s)`);i.deleted=new Date().toISOString()}
+/* Itens repetidos: mesma área, nome, valor previsto e ambiente. Só arquiva a cópia que não tem NADA registrado (pagamentos, fotos, anotações, compra, prazos). Quem tem dados fica para revisão manual. */
+const untouched=i=>!pd(i.id).length&&!S.notes.some(n=>n.itemId===i.id)&&!(i.img||[]).length&&i.contracted==null&&!(i.qtyBought>0)&&i.status==='todo'&&!i.notes&&!i.returned&&!i.researching&&!i.store&&!i.supId&&!i.start&&!i.end&&!i.buyDate;
+function dupGroups(){const m=new Map(),ord=new Map();act().filter(i=>i.area!=='compra').forEach((i,x)=>{ord.set(i.id,x);const k=[i.area,_nm(i.name).trim().replace(/\s+/g,' '),i.planned,i.roomId||''].join('|');if(!m.has(k))m.set(k,[]);m.get(k).push(i)});
+ const sc=i=>pd(i.id).length*1000+S.notes.filter(n=>n.itemId===i.id).length*100+(i.img||[]).length*100+(i.contracted!=null?50:0)+(i.qtyBought>0?50:0)+(i.status!=='todo'?50:0)+(i.store?5:0)+(i.notes?5:0);
+ return [...m.values()].filter(g=>g.length>1).map(g=>{const s=g.slice().sort((a,b)=>sc(b)-sc(a)||ord.get(a.id)-ord.get(b.id)),keep=s[0],rest=s.slice(1);return{keep,safe:rest.filter(untouched),review:rest.filter(i=>!untouched(i))}})}
+function dedupeArchive(){let n=0;dupGroups().forEach(g=>g.safe.forEach(i=>{delItem(i.id);log(i.id,'Repetido: arquivado pela limpeza de itens repetidos (pode ser restaurado)');n++}));return n}
+const recentBackup=()=>!!S.meta.lastExport&&Date.now()-Date.parse(S.meta.lastExport)<30*60000;
 function restoreItem(id){const i=item(id);if(i&&i.deleted){i.deleted=null;log(id,'Item restaurado')}}
 function addNote(id,text,photos){S.notes.push({id:uid(),itemId:id,ts:new Date().toISOString(),text,photos:photos||[]})}
 
@@ -500,7 +508,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1544';
+const APP_VER='20261110-1551';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -612,7 +620,15 @@ function aboutCard(){const u=U.upd,nv=typeof u==='string'&&u.startsWith('new:');
  ):'<p class="note">A atualização automática funciona no app instalado a partir do endereço da internet.</p>')+'</section>'}
 async function updCheck(){U.upd='checking';render();try{const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});const m=/APP_VER=.(\d{8}-\d{4}).;/.exec(await r.text());U.upd=!r.ok||!m?'err':m[1]===APP_VER?'ok':'new:'+m[1]}catch(e){U.upd='err'}render()}
 async function updGo(){try{const rs=await navigator.serviceWorker.getRegistrations();for(const g of rs)await g.unregister();for(const k of await caches.keys())if(k.startsWith('hth'))await caches.delete(k)}catch(e){}location.reload()}
-const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+archive()+aboutCard()+dangerZone()
+function dedupCard(){const gs=dupGroups();if(!gs.length)return '';const safe=gs.reduce((a,g)=>a+g.safe.length,0),rev=gs.filter(g=>g.review.length),ok=recentBackup(),arm=U.arm==='dedup';
+ return `<section class="dedup" aria-labelledby="dph"><h3 id="dph">Itens repetidos</h3>
+<p>${safe?`Encontrei <b>${safe}</b> item(ns) repetido(s) em ${gs.filter(g=>g.safe.length).length} grupo(s): mesmo nome, área, valor e ambiente, e <b>sem pagamentos, fotos ou anotações</b>. Eles vão para “Itens excluídos” e podem ser restaurados.`:'Há itens com o mesmo nome, mas todos têm dados registrados. Revise manualmente.'}</p>
+${safe?`<p class="fin">Itens ativos: ${act().length} → ${act().length-safe}</p>
+<details class="addbox gonebox" data-addbox="dup" ${U.addOpen.dup?'open':''}><summary>Ver quais serão arquivados</summary>${gs.filter(g=>g.safe.length).slice(0,60).map(g=>`<div class="gr"><div class="gl2"><span class="gn2">${esc(g.keep.name)}</span><small>${AREA_NM[g.keep.area]||''} · ${R(g.keep.planned)} · fica 1, arquiva ${g.safe.length}</small></div></div>`).join('')}${gs.filter(g=>g.safe.length).length>60?'<p class="note">E outros grupos.</p>':''}</details>
+${ok?'<p class="warn ok" role="status">Backup feito há pouco. Pode limpar.</p>':'<p class="note">Antes de limpar, baixe um backup (vale por 30 minutos).</p><button class="btn alt" data-exp="file" style="width:100%">Baixar backup antes</button>'}
+<button class="btn" data-dedup ${ok?'':'disabled'} style="width:100%;margin-top:8px">${arm?'Toque de novo para arquivar '+safe:'Arquivar '+safe+' repetido(s)'}</button>`:''}
+${rev.length?`<p class="note">Com dados nos dois lados (não mexi): ${rev.slice(0,12).map(g=>esc(g.keep.name)+' ×'+(1+g.review.length+g.safe.length)).join(', ')}${rev.length>12?'…':''}.</p>`:''}</section>`}
+const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+dedupCard()+archive()+aboutCard()+dangerZone()
 
 /* ---------- Escolha de cômodos: tipos, textos e ilustrações próprias ---------- */
 const RT_ORDER=['sala','jantar','cozinha','casal','solteiro','crianca','escritorio','banheiro','lavabo','lavanderia','varanda','closet','corredor','despensa','garagem','quintal'];
@@ -971,6 +987,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-arc]'))U.arc=U.arc===b.dataset.arc?null:b.dataset.arc;
  else if(b=q('[data-tp]'))togglePay(b.dataset.tp);
  else if(b=q('[data-dp]')){const id=b.dataset.dp;if(was==='dp:'+id)delPay(id);else U.arm='dp:'+id}
+ else if(b=q('[data-dedup]')){if(!recentBackup())return;if(was==='dedup'){const n=dedupeArchive();U.bmsg=n+' item(ns) repetido(s) arquivado(s). Veja em Itens excluídos para restaurar.'}else U.arm='dedup'}
  else if(b=q('[data-exp]')){doExport(b.dataset.exp);return}
  else if(q('[data-impt]')){readImport(document.getElementById('pastebox').value);return}
  else if(b=q('[data-imp]')){const m=b.dataset.imp;if(m==='cancel')U.imp=null;else if(m==='replace'&&was!=='imprep'){U.arm='imprep'}else{doImport(m);return}}
