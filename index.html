@@ -553,7 +553,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1621';
+const APP_VER='20261110-1641';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -869,9 +869,9 @@ async function aiRead(file){const P=U.pl;if(!P)return;P.ai={busy:true,err:''};re
    try{r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':aiKey()},body,signal:ac.signal})}finally{clearTimeout(tm)}
    if(r.status!==404)break}
   if(!r.ok){let m='';try{m=((await r.json()).error||{}).message||''}catch(e){}
-   throw{msg:r.status===429?'O limite gratuito foi atingido. Tente de novo daqui a alguns minutos ou amanhã.':(r.status===400&&/api key/i.test(m))||r.status===401||r.status===403?'A chave não foi aceita. Confira se copiou inteira, ou crie outra.':r.status>=500?'O serviço da IA está instável agora. Tente mais tarde.':'A IA não conseguiu usar esta foto. Tente outra, mais nítida.'}}
+   throw{msg:r.status===429?'O limite gratuito foi atingido. Tente de novo daqui a alguns minutos ou amanhã.':(r.status===400&&/api key/i.test(m))||r.status===401||r.status===403?'A chave não foi aceita. Confira se copiou inteira, ou crie outra. (Código '+r.status+(m?': '+m.slice(0,120):'')+')':r.status>=500?'O serviço da IA está instável agora. Tente mais tarde.':'A IA não conseguiu usar esta foto. Tente outra, mais nítida. (Código '+r.status+(m?': '+m.slice(0,120):'')+')'}}
   const tx=aiText(await r.json());if(!tx.ok)throw{msg:tx.err};const pl=aiToPlan(tx.text);if(!pl.ok)throw{msg:pl.err};P.imp=pl;P.ai={busy:false,err:''};U.addOpen.plimp=true}
- catch(e){P.ai={busy:false,err:e&&e.msg?e.msg:'Não consegui falar com a IA. Confira a internet e tente de novo.'}}
+ catch(e){P.ai={busy:false,err:e&&e.msg?e.msg:'Não consegui falar com a IA. '+(e&&e.name==='AbortError'?'Demorou demais (mais de 60 segundos). Tente com uma foto menor ou com sinal melhor.':'O aparelho não conseguiu chegar ao serviço do Google. Confira a internet, o bloqueador de anúncios ou a VPN. ')+'(Detalhe técnico: '+String(e&&(e.name||'')+' '+(e&&e.message||'')).trim().slice(0,120)+')'}}
  if(U.pl===P)render()}
 function aiBlock(P){const ai=P.ai||{};
  if(aiKey())return `<div class="rsum"><b>Ler o desenho com IA</b><p class="note">Escolha a foto do rascunho. A IA lê os nomes e as medidas escritas e você confere tudo antes de aplicar.</p>
