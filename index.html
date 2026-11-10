@@ -170,6 +170,17 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .pcl{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.pcl .pl{flex:1;min-width:0}.pcl .pl b{display:block;font-size:15px}.pcl .pl small{color:var(--mute);font-size:12px}.pcl .pv{font-weight:700;font-size:15px;white-space:nowrap}.pcl.late .pl small{color:var(--neg,#a33b2e);font-weight:700}
 .ck{flex:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--taupe);background:var(--card);color:var(--card);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}.pcl.ok .ck{background:var(--olive);border-color:var(--olive);color:#fff}
 .pedit{background:var(--sand);border-radius:12px;padding:10px;margin:2px 0 8px}.pedit .warn{grid-column:1/-1;margin:0}.pf .full{grid-column:1/-1}
+.cz-wrap{margin:14px 0 22px}.cz-wrap h3{margin-bottom:2px}
+.cz-stage{position:relative;margin:0 -16px}
+.cz{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:16px calc(50% - 98px) 22px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}.cz::-webkit-scrollbar{display:none}.cz:focus-visible{outline:3px solid var(--olive);outline-offset:-3px;border-radius:12px}
+.cc{flex:none;width:196px;aspect-ratio:3/4;border-radius:20px;overflow:hidden;position:relative;scroll-snap-align:center;transform:scale(var(--s,1));opacity:var(--o,1);transition:transform .18s,opacity .18s;box-shadow:0 12px 26px rgba(40,30,20,.2);cursor:pointer;background:var(--sand)}
+.cc svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ct{position:absolute;inset:auto 0 0 0;padding:48px 14px 14px;background:linear-gradient(transparent,rgba(30,26,22,.8));color:#f7f3ec}.ct b{display:block;font:600 25px/1.05 "Cormorant Garamond",Georgia,serif}.ct small{font-size:12px;color:#e9e0d1}
+.cz-ar{display:none;position:absolute;top:calc(50% - 10px);transform:translateY(-50%);z-index:2;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:28px;line-height:1;padding:0 0 3px;cursor:pointer;box-shadow:0 4px 14px rgba(40,30,20,.15)}.cz-ar.l{left:12px}.cz-ar.r{right:12px}
+@media (hover:hover) and (min-width:560px){.cz-ar{display:block}}
+.cz-info{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}.cz-info h4{font:600 26px/1.1 "Cormorant Garamond",Georgia,serif;margin:0 0 6px;color:var(--brown)}.cz-info p{margin:6px 0}.cz-info .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.cz-info .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.cz-info .btn{min-width:190px}
+@media (min-width:760px){.cc{width:232px}.cz{padding:16px calc(50% - 116px) 22px}.cz-stage{margin:0}}
+@media (prefers-reduced-motion:reduce){.cc{transition:none}}
 details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
 .chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
@@ -224,8 +235,12 @@ const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 const LBL={obra:['A fazer','Em andamento','Concluído'],enxoval:['Falta comprar','Pesquisando','Comprado']};
 const ST=['todo','doing','done'];
 const KIND={servico:'Serviço',material:'Material',produto:'Produto'};
+const RT_RX={sala:/\bsala\b(?!\s*(de\s+)?jantar)|living/,jantar:/jantar/,cozinha:/cozinha/,casal:/casal|suite|\bquarto\b(?!.*(solteiro|hospede|crianca|bebe|infantil))/,solteiro:/solteiro|hospede/,crianca:/crianca|bebe|infantil|filh/,escritorio:/escritorio|home\s*office|\boffice\b/,banheiro:/banheiro/,lavabo:/lavabo/,lavanderia:/lavanderia|area\s*de\s*servic/,varanda:/varanda|sacada|terraco/,closet:/closet/,corredor:/corredor|\bhall\b|entrada/,despensa:/despensa/,garagem:/garagem/,quintal:/quintal|jardim|area\s*externa|churrasq/};
+const roomKinds=name=>{const n=_nm(name);return Object.keys(RT_RX).filter(k=>RT_RX[k].test(n))};
+const roomsOfKind=(rooms,k)=>rooms.filter(r=>r.kind===k||(!r.kind&&roomKinds(r.name).includes(k)));
+const uniqueRoomName=(base,rooms)=>{const used=new Set(rooms.map(r=>_nm(r.name).trim())),b=String(base).trim();if(!used.has(_nm(b)))return b;for(let k=2;k<200;k++){const c=b+' '+k;if(!used.has(_nm(c)))return c}return b+' '+Date.now()};
 const DEF=[['r-sala','Sala e jantar'],['r-cozinha','Cozinha e lavanderia'],['r-quarto','Quarto'],['r-banheiro','Banheiro'],['r-corredor','Corredor']];
-const mkRoom=(name,img,id)=>{const r={id:id||uid(),name,img:img||[],w:null,l:null,h:null,decor:''};S.rooms.push(r);return r};
+const mkRoom=(name,img,id,kind)=>{const r={id:id||uid(),name,img:img||[],w:null,l:null,h:null,decor:'',kind:kind||null};S.rooms.push(r);return r};
 const seedRooms=()=>DEF.forEach(([id,n])=>mkRoom(n,[],id));
 function roomFor(name){const n=String(name||'').trim().toLowerCase();if(!n)return null;
  return S.rooms.find(r=>{const m=r.name.toLowerCase();return m===n||m.includes(n)||n.includes(m)})||mkRoom(String(name).trim())}
@@ -379,7 +394,7 @@ function migrate(o){const s=Object.assign(EMPTY(),o);
    if(i.researching===undefined){if(n.status==='done')n.qtyBought=Math.max(n.qtyBought,n.qtyNeed);n.researching=n.status==='doing'&&n.qtyBought===0}
    syncStatus(n)}
   return n});
- s.rooms=s.rooms.map(r=>Object.assign({img:[],w:null,l:null,h:null,decor:''},r));
+ s.rooms=s.rooms.map(r=>Object.assign({img:[],w:null,l:null,h:null,decor:'',kind:null},r));
  const h=o.house||{},hasData=s.items.length>0||s.notes.length>0||!!o.cover||Object.values(s.budget).some(v=>v!=null),nm=typeof h.name==='string'?h.name.slice(0,60):'';
  s.house={name:nm,cover:(typeof h.cover==='string'&&h.cover)?h.cover:((typeof o.cover==='string'&&o.cover)?o.cover:null),done:o.house?(!!h.done||!!nm||hasData):hasData};delete s.cover;
  s.v=4;return s}
@@ -480,10 +495,10 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1501';
+const APP_VER='20261110-1511';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
@@ -594,9 +609,113 @@ async function updCheck(){U.upd='checking';render();try{const r=await fetch(loca
 async function updGo(){try{const rs=await navigator.serviceWorker.getRegistrations();for(const g of rs)await g.unregister();for(const k of await caches.keys())if(k.startsWith('hth'))await caches.delete(k)}catch(e){}location.reload()}
 const backupPage=()=>crumb()+`<h2 class="pt" id="bkp">Backup</h2>`+accountCard()+localAccountHint()+`<p class="note">${C.mode?'Seus dados estão na conta. Você também pode baixar ou copiar um backup para guardar uma cópia à parte, e restaurar aqui.':'Seus dados e fotos ficam só neste aparelho. Baixe ou copie um backup para guardar ou levar para outro aparelho, e restaure aqui.'}</p>`+backupCard()+archive()+aboutCard()+dangerZone()
 
-function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2><div class="rg">${S.rooms.map(r=>{const n=act().filter(i=>i.roomId===r.id).length;
+/* ---------- Escolha de cômodos: tipos, textos e ilustrações próprias ---------- */
+const RT_ORDER=['sala','jantar','cozinha','casal','solteiro','crianca','escritorio','banheiro','lavabo','lavanderia','varanda','closet','corredor','despensa','garagem','quintal'];
+const _w=(x,y,w,h,c)=>`<path d="M${x} ${y+h}V${y+w/2}a${w/2} ${w/2} 0 0 1 ${w} 0V${y+h}z" fill="${c}" opacity=".92"/><path d="M${x+w/2} ${y+w/2-6}V${y+h}M${x} ${y+h*.58}H${x+w}" stroke="rgba(60,45,35,.28)" stroke-width="1.6" fill="none"/>`;
+const _pl=(x,y,s,p)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-9 0h18l-3 20h-12z" fill="${p.d}"/><path d="M0 0C-14-10-16-26-6-34 0-24 2-12 0 0zM0 0C12-12 20-24 12-36 4-26 0-12 0 0zM0 0C-4-14 2-30 0-42 8-30 6-12 0 0z" fill="${p.g}"/></g>`;
+const _rug=(cx,y,w,c)=>`<ellipse cx="${cx}" cy="${y}" rx="${w}" ry="${w*.13}" fill="${c}" opacity=".7"/>`;
+const SC={
+sala:p=>`${_w(112,30,58,86,p.c)}<rect x="22" y="48" width="42" height="56" rx="3" fill="${p.c}"/><rect x="28" y="54" width="30" height="44" rx="2" fill="${p.a}" opacity=".75"/><circle cx="43" cy="76" r="9" fill="${p.c}" opacity=".85"/>
+<rect x="36" y="128" width="128" height="38" rx="12" fill="${p.a}"/><rect x="24" y="142" width="26" height="46" rx="10" fill="${p.a}"/><rect x="150" y="142" width="26" height="46" rx="10" fill="${p.a}"/><rect x="48" y="150" width="104" height="34" rx="9" fill="${p.a}" opacity=".78"/><rect x="58" y="134" width="40" height="24" rx="8" fill="${p.c}" opacity=".55"/><rect x="104" y="134" width="40" height="24" rx="8" fill="${p.c}" opacity=".35"/>
+<rect x="40" y="186" width="5" height="9" fill="${p.d}"/><rect x="155" y="186" width="5" height="9" fill="${p.d}"/>${_rug(100,226,86,p.m)}<rect x="66" y="208" width="68" height="8" rx="4" fill="${p.d}"/><rect x="72" y="214" width="4" height="12" fill="${p.d}"/><rect x="124" y="214" width="4" height="12" fill="${p.d}"/>
+<path d="M186 70V196" stroke="${p.d}" stroke-width="3"/><path d="M172 70h28l-6-24h-16z" fill="${p.c}"/><ellipse cx="186" cy="198" rx="12" ry="3.5" fill="${p.d}"/>`,
+jantar:p=>`<path d="M100 0V42" stroke="${p.d}" stroke-width="2"/><path d="M78 62q22-34 44 0z" fill="${p.m}"/><rect x="26" y="74" width="148" height="3" fill="none"/>${_w(26,86,44,70,p.c)}
+<rect x="30" y="152" width="140" height="10" rx="5" fill="${p.d}"/><rect x="40" y="160" width="6" height="52" fill="${p.d}"/><rect x="154" y="160" width="6" height="52" fill="${p.d}"/>
+<rect x="46" y="132" width="26" height="26" rx="6" fill="${p.a}"/><rect x="50" y="158" width="4" height="46" fill="${p.m}"/><rect x="66" y="158" width="4" height="46" fill="${p.m}"/><rect x="128" y="132" width="26" height="26" rx="6" fill="${p.a}"/><rect x="130" y="158" width="4" height="46" fill="${p.m}"/><rect x="148" y="158" width="4" height="46" fill="${p.m}"/>
+<rect x="86" y="140" width="28" height="12" rx="6" fill="${p.c}"/><rect x="92" y="132" width="3" height="10" fill="${p.g}"/><circle cx="93" cy="130" r="6" fill="${p.g}"/>${_rug(100,232,88,p.m)}
+<rect x="150" y="104" width="38" height="3" fill="${p.d}"/><rect x="152" y="108" width="34" height="42" rx="3" fill="${p.a}" opacity=".6"/>`,
+cozinha:p=>`<rect x="14" y="34" width="84" height="46" rx="4" fill="${p.a}"/><rect x="16" y="36" width="40" height="42" rx="3" fill="${p.c}" opacity=".35"/><rect x="58" y="36" width="38" height="42" rx="3" fill="${p.c}" opacity=".2"/><circle cx="52" cy="58" r="2" fill="${p.d}"/><circle cx="62" cy="58" r="2" fill="${p.d}"/>
+<path d="M104 30h38l8 30h-54z" fill="${p.m}"/><path d="M118 30V10h10v20" fill="${p.m}"/><rect x="14" y="140" width="116" height="52" rx="4" fill="${p.a}"/><rect x="12" y="132" width="120" height="10" rx="3" fill="${p.d}"/><rect x="20" y="152" width="48" height="36" rx="3" fill="${p.c}" opacity=".3"/><rect x="72" y="152" width="48" height="36" rx="3" fill="${p.c}" opacity=".2"/>
+<rect x="88" y="126" width="30" height="6" rx="2" fill="${p.c}"/><rect x="92" y="120" width="22" height="7" rx="3" fill="${p.m}"/><circle cx="34" cy="126" r="7" fill="${p.c}"/><path d="M28 122l12-14" stroke="${p.d}" stroke-width="2"/>
+<rect x="142" y="76" width="46" height="116" rx="6" fill="${p.c}"/><path d="M142 124h46" stroke="${p.m}" stroke-width="2"/><rect x="148" y="94" width="3" height="18" rx="1.5" fill="${p.m}"/><rect x="148" y="134" width="3" height="26" rx="1.5" fill="${p.m}"/>
+<rect x="16" y="196" width="112" height="6" fill="none"/>${_rug(80,232,72,p.m)}<rect x="46" y="204" width="28" height="5" rx="2.5" fill="${p.d}"/><rect x="58" y="208" width="4" height="22" fill="${p.d}"/>`,
+casal:p=>`<rect x="96" y="40" width="70" height="46" rx="3" fill="${p.c}"/><rect x="102" y="46" width="58" height="34" rx="2" fill="${p.a}" opacity=".6"/><rect x="26" y="88" width="30" height="40" rx="3" fill="${p.c}" opacity=".7"/>
+<rect x="34" y="104" width="132" height="56" rx="10" fill="${p.m}"/><rect x="26" y="128" width="148" height="46" rx="12" fill="${p.a}"/><rect x="26" y="150" width="148" height="30" rx="9" fill="${p.a}" opacity=".7"/><rect x="42" y="118" width="46" height="18" rx="8" fill="${p.c}"/><rect x="108" y="118" width="46" height="18" rx="8" fill="${p.c}"/><rect x="26" y="152" width="148" height="8" fill="${p.d}" opacity=".18"/>
+<rect x="30" y="178" width="6" height="14" fill="${p.d}"/><rect x="164" y="178" width="6" height="14" fill="${p.d}"/>
+<rect x="2" y="140" width="20" height="36" rx="3" fill="${p.d}"/><rect x="178" y="140" width="20" height="36" rx="3" fill="${p.d}"/><path d="M5 140l7-16 7 16z" fill="${p.c}"/><path d="M181 140l7-16 7 16z" fill="${p.c}"/><rect x="4" y="176" width="3" height="16" fill="${p.d}"/><rect x="193" y="176" width="3" height="16" fill="${p.d}"/>${_rug(100,228,88,p.m)}`,
+solteiro:p=>`${_w(120,34,54,80,p.c)}<rect x="18" y="52" width="40" height="30" rx="3" fill="${p.c}" opacity=".8"/><rect x="22" y="56" width="32" height="22" rx="2" fill="${p.a}" opacity=".6"/>
+<rect x="22" y="112" width="92" height="46" rx="8" fill="${p.m}"/><rect x="16" y="134" width="108" height="40" rx="10" fill="${p.a}"/><rect x="16" y="152" width="108" height="24" rx="8" fill="${p.a}" opacity=".7"/><rect x="26" y="122" width="34" height="16" rx="7" fill="${p.c}"/><rect x="20" y="174" width="5" height="16" fill="${p.d}"/><rect x="114" y="174" width="5" height="16" fill="${p.d}"/>
+<rect x="138" y="116" width="52" height="74" rx="4" fill="${p.d}" opacity=".85"/><path d="M164 118V188" stroke="${p.c}" stroke-width="1.5" opacity=".6"/><circle cx="160" cy="154" r="2" fill="${p.c}"/><circle cx="168" cy="154" r="2" fill="${p.c}"/>${_rug(80,226,76,p.m)}`,
+crianca:p=>`<path d="M30 40l10 12-14 2 12 8-14 6" fill="none"/><g fill="${p.c}"><path d="M42 36l3 7 7 .6-5.5 4.6 1.8 7-6.3-3.9-6.3 3.9 1.8-7-5.5-4.6 7-.6z"/><path d="M150 52l2.4 5.6 5.8.5-4.4 3.7 1.4 5.7-5.2-3.1-5.2 3.1 1.4-5.7-4.4-3.7 5.8-.5z"/></g>
+${_w(100,72,40,58,p.c)}<rect x="18" y="124" width="104" height="30" rx="8" fill="${p.a}"/><rect x="18" y="106" width="12" height="62" rx="6" fill="${p.m}"/><rect x="110" y="106" width="12" height="62" rx="6" fill="${p.m}"/><rect x="34" y="112" width="30" height="18" rx="8" fill="${p.c}"/><rect x="22" y="166" width="5" height="22" fill="${p.d}"/><rect x="113" y="166" width="5" height="22" fill="${p.d}"/>
+<rect x="136" y="132" width="52" height="5" rx="2" fill="${p.d}"/><rect x="142" y="104" width="12" height="28" rx="2" fill="${p.a}"/><rect x="158" y="114" width="12" height="18" rx="2" fill="${p.g}"/><circle cx="180" cy="124" r="8" fill="${p.c}"/>
+<rect x="136" y="152" width="52" height="5" rx="2" fill="${p.d}"/><rect x="144" y="140" width="16" height="12" rx="2" fill="${p.c}"/><rect x="166" y="136" width="14" height="16" rx="7" fill="${p.a}"/>${_rug(100,224,70,p.g)}<rect x="68" y="204" width="18" height="18" rx="3" fill="${p.a}"/><rect x="88" y="212" width="14" height="14" rx="3" fill="${p.c}"/>`,
+escritorio:p=>`<rect x="20" y="40" width="70" height="3" fill="${p.d}"/><rect x="24" y="22" width="10" height="18" rx="1" fill="${p.a}"/><rect x="36" y="26" width="8" height="14" rx="1" fill="${p.g}"/><rect x="46" y="20" width="12" height="20" rx="1" fill="${p.c}"/><rect x="60" y="28" width="9" height="12" rx="1" fill="${p.m}"/>
+<rect x="20" y="70" width="70" height="3" fill="${p.d}"/><rect x="24" y="52" width="14" height="18" rx="1" fill="${p.m}"/><rect x="40" y="56" width="8" height="14" rx="1" fill="${p.a}"/><rect x="50" y="50" width="12" height="20" rx="1" fill="${p.c}"/>${_w(124,34,54,76,p.c)}
+<rect x="30" y="140" width="140" height="8" rx="4" fill="${p.d}"/><rect x="38" y="146" width="6" height="46" fill="${p.d}"/><rect x="156" y="146" width="6" height="46" fill="${p.d}"/><rect x="118" y="148" width="38" height="36" rx="3" fill="${p.m}"/>
+<rect x="64" y="104" width="52" height="34" rx="3" fill="${p.d}"/><rect x="68" y="108" width="44" height="26" rx="1.5" fill="${p.c}" opacity=".85"/><rect x="86" y="138" width="8" height="4" fill="${p.d}"/>
+<path d="M148 138V108l14-12" stroke="${p.d}" stroke-width="3" fill="none"/><path d="M158 94l18 6-6 10z" fill="${p.a}"/>
+<rect x="68" y="160" width="40" height="10" rx="5" fill="${p.a}"/><rect x="84" y="168" width="6" height="22" fill="${p.d}"/><ellipse cx="87" cy="194" rx="16" ry="3" fill="${p.d}"/><rect x="62" y="130" width="38" height="24" rx="10" fill="none"/>${_rug(100,230,70,p.m)}`,
+banheiro:p=>`<circle cx="62" cy="62" r="26" fill="${p.c}" opacity=".9"/><circle cx="62" cy="62" r="26" fill="none" stroke="${p.d}" stroke-width="3"/>
+<rect x="28" y="112" width="86" height="46" rx="6" fill="${p.a}"/><rect x="24" y="106" width="94" height="10" rx="4" fill="${p.c}"/><path d="M52 106q14-12 28 0z" fill="${p.m}"/><rect x="66" y="84" width="4" height="22" fill="${p.d}"/><rect x="32" y="122" width="38" height="32" rx="3" fill="${p.c}" opacity=".3"/><rect x="74" y="122" width="38" height="32" rx="3" fill="${p.c}" opacity=".2"/>
+<path d="M140 40h46v152h-46z" fill="${p.c}" opacity=".35"/><path d="M140 40h46v152h-46z" fill="none" stroke="${p.d}" stroke-width="2"/><circle cx="150" cy="116" r="2.4" fill="${p.d}"/><path d="M163 22V40M163 28q8 0 8 8" stroke="${p.d}" stroke-width="2.4" fill="none"/>
+<rect x="124" y="70" width="3" height="42" fill="${p.d}"/><path d="M118 74h18v34q-9 8-18 0z" fill="${p.a}"/>${_rug(80,222,62,p.g)}${_pl(24,186,.8,p)}`,
+lavabo:p=>`<path d="M100 20V56" stroke="${p.d}" stroke-width="2"/><path d="M84 70q16-22 32 0z" fill="${p.m}"/><rect x="44" y="76" width="112" height="70" rx="56" fill="${p.c}"/><rect x="44" y="76" width="112" height="70" rx="56" fill="none" stroke="${p.d}" stroke-width="3"/>
+<rect x="38" y="154" width="124" height="14" rx="5" fill="${p.d}"/><path d="M74 154q26-26 52 0z" fill="${p.c}"/><rect x="97" y="124" width="6" height="26" fill="${p.m}"/><path d="M97 124h14" stroke="${p.m}" stroke-width="4"/><rect x="48" y="168" width="104" height="22" rx="4" fill="${p.a}"/>
+<rect x="150" y="104" width="30" height="40" rx="3" fill="${p.a}" opacity=".7"/><path d="M150 112h30M150 120h30" stroke="${p.c}" stroke-width="2"/>${_pl(24,190,.9,p)}`,
+lavanderia:p=>`<rect x="18" y="46" width="100" height="4" fill="${p.d}"/><rect x="24" y="26" width="16" height="20" rx="3" fill="${p.a}"/><rect x="44" y="30" width="14" height="16" rx="3" fill="${p.c}"/><rect x="62" y="22" width="18" height="24" rx="4" fill="${p.m}"/><rect x="86" y="32" width="14" height="14" rx="3" fill="${p.g}"/>
+<rect x="18" y="86" width="100" height="4" fill="${p.d}"/><rect x="24" y="68" width="22" height="18" rx="2" fill="${p.c}"/><rect x="50" y="64" width="22" height="22" rx="2" fill="${p.a}" opacity=".7"/>
+<rect x="30" y="112" width="82" height="80" rx="8" fill="${p.c}"/><rect x="30" y="112" width="82" height="16" rx="8" fill="${p.m}" opacity=".5"/><circle cx="71" cy="158" r="26" fill="${p.d}" opacity=".85"/><circle cx="71" cy="158" r="19" fill="${p.a}" opacity=".55"/><circle cx="44" cy="120" r="3" fill="${p.d}"/><rect x="60" y="116" width="26" height="6" rx="3" fill="${p.d}" opacity=".6"/>
+<rect x="128" y="124" width="58" height="68" rx="5" fill="${p.m}"/><rect x="134" y="132" width="46" height="26" rx="13" fill="${p.c}" opacity=".7"/><rect x="154" y="106" width="5" height="22" fill="${p.d}"/><path d="M154 106h18" stroke="${p.d}" stroke-width="4"/>
+<path d="M130 52H190" stroke="${p.d}" stroke-width="2"/><path d="M138 52v30h14V52zM160 52v22h14V52z" fill="${p.a}" opacity=".8"/><path d="M40 200h40l-4 26H44z" fill="${p.a}"/>`,
+varanda:p=>`<path d="M0 124h200" stroke="${p.d}" stroke-width="3"/><path d="M0 188h200" stroke="${p.d}" stroke-width="4"/>${Array.from({length:14},(_,k)=>`<path d="M${8+k*14} 124V188" stroke="${p.d}" stroke-width="2" opacity=".75"/>`).join('')}
+<path d="M10 30q40 16 90 6t90 6" stroke="${p.d}" stroke-width="1.6" fill="none"/>${[22,52,86,120,152,182].map((x,k)=>`<circle cx="${x}" cy="${[40,48,44,44,46,50][k]}" r="4.5" fill="${p.c}"/><circle cx="${x}" cy="${[40,48,44,44,46,50][k]}" r="9" fill="${p.c}" opacity=".25"/>`).join('')}
+${_pl(34,170,1.25,p)}${_pl(168,170,1,p)}<rect x="68" y="146" width="62" height="10" rx="5" fill="${p.a}"/><rect x="72" y="126" width="12" height="24" rx="5" fill="${p.a}" opacity=".7"/><rect x="76" y="156" width="4" height="30" fill="${p.d}"/><rect x="118" y="156" width="4" height="30" fill="${p.d}"/><rect x="86" y="164" width="30" height="5" rx="2.5" fill="${p.m}"/><rect x="100" y="169" width="3" height="18" fill="${p.m}"/>${_rug(100,232,70,p.m)}`,
+closet:p=>`<rect x="10" y="30" width="180" height="162" rx="4" fill="${p.d}" opacity=".18"/><path d="M18 52H110M18 108H110" stroke="${p.d}" stroke-width="3"/>${[24,34,44,54,64,74,84,94,102].map((x,k)=>`<path d="M${x} 52v${[34,40,28,36,32,38,30,36,26][k]}" stroke="${[p.a,p.c,p.m,p.a,p.g,p.c,p.m,p.a,p.c][k]}" stroke-width="8" stroke-linecap="round"/>`).join('')}${[24,36,48,60,72,84,96].map((x,k)=>`<path d="M${x} 108v${[28,40,34,26,38,32,30][k]}" stroke="${[p.c,p.a,p.g,p.m,p.c,p.a,p.m][k]}" stroke-width="8" stroke-linecap="round"/>`).join('')}
+<rect x="122" y="40" width="62" height="3" fill="${p.d}"/><rect x="128" y="22" width="22" height="18" rx="2" fill="${p.c}"/><rect x="154" y="26" width="24" height="14" rx="2" fill="${p.a}"/><rect x="122" y="84" width="62" height="3" fill="${p.d}"/><rect x="128" y="62" width="24" height="22" rx="2" fill="${p.m}"/><rect x="156" y="68" width="22" height="16" rx="2" fill="${p.c}"/>
+<rect x="122" y="130" width="62" height="3" fill="${p.d}"/><path d="M130 130l8-14h14l6 14zM160 130l6-10h14v10z" fill="${p.a}"/><rect x="122" y="168" width="62" height="3" fill="${p.d}"/><path d="M128 168l7-12h12l5 12zM158 168l7-10h14l4 10z" fill="${p.m}"/>${_rug(100,228,70,p.m)}`,
+corredor:p=>`<rect x="20" y="40" width="50" height="86" rx="25" fill="${p.c}" opacity=".9"/><rect x="26" y="46" width="38" height="74" rx="19" fill="${p.a}" opacity=".35"/><path d="M110 56h72" stroke="${p.d}" stroke-width="3"/>${[120,144,168].map((x,k)=>`<circle cx="${x}" cy="62" r="4" fill="${p.d}"/><path d="M${x} 66v${[22,30,18][k]}" stroke="${[p.a,p.m,p.c][k]}" stroke-width="9" stroke-linecap="round"/>`).join('')}
+<rect x="14" y="144" width="86" height="8" rx="4" fill="${p.d}"/><rect x="22" y="150" width="5" height="42" fill="${p.d}"/><rect x="86" y="150" width="5" height="42" fill="${p.d}"/><rect x="38" y="152" width="48" height="22" rx="2" fill="${p.a}" opacity=".8"/><rect x="44" y="124" width="9" height="20" rx="3" fill="${p.m}"/><circle cx="76" cy="136" r="8" fill="${p.c}"/>
+<rect x="116" y="156" width="68" height="14" rx="6" fill="${p.a}"/><rect x="120" y="168" width="4" height="22" fill="${p.d}"/><rect x="176" y="168" width="4" height="22" fill="${p.d}"/><path d="M130 156l6-10h10l4 10zM156 156l4-8h12l4 8z" fill="${p.m}"/>${_rug(100,224,86,p.m)}`,
+despensa:p=>`${[46,92,138,184].map(y=>`<rect x="14" y="${y}" width="172" height="5" fill="${p.d}"/>`).join('')}${[0,1,2,3].map(r=>[22,50,78,106,134,160].map((x,k)=>{const h=[22,28,18,26,20,24][(k+r*2)%6],cs=[p.a,p.c,p.m,p.g][(k+r)%4];return `<rect x="${x}" y="${[46,92,138,184][r]-h}" width="22" height="${h}" rx="${r%2?3:6}" fill="${cs}"/>`}).join('')).join('')}`,
+garagem:p=>`${[34,62,90,118].map(y=>`<rect x="14" y="${y}" width="172" height="12" rx="2" fill="${p.d}" opacity="${.14+y/900}"/>`).join('')}
+<path d="M26 170q4-26 30-30l30-16q24-6 48 0l24 18q22 4 28 28v12H26z" fill="${p.a}"/><path d="M62 142l22-14q16-4 32 0l16 14z" fill="${p.c}" opacity=".7"/><circle cx="66" cy="184" r="14" fill="${p.d}"/><circle cx="66" cy="184" r="6" fill="${p.c}"/><circle cx="148" cy="184" r="14" fill="${p.d}"/><circle cx="148" cy="184" r="6" fill="${p.c}"/>
+<rect x="16" y="196" width="168" height="4" fill="${p.d}" opacity=".5"/><rect x="154" y="152" width="26" height="8" rx="3" fill="${p.c}" opacity=".7"/>`,
+quintal:p=>`<circle cx="60" cy="72" r="38" fill="${p.g}"/><circle cx="88" cy="88" r="30" fill="${p.g}" opacity=".85"/><circle cx="34" cy="94" r="26" fill="${p.g}" opacity=".8"/><rect x="56" y="100" width="9" height="86" rx="3" fill="${p.d}"/>
+<path d="M120 124H200" stroke="${p.d}" stroke-width="3"/>${Array.from({length:6},(_,k)=>`<path d="M${126+k*13} 112v50" stroke="${p.m}" stroke-width="7" stroke-linecap="round"/>`).join('')}
+<path d="M0 188q50-10 100 0t100 0V260H0z" fill="${p.g}" opacity=".6"/><rect x="118" y="176" width="64" height="8" rx="3" fill="${p.a}"/><rect x="124" y="182" width="5" height="14" fill="${p.d}"/><rect x="172" y="182" width="5" height="14" fill="${p.d}"/><rect x="116" y="158" width="68" height="6" rx="3" fill="${p.a}" opacity=".8"/>${_pl(92,214,1,p)}<circle cx="168" cy="40" r="14" fill="${p.c}" opacity=".9"/>`
+};
+const RT={
+ sala:{n:'Sala de estar',pal:['#e8dccb','#cdb99f','#bfa98c','#7a6a55','#3b3027','#7d8450','#f7f3ec'],d:'O cômodo de receber e descansar. Pense primeiro em como vocês usam: TV, conversa, leitura ou tudo isso junto.',it:['Sofá','Rack ou painel de TV','Mesa de centro','Tapete','Cortina','Luminária']},
+ jantar:{n:'Sala de jantar',pal:['#ead9c3','#d3b793','#c4a479','#8a5e3c','#3b2c22','#7d8450','#f7f3ec'],d:'Onde a casa se reúne para comer. Meça o espaço antes de escolher a mesa: precisa sobrar folga para puxar as cadeiras.',it:['Mesa','Cadeiras','Aparador','Lustre ou pendente','Tapete']},
+ cozinha:{n:'Cozinha',pal:['#e4e0cf','#c3c4a0','#aeb28a','#5d6538','#2f3426','#6d7a45','#f7f3ec'],d:'O cômodo mais técnico da casa. Pontos de água, gás e tomadas definem onde cada coisa vai antes de qualquer compra.',it:['Geladeira','Fogão ou cooktop','Armários','Panelas','Utensílios','Micro-ondas']},
+ casal:{n:'Quarto de casal',pal:['#ecdfd2','#d6bfae','#c3a592','#8a6a5a','#3d2d27','#8c8f62','#f7f3ec'],d:'Feito para descansar. Escurecer bem o ambiente e ter um bom colchão faz mais diferença do que qualquer enfeite.',it:['Cama','Colchão','Guarda-roupa','Criados-mudos','Cortina blackout','Roupa de cama']},
+ solteiro:{n:'Quarto de solteiro ou hóspedes',pal:['#e6e2d4','#c9c8ae','#b5b595','#6f7a5a','#313629','#8c8f62','#f7f3ec'],d:'Um quarto flexível: serve para visitas hoje e para outro uso depois. Móveis simples e fáceis de mudar ajudam.',it:['Cama','Colchão','Guarda-roupa','Escrivaninha','Cortina']},
+ crianca:{n:'Quarto de criança',pal:['#efe3cd','#dfc79a','#cdb27f','#b9855c','#3f3128','#8c9a62','#f7f3ec'],d:'Cresce junto com a criança. Escolha móveis que durem anos e deixe espaço livre no chão para brincar.',it:['Cama ou berço','Guarda-roupa','Nichos para brinquedos','Tapete','Luz de apoio']},
+ escritorio:{n:'Home office',pal:['#e3dfd6','#c4bfb0','#b0a998','#5f6a74','#2c3036','#7d8450','#f7f3ec'],d:'Cuide da cadeira e da luz primeiro: são elas que decidem se dá para trabalhar horas sem cansar.',it:['Mesa','Cadeira ergonômica','Estante','Luminária de mesa','Organizadores']},
+ banheiro:{n:'Banheiro',pal:['#e1e3dd','#bfc8c0','#a9b5ad','#5f766d','#2b3631','#7d8f6a','#f7f3ec'],d:'Cômodo molhado: ventilação, piso antiderrapante e boa iluminação ao redor do espelho valem mais do que acessórios.',it:['Box','Gabinete','Espelho','Toalhas','Lixeira','Tapete antiderrapante']},
+ lavabo:{n:'Lavabo',pal:['#ece0d3','#d8c3ae','#c6ab92','#8d6b55','#3a2d26','#7d8450','#f7f3ec'],d:'O banheiro de visitas, sem chuveiro. É pequeno, então vale caprichar nos detalhes: espelho, luz e uma cuba bonita.',it:['Cuba','Espelho','Toalha de mão','Saboneteira','Lixeira pequena']},
+ lavanderia:{n:'Lavanderia',pal:['#e3e5e2','#c0c9c8','#a9b6b6','#5f7479','#2a3436','#7d8f6a','#f7f3ec'],d:'Planeje o caminho: lavar, secar e guardar. Defina onde fica a máquina e o varal antes de comprar armários.',it:['Máquina de lavar','Tanque','Varal','Cesto','Prateleiras','Produtos de limpeza']},
+ varanda:{n:'Varanda',pal:['#e2e6d3','#bcc79c','#a7b484','#5f7340','#2b3322','#6d8a3f','#f7f3ec'],d:'Um respiro da casa. Mesmo pequena, cabe um cantinho de sentar e algumas plantas. Veja se precisa de tela de proteção.',it:['Poltronas','Mesa lateral','Plantas','Iluminação externa','Tela de proteção']},
+ closet:{n:'Closet',pal:['#eadfd4','#d2bfae','#bea791','#7d6552','#37292a','#8c8f62','#f7f3ec'],d:'Organizar é o que importa: araras, gavetas e sapateira que combinem com a sua rotina, não só com o espaço.',it:['Araras','Gaveteiros','Sapateira','Cabides','Caixas organizadoras']},
+ corredor:{n:'Corredor ou hall',pal:['#e9dfd2','#d1c0a9','#bda88d','#7a6853','#352c24','#7d8450','#f7f3ec'],d:'A primeira impressão da casa. Um aparador com espelho e um lugar para chaves e sapatos já resolvem o dia a dia.',it:['Aparador','Espelho','Cabideiro','Banco','Luz de presença']},
+ despensa:{n:'Despensa',pal:['#ebe0cb','#d6c19a','#c5ac7c','#8a6d3e','#3a2f20','#8a8f4f','#f7f3ec'],d:'Guardar mantimentos em potes e prateleiras ajustáveis evita desperdício e facilita saber o que falta comprar.',it:['Prateleiras','Potes','Cestos organizadores','Etiquetas']},
+ garagem:{n:'Garagem',pal:['#e1e0dc','#c0bfb8','#aaa89f','#5d6168','#2b2d31','#7a8a5a','#f7f3ec'],d:'Além do carro, costuma virar depósito. Prateleiras na parede e ganchos liberam o chão.',it:['Prateleiras','Ganchos','Ferramentas','Iluminação']},
+ quintal:{n:'Quintal ou área externa',pal:['#e4e7d2','#c1cd9a','#a9b980','#5a7a3a','#27331f','#6d8a3f','#f7f3ec'],d:'Piso que escoe a água, sombra e um canto para sentar já transformam a área. Plantas são a parte mais fácil de mudar depois.',it:['Piso externo','Churrasqueira','Mesa externa','Jardim','Iluminação']}
+};
+const rtScene=k=>{const t=RT[k],q=t.pal,p={a:q[3],d:q[4],g:q[5],c:q[6],m:q[2]};return `<svg viewBox="0 0 200 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="rg-${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${q[0]}"/><stop offset=".72" stop-color="${q[1]}"/></linearGradient></defs><rect width="200" height="260" fill="url(#rg-${k})"/><rect y="186" width="200" height="74" fill="${q[2]}"/><rect y="186" width="200" height="3" fill="${q[4]}" opacity=".16"/>${SC[k](p)}</svg>`};
+
+const roomsOf=k=>roomsOfKind(S.rooms,k);
+function czInfo(x){const k=RT_ORDER[x],t=RT[k],have=roomsOf(k),last=U.czm&&U.czm.k===k?U.czm:null;
+ return `<h4>${esc(t.n)}</h4><p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>
+<p class="note">${have.length?'Já na sua casa: '+have.map(r=>esc(r.name)).join(', ')+'.':'Ainda não está na sua casa.'}</p>
+${last?`<p class="warn ok" role="status">${esc(last.name)} foi adicionado. <button class="lk" data-room="${last.id}">Abrir e medir</button></p>`:''}
+<div class="acts"><button class="btn" data-czadd="${k}">${have.length?'Adicionar mais um':'Adicionar à minha casa'}</button><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver fotos de inspiração</a></div>`}
+function picker(){const n=RT_ORDER.length,cur=Math.min(Math.max(U.czi||0,0),n-1);
+ return `<section class="cz-wrap" aria-labelledby="czh"><h3 id="czh">Escolha seus cômodos</h3><p class="note">Deslize e toque em “Adicionar”. Depois você muda o nome e coloca as medidas.</p>
+<div class="cz-stage"><button class="cz-ar l" data-czs="-1" aria-label="Cômodo anterior">‹</button><div class="cz" id="cz" role="group" aria-roledescription="carrossel" aria-label="Tipos de cômodo" tabindex="0">${RT_ORDER.map((k,x)=>{const h=roomsOf(k).length;return `<article class="cc" data-ci="${x}" aria-roledescription="slide" aria-label="${x+1} de ${n}: ${esc(RT[k].n)}">${rtScene(k)}<div class="ct"><b>${esc(RT[k].n)}</b>${h?`<small>Na sua casa: ${h}</small>`:''}</div></article>`}).join('')}</div><button class="cz-ar r" data-czs="1" aria-label="Próximo cômodo">›</button></div>
+<div class="cz-info" id="czinfo" aria-live="polite">${czInfo(cur)}</div></section>`}
+function czGo(d,abs){const c=document.getElementById('cz');if(!c)return;const k=c.children.length,x=Math.min(k-1,Math.max(0,abs!=null?abs:(U.czi||0)+d)),e=c.children[x],rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;c.scrollTo({left:e.offsetLeft+e.offsetWidth/2-c.clientWidth/2,behavior:rm?'auto':'smooth'})}
+function czBind(){const c=document.getElementById('cz');if(!c)return;const cards=[...c.children];let raf=0;
+ const upd=()=>{raf=0;const m=c.scrollLeft+c.clientWidth/2;let best=0,bd=1e9;cards.forEach((e,x)=>{const d=Math.abs(e.offsetLeft+e.offsetWidth/2-m),r=Math.min(1,d/(e.offsetWidth*1.1));e.style.setProperty('--s',(1-.14*r).toFixed(3));e.style.setProperty('--o',(1-.5*r).toFixed(3));if(d<bd){bd=d;best=x}});
+  cards.forEach((e,x)=>e.setAttribute('aria-current',x===best?'true':'false'));
+  if(best!==(U.czi||0)){U.czi=best;U.czm=null;const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(best)}};
+ c.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(upd)},{passive:true});
+ const x=Math.min(cards.length-1,Math.max(0,U.czi||0)),e=cards[x];c.scrollLeft=e.offsetLeft+e.offsetWidth/2-c.clientWidth/2;upd()}
+function addRoomKind(k){const t=RT[k];if(!t)return;const name=uniqueRoomName(t.n,S.rooms),r=mkRoom(name,[],null,k);U.czm={k,id:r.id,name}}
+function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2>${picker()}<h3>Seus ambientes (${S.rooms.length})</h3><div class="rg">${S.rooms.map(r=>{const n=act().filter(i=>i.roomId===r.id).length;
  const pe=prog(r.id);return `<button class="rc${r.img[0]?'':' none'}" data-room="${r.id}">${r.img[0]?imgEl(r.img[0],''):''}<span><b>${esc(r.name)}</b><small>${n} ${n===1?'item':'itens'}${pe.n?' · enxoval '+pe.pct+'%':''}</small></span></button>`}).join('')}</div>
-<form class="add" id="rf"><input class="full" name="name" required placeholder="Novo ambiente (ex.: Varanda)" aria-label="Nome do ambiente"><button class="btn full">Adicionar ambiente</button></form>`}
+<details class="addbox" data-addbox="room" ${U.addOpen.room?'open':''}><summary>Criar ambiente com outro nome</summary><form class="add" id="rf"><input class="full" name="name" required placeholder="Novo ambiente (ex.: Sala de TV)" aria-label="Nome do ambiente"><button class="btn full">Adicionar ambiente</button></form></details>`}
 const mini=i=>`<button class="mini" data-go="${i.id}"><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'} · ${stLabel(i)}</small></span><span>${R(ic(i).commit)}</span></button>`;
 function roomPage(){const r=S.rooms.find(x=>x.id===U.room);if(!r){U.room=null;return rooms()}
  const pr=prog(r.id),its=act().filter(i=>i.roomId===r.id),ar=r.w&&r.l?(r.w*r.l).toFixed(2).replace('.',',')+' m²':'—',ri=Math.min(U.ri,Math.max(0,r.img.length-1)),cur=r.img[ri];
@@ -737,7 +856,7 @@ function render(){
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
  const ob=!S.house.done||U.ob>=2;document.body.classList.toggle('ob',ob);
  document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
- hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
+ czBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
 
 /* ---------- Exportar e restaurar ---------- */
 let DL;try{window.claude&&claude.use&&claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
@@ -766,7 +885,7 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
  else if(b=q('[data-room]')){U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
@@ -809,6 +928,9 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-del]')){const id=b.dataset.del;if(was===id){delItem(id);if(U.open===id)U.open=null}else U.arm=id}
  else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.q='';U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
  else if(q('[data-rfclear]'))U.rf=null;
+ else if(b=q('[data-czs]')){czGo(+b.dataset.czs);return}
+ else if(b=q('.cc')){czGo(0,+b.dataset.ci);return}
+ else if(b=q('[data-czadd]'))addRoomKind(b.dataset.czadd)
  else if(b=q('[data-pe]')){U.pe=U.pe===b.dataset.pe?null:b.dataset.pe;U.dm=''}
  else if(q('[data-updchk]')){updCheck();return}
  else if(q('[data-updgo]')){updGo();return}
