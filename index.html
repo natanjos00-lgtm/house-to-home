@@ -183,6 +183,7 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .cc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cc-b{position:absolute;inset:0;width:100%;height:100%;border:0;background:none;padding:0;cursor:pointer;z-index:1}.cc .ct{z-index:2;pointer-events:none}.cc-x{position:absolute;top:10px;right:10px;z-index:3;min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(30,26,22,.62);color:#f7f3ec;font:600 18px/1 Figtree,sans-serif;padding:0 10px;cursor:pointer}.cc-x:hover{background:rgba(30,26,22,.85)}
 .dedup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:14px 0}.dedup h3{margin:0 0 6px}.dedup p{margin:6px 0}
 .stc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:16px 0}.stc h3{margin:2px 0 2px;font-size:26px}.stc p{margin:4px 0}.stc .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.stc>.btn{margin-top:10px}
+.gdq{border:0;padding:0;margin:14px 0 18px;display:grid;gap:8px}.gdq legend{font:600 17px Figtree,sans-serif;padding:0;margin-bottom:8px}.gdq button{min-height:48px;text-align:left;padding:10px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font:inherit;font-size:15px;cursor:pointer}.gdq button[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;font-weight:600}.gdc{margin:6px 0}.gdc b{font-weight:600}
 .gdp{margin:12px 0 4px}.gdp b{font:700 14px Figtree,sans-serif}.gdg{margin:20px 0}.gdi{display:grid;grid-template-columns:40px 1fr;gap:6px;padding:10px 0;border-top:1px solid var(--line)}.gdi p{margin:3px 0 0;font-size:14px;color:var(--mute);line-height:1.4}.gdi b{font-weight:600;font-size:16px;line-height:1.3}.gdi .gdd{color:var(--gold2);font-weight:600}.gdi .acts{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px}.gdi.ok b{color:var(--mute)}.gdi.na{opacity:.6}
 .gdk{width:44px;height:44px;margin:-6px 0 0 -6px;background:none;border:0;padding:0;display:grid;place-items:center;cursor:pointer;color:transparent}.gdk i{width:26px;height:26px;border:2px solid var(--gold);border-radius:8px;display:grid;place-items:center}.gdi.ok .gdk i{background:var(--gold);color:var(--card)}.gdk:focus-visible i{outline:2px solid var(--gold2);outline-offset:3px}.gdk:disabled{cursor:default}.gdk:disabled i{border-color:var(--line)}
 .pal{display:inline-flex;border-radius:8px;overflow:hidden;margin:6px 0;vertical-align:middle}.pal i{display:block;width:34px;height:22px}.pal.sm i{width:22px;height:14px}.pal.big{display:flex;border-radius:12px;margin:12px 0}.pal.big i{flex:1;height:44px;width:auto}
@@ -291,28 +292,36 @@ const estat=i=>i.returned?'returned':pstat(i);
 const FLT=[['all','Todos'],['pending','Pendente'],['partial','Parcialmente comprado'],['researching','Pesquisando'],['bought','Comprado'],['returned','Devolvido']];
 const STY_IDS=['escandinavo','industrial','contemporaneo','minimalista','rustico','classico','boho','japandi'];
 function cleanStyle(o){if(!o||typeof o!=='object'||!Array.isArray(o.profiles))return null;const ps=o.profiles.slice(0,2).map(p=>{if(!p||typeof p!=='object')return null;const sc={};STY_IDS.forEach(k=>{const v=Number(p.sc&&p.sc[k]);sc[k]=isFinite(v)&&v>0?Math.min(Math.round(v),999):0});return{name:String(p.name==null?'':p.name).replace(/\s+/g,' ').trim().slice(0,30),sc,ts:typeof p.ts==='string'?p.ts.slice(0,30):''}}).filter(Boolean);return ps.length?{profiles:ps}:null}
-/* Guia da primeira casa: lembretes gerais (sem prazos nem valores). Cada item tem id fixo, porque o progresso é salvo por id. */
+/* Guia da primeira casa: lembretes gerais (sem prazos nem valores). Cada item tem id fixo, porque o progresso é salvo por id.
+   w = condição opcional: o passo só aparece se o perfil tiver esses valores. est: novo|usado; tipo: casa|apto; cond: true|false (condomínio); pag: fin|vista. */
 const GUIDE=[
 {id:'doc',t:'Papéis e chaves',items:[
  {id:'doc-guardar',t:'Reunir os documentos da compra em uma pasta',d:'Contrato, matrícula, comprovantes de pagamento e do financiamento. Guarde uma cópia digital e outra no papel.'},
  {id:'doc-matricula',t:'Acompanhar a matrícula do imóvel no seu nome',d:'O registro é feito no cartório de imóveis e o prazo varia. Com financiamento, o banco costuma pedir a matrícula atualizada. Pergunte ao banco ou ao cartório o que falta.'},
- {id:'doc-promessa',t:'Reler o que o contrato promete entregar',d:'Se houver memorial descritivo, deixe à mão. Ele é a referência na hora da vistoria.'},
+ {id:'doc-promessa',w:{est:'novo'},t:'Reler o que o contrato promete entregar',d:'Se houver memorial descritivo, deixe à mão. Ele é a referência na hora da vistoria.'},
+ {id:'doc-debitos',w:{est:'usado'},t:'Conferir se não ficaram dívidas do antigo dono',d:'IPTU, condomínio, luz, água e gás. Peça os comprovantes de quitação e confirme com a prefeitura, a administração e as empresas.'},
+ {id:'doc-escritura',w:{pag:'vista'},t:'Conferir se a escritura e o registro foram feitos',d:'No papel, o imóvel só passa a ser seu depois do registro no cartório de imóveis. Guarde cópia da escritura e da matrícula.'},
  {id:'doc-chaves',t:'Combinar data e local da entrega das chaves',d:'Peça por escrito, para não haver dúvida sobre a partir de quando contas e condomínio passam a ser seus.'}]},
 {id:'vis',t:'Vistoria e entrega',items:[
  {id:'vis-fazer',t:'Fazer a vistoria com calma, sem pressa',d:'Se quiser, leve um engenheiro ou arquiteto de confiança. Conferir tudo em um dia só costuma ser cansativo; peça mais tempo se precisar.'},
  {id:'vis-testar',t:'Testar o que dá para testar',d:'Tomadas, interruptores, torneiras, descargas, chuveiro, ralos, portas, janelas, fechaduras e ar-condicionado, se houver. Olhe também cantos do teto e paredes à procura de manchas.'},
- {id:'vis-registro',t:'Fotografar e anotar tudo que estiver errado',d:'Fotos e vídeos com data, e uma lista escrita dos defeitos. Evite assinar o termo de entrega com pendências sem registrá-las no próprio termo.'},
+ {id:'vis-registro',w:{est:'novo'},t:'Fotografar e anotar tudo que estiver errado',d:'Fotos e vídeos com data, e uma lista escrita dos defeitos. Evite assinar o termo de entrega com pendências sem registrá-las no próprio termo.'},
+ {id:'vis-registro-usado',w:{est:'usado'},t:'Fotografar o estado do imóvel e anotar o que não bate com o combinado',d:'Fotos e vídeos com data. Se algo estiver diferente do que foi combinado, registre por escrito e converse com o vendedor.'},
+ {id:'vis-reforma',w:{est:'usado'},t:'Perguntar se o imóvel já passou por reformas',d:'Mudanças em paredes, varanda ou instalações podem precisar de autorização. Se tiver dúvida, peça a opinião de um engenheiro ou arquiteto.'},
+ {id:'vis-casa',w:{tipo:'casa'},t:'Olhar telhado, calhas, muro, portão e área externa',d:'Procure infiltrações, entupimentos e partes soltas. Teste o portão e o interfone, se houver.'},
+ {id:'vis-vaga',w:{tipo:'apto'},t:'Conferir a vaga de garagem e o depósito, se houver',d:'Número, tamanho e localização devem bater com o contrato.'},
  {id:'vis-medidores',t:'Fotografar os medidores de luz, água e gás',d:'Assim fica registrado o ponto de partida do seu consumo.'},
- {id:'vis-garantia',t:'Guardar manuais, notas fiscais e termos de garantia',d:'Segundo o Código Civil (art. 618), problemas na solidez e segurança da obra têm garantia de 5 anos. Para o restante, confira os prazos no contrato e reclame por escrito logo que notar.'}]},
+ {id:'vis-garantia',w:{est:'novo'},t:'Guardar manuais, notas fiscais e termos de garantia',d:'Segundo o Código Civil (art. 618), problemas na solidez e segurança da obra têm garantia de 5 anos. Para o restante, confira os prazos no contrato e reclame por escrito logo que notar.'},
+ {id:'vis-garantia-usado',w:{est:'usado'},t:'Pedir ao vendedor manuais, notas fiscais e garantias',d:'Se o imóvel ainda estiver dentro da garantia da construtora, ela pode valer para você. Pergunte à construtora ou à administração.'}]},
 {id:'ctas',t:'Contas e serviços',items:[
  {id:'ctas-luz',t:'Pedir a ligação ou a troca de titularidade da luz',d:'É feito com a distribuidora de energia da sua região. Tenha em mãos documento, CPF e comprovante de que o imóvel é seu.'},
  {id:'ctas-agua',t:'Pedir a ligação ou a troca de titularidade da água e esgoto',d:'Cada cidade tem a sua companhia. Veja no site ou no telefone dela o que pedem.'},
  {id:'ctas-gas',t:'Resolver o gás, se a casa usa',d:'Botijão, gás encanado ou nenhum. Em prédio, pergunte à administração como funciona.'},
  {id:'ctas-net',t:'Agendar a internet antes da mudança',d:'A instalação costuma ter fila. Combine o dia com a operadora e veja se o prédio tem restrições.'},
- {id:'ctas-cond',t:'Se for condomínio: cadastro de morador, regras e taxas',d:'Peça o regimento interno e o contato da administração. Pergunte sobre horários de mudança e uso do elevador.'},
+ {id:'ctas-cond',w:{cond:true},t:'Se for condomínio: cadastro de morador, regras e taxas',d:'Peça o regimento interno e o contato da administração. Pergunte sobre horários de mudança e uso do elevador.'},
  {id:'ctas-iptu',t:'Conferir o IPTU',d:'Veja em nome de quem o carnê está e se há algo em aberto. A prefeitura informa como atualizar o cadastro.'}]},
 {id:'seg',t:'Seguros e cadastros',items:[
- {id:'seg-fin',t:'Entender os seguros do financiamento',d:'Eles costumam proteger a dívida e o imóvel em si, e geralmente entram na parcela. Confira no contrato o que cobrem.'},
+ {id:'seg-fin',w:{pag:'fin'},t:'Entender os seguros do financiamento',d:'Eles costumam proteger a dívida e o imóvel em si, e geralmente entram na parcela. Confira no contrato o que cobrem.'},
  {id:'seg-res',t:'Pensar em um seguro residencial para os seus bens',d:'Móveis e eletrodomésticos normalmente não estão nos seguros do financiamento. Compare coberturas e preços antes de contratar.'},
  {id:'seg-endereco',t:'Atualizar o endereço',d:'Bancos, trabalho, planos, cartões, documentos e apps de entrega. Faça uma lista e vá riscando.'}]},
 {id:'casa',t:'Primeiros dias na casa',items:[
@@ -320,22 +329,30 @@ const GUIDE=[
  {id:'casa-registros',t:'Descobrir onde ficam o registro de água, o quadro de luz e o gás',d:'Todos que moram na casa precisam saber desligar em caso de vazamento ou curto.'},
  {id:'casa-chaves',t:'Fazer cópias das chaves e conferir as fechaduras',d:'Se tiver dúvida sobre quem já teve cópia, considere trocar o miolo da fechadura.'},
  {id:'casa-limpeza',t:'Fazer uma limpeza pesada antes de entrar os móveis',d:'É bem mais fácil com a casa vazia.'},
- {id:'casa-contatos',t:'Guardar contatos úteis',d:'Síndico ou administração, eletricista, encanador e chaveiro de confiança.'}]},
+ {id:'casa-contatos',t:'Guardar contatos úteis',d:'Administração ou vizinhos de confiança, eletricista, encanador e chaveiro.'},
+ {id:'casa-seguranca',w:{tipo:'casa'},t:'Pensar na segurança da casa',d:'Portão, iluminação externa, câmeras ou alarme. Escolha o que cabe no seu orçamento.'},
+ {id:'casa-rua',w:{cond:false},t:'Descobrir como funcionam a coleta de lixo e o correio',d:'Dias e horários da coleta e onde fica a caixa de correio. Os vizinhos costumam ajudar.'}]},
 {id:'mud',t:'Mudança',items:[
- {id:'mud-data',t:'Escolher a data e o jeito da mudança',d:'Peça mais de um orçamento se for contratar. Em prédio, reserve o elevador ou o horário com a administração.'},
+ {id:'mud-data',t:'Escolher a data e o jeito da mudança',d:'Peça mais de um orçamento se for contratar. Combine com quem vai ajudar o horário e quem fica na casa para receber.'},
+ {id:'mud-predio',w:{cond:true},t:'Combinar a mudança com a administração do condomínio',d:'Horários permitidos, uso do elevador ou da entrada de serviço, e se é preciso avisar a portaria.'},
  {id:'mud-caixa',t:'Separar uma caixa com o essencial',d:'Documentos, remédios, carregadores, ferramentas básicas, produtos de limpeza e papel higiênico. Leve com você, e não no caminhão.'},
  {id:'mud-noite',t:'Montar o kit da primeira noite',d:'Roupa de cama, toalhas, itens de higiene, luz de apoio e algo para comer.'},
  {id:'mud-eletros',t:'Preparar os eletrodomésticos',d:'Geladeira e máquina de lavar precisam ser esvaziadas e secas antes de transportar. Veja no manual de cada um.'}]}
 ];
 
 const GD_IDS=GUIDE.reduce((a,g)=>a.concat(g.items.map(i=>i.id)),[]);
-function cleanGuide(o){if(!o||typeof o!=='object')return null;const ok={},na={},re=/^\d{4}-\d{2}-\d{2}$/;
+const GD_OPT={est:['novo','usado'],tipo:['casa','apto'],pag:['fin','vista']};
+function cleanPerfil(p){if(!p||typeof p!=='object')return null;const r={};for(const k of Object.keys(GD_OPT)){if(GD_OPT[k].indexOf(p[k])<0)return null;r[k]=p[k]}if(typeof p.cond!=='boolean')return null;r.cond=p.cond;return{est:r.est,tipo:r.tipo,cond:r.cond,pag:r.pag}}
+function guideVisible(i,p){if(!i.w||!p)return true;return Object.keys(i.w).every(k=>p[k]===i.w[k])}
+function guideList(p){return GUIDE.map(g=>({id:g.id,t:g.t,items:g.items.filter(i=>guideVisible(i,p))})).filter(g=>g.items.length)}
+function cleanGuide(o){if(!o||typeof o!=='object')return null;const ok={},na={},re=/^\d{4}-\d{2}-\d{2}$/,pf=cleanPerfil(o.perfil);
  GD_IDS.forEach(id=>{const v=o.ok&&typeof o.ok==='object'?o.ok[id]:null;if(typeof v==='string'&&re.test(v))ok[id]=v});
  GD_IDS.forEach(id=>{if(o.na&&typeof o.na==='object'&&o.na[id]===1&&!ok[id])na[id]=1});
- return Object.keys(ok).length||Object.keys(na).length?{ok,na}:null}
-function guideStats(g){const c=cleanGuide(g)||{ok:{},na:{}},n=GD_IDS.filter(id=>!c.na[id]).length,d=GD_IDS.filter(id=>c.ok[id]).length;return{n,d,pct:n?Math.round(d/n*100):0,na:GD_IDS.length-n}}
+ if(!Object.keys(ok).length&&!Object.keys(na).length&&!pf)return null;const r={ok,na};if(pf)r.perfil=pf;return r}
+function guideStats(g){const c=cleanGuide(g)||{ok:{},na:{}},ids=guideList(c.perfil).reduce((a,x)=>a.concat(x.items.map(i=>i.id)),[]),n=ids.filter(id=>!c.na[id]).length,d=ids.filter(id=>c.ok[id]).length;return{n,d,pct:n?Math.round(d/n*100):0,na:ids.length-n}}
 function guideSet(id,st,today){if(GD_IDS.indexOf(id)<0)return false;const g=cleanGuide(S.house.guide)||{ok:{},na:{}};delete g.ok[id];delete g.na[id];
  if(st==='ok')g.ok[id]=today;else if(st==='na')g.na[id]=1;const c=cleanGuide(g);if(c)S.house.guide=c;else delete S.house.guide;return true}
+function guideProfile(p){const pf=cleanPerfil(p);if(!pf)return false;const g=cleanGuide(S.house.guide)||{ok:{},na:{}};g.perfil=pf;S.house.guide=cleanGuide(g);return true}
 function styleTotals(st){const t={};STY_IDS.forEach(k=>t[k]=0);((st&&st.profiles)||[]).forEach(p=>{const m=Math.max(1,...STY_IDS.map(k=>p.sc[k]||0));STY_IDS.forEach(k=>t[k]+=(p.sc[k]||0)/m)});return t}
 function styleRank(st){const t=styleTotals(st);return STY_IDS.slice().sort((a,b)=>t[b]-t[a]||STY_IDS.indexOf(a)-STY_IDS.indexOf(b))}
 function saveProfile(name,sc){const nm=String(name||'').replace(/\s+/g,' ').trim().slice(0,30),st=cleanStyle(S.house.style)||{profiles:[]},ts=new Date().toISOString(),p={name:nm,sc,ts},ix=st.profiles.findIndex(x=>_nm(x.name)===_nm(nm));
@@ -600,7 +617,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1659';
+const APP_VER='20261110-1712';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -987,14 +1004,24 @@ function styleCard(){const si=styleInfo();
 const gdToday=()=>{const d=new Date(),z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())};
 const gdDate=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return m?m[3]+'/'+m[2]+'/'+m[1]:''};
 const GDCHK='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-function guideCard(){const st=guideStats(S.house.guide);
- return `<section class="stc" aria-label="Guia da primeira casa"><p class="cap">Guia da primeira casa</p><h3>${st.d?st.d+' de '+st.n+' passos feitos':'Do recebimento das chaves à mudança'}</h3><p>${st.d?'Continue de onde parou.':'Vistoria, contas, seguros e mudança em uma lista para marcar, junto com a outra pessoa.'}</p><div class="bar full" role="progressbar" aria-label="Andamento do guia" aria-valuenow="${st.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${st.pct}%"></i></div><button class="btn${st.d?' alt':''}" data-gdopen>${st.d?'Abrir o guia':'Ver o guia'}</button></section>`}
-function guidePage(){const g=cleanGuide(S.house.guide)||{ok:{},na:{}},st=guideStats(g),back='<button class="lk back" data-gdx>← Início</button>';
+const GDQ=[['est','Como é o imóvel?',[['novo','Novo, direto da construtora'],['usado','Seminovo ou usado, de outra pessoa']]],['tipo','É casa ou apartamento?',[['casa','Casa'],['apto','Apartamento']]],['cond','Fica em condomínio?',[['sim','Sim, em prédio ou condomínio fechado'],['nao','Não, em rua comum, sem condomínio']]],['pag','Como foi a compra?',[['fin','Financiada em banco'],['vista','À vista ou com recursos próprios']]]];
+const gdPerfilTxt=p=>[p.est==='novo'?'Imóvel novo':'Seminovo ou usado',p.tipo==='casa'?'Casa':'Apartamento',p.cond?'Condomínio':'Rua, sem condomínio',p.pag==='fin'?'Financiada':'À vista'].join(' · ');
+const gdAns=d=>({est:d.est,tipo:d.tipo,cond:d.cond==='sim'?true:d.cond==='nao'?false:null,pag:d.pag});
+function guideCard(){const g=cleanGuide(S.house.guide),st=guideStats(S.house.guide),pf=g&&g.perfil;
+ return `<section class="stc" aria-label="Guia da primeira casa"><p class="cap">Guia da primeira casa</p>${pf?`<h3>${st.d?st.d+' de '+st.n+' passos feitos':'Seu guia está pronto'}</h3><p>${esc(gdPerfilTxt(pf))}</p><div class="bar full" role="progressbar" aria-label="Andamento do guia" aria-valuenow="${st.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${st.pct}%"></i></div><button class="btn${st.d?' alt':''}" data-gdopen>${st.d?'Abrir o guia':'Ver o guia'}</button>`
+ :`<h3>Um guia para o seu caso</h3><p>Responda 4 perguntas rápidas e veja só os passos que valem para você: vistoria, contas, seguros e mudança.</p><button class="btn" data-gdopen>Montar o meu guia</button>`}</section>`}
+function guideAsk(z,back){const d=z.d||{},ok=!!(d.est&&d.tipo&&d.cond&&d.pag);
+ return back+`<h2 class="pt">Monte o seu guia</h2><p class="note">Quatro perguntas, sem resposta errada. O guia mostra só o que vale para o seu caso. Você pode mudar depois, e o que já marcou fica guardado.</p>`
+ +GDQ.map(([k,q,o])=>`<fieldset class="gdq"><legend>${q}</legend>${o.map(([v,l])=>`<button type="button" data-gdp="${k}:${v}" aria-pressed="${d[k]===v}">${l}</button>`).join('')}</fieldset>`).join('')
+ +`<button class="btn" data-gdgo style="width:100%" ${ok?'':'disabled'}>${S.house.guide&&S.house.guide.perfil?'Atualizar o meu guia':'Montar o meu guia'}</button>${ok?'':'<p class="note">Responda as quatro perguntas para continuar.</p>'}`}
+function guidePage(){const z=U.gd,g=cleanGuide(S.house.guide)||{ok:{},na:{}},back='<button class="lk back" data-gdx>← Início</button>';
+ if(!g.perfil||z.mode==='q')return guideAsk(z,back);
+ const st=guideStats(g);
  const row=i=>{const ok=!!g.ok[i.id],na=!!g.na[i.id];
   return `<div class="gdi${ok?' ok':''}${na?' na':''}"><button class="gdk" role="checkbox" aria-checked="${ok}" aria-label="${esc(i.t)}" data-gdt="${i.id}" ${na?'disabled':''}><i>${GDCHK}</i></button><div><b>${esc(i.t)}</b><p>${esc(i.d)}</p>${ok?`<p class="gdd">Feito em ${gdDate(g.ok[i.id])}</p>`:''}<div class="acts">${i.go==='plan'&&!ok&&!na?'<button class="lk" data-plopen>Abrir a planta da casa</button>':''}${na?`<button class="lk" data-gdn="${i.id}" data-m="in">Não se aplica. Voltar a incluir</button>`:ok?'':`<button class="lk" data-gdn="${i.id}" data-m="na">Não se aplica a mim</button>`}</div></div></div>`};
- return back+`<h2 class="pt">Guia da primeira casa</h2><p class="note">Lembretes gerais, sem prazos nem valores. Regras e prazos mudam por cidade, banco e construtora: confira sempre no seu contrato e com cada empresa.</p>
+ return back+`<h2 class="pt">Guia da primeira casa</h2><p class="gdc"><b>${esc(gdPerfilTxt(g.perfil))}</b> <button class="lk" data-gdedit>Mudar</button></p><p class="note">Lembretes gerais, sem prazos nem valores. Regras e prazos mudam por cidade, banco e construtora: confira sempre no seu contrato e com cada empresa.</p>
 <div class="gdp"><b>${st.d} de ${st.n} passos feitos · ${st.pct}%</b><div class="bar full" role="progressbar" aria-label="Andamento do guia" aria-valuenow="${st.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${st.pct}%"></i></div></div>`
- +GUIDE.map(gr=>{const n=gr.items.filter(i=>!g.na[i.id]).length,d=gr.items.filter(i=>g.ok[i.id]).length;
+ +guideList(g.perfil).map(gr=>{const n=gr.items.filter(i=>!g.na[i.id]).length,d=gr.items.filter(i=>g.ok[i.id]).length;
   return `<section class="gdg" aria-labelledby="gh-${gr.id}"><div class="gh"><h3 id="gh-${gr.id}" style="margin:0">${esc(gr.t)}</h3><span>${d} de ${n}</span></div>${gr.items.map(row).join('')}</section>`}).join('')}
 function qOpt(o,i,vis){const pal=o.pal||(o.k?STY[o.k].pal.slice(0,3):null),p=o.k?rpGet('st_'+o.k):null;
  return `<button class="qo${vis?' v':''}" data-qa="${i}">${vis?`<span class="qimg" data-k="st_${o.k}" style="background:linear-gradient(135deg,${pal.join(',')})">${p?`<img src="${esc(p[0].u)}" alt="" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()">`:''}</span>`:(pal?palRow(pal,'sm'):'')}<b>${esc(o.t)}</b></button>`}
@@ -1276,7 +1303,10 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('[data-plapply]')){const im=U.pl.imp;if(im&&im.ok){const r=planApply(im.rooms);U.pl.imp=null;U.pl.txt='';U.pl.sel=null;U.msg=r.upd+' ambiente(s) atualizado(s) e '+r.nw+' criado(s).'}}
  else if(b=q('[data-qzopen]')){U.qz=b.dataset.qzopen==='r'?{step:QZ.length,ans:[],who:''}:{step:-1,ans:[],who:''};scrollTo(0,0)}
  else if(q('[data-qzx]')){U.qz=null;scrollTo(0,0)}
- else if(q('[data-gdopen]')){U.gd=true;scrollTo(0,0)}
+ else if(q('[data-gdopen]')){const c=cleanGuide(S.house.guide);U.gd=c&&c.perfil?{mode:'list'}:{mode:'q',d:{}};scrollTo(0,0)}
+ else if(q('[data-gdedit]')){const c=cleanGuide(S.house.guide),p=c&&c.perfil;U.gd={mode:'q',d:p?{est:p.est,tipo:p.tipo,cond:p.cond?'sim':'nao',pag:p.pag}:{}};scrollTo(0,0)}
+ else if(b=q('[data-gdp]')){const [k,v]=b.dataset.gdp.split(':');U.gd.d=U.gd.d||{};U.gd.d[k]=v;if(k==='tipo'&&v==='apto'&&!U.gd.d.cond)U.gd.d.cond='sim'}
+ else if(q('[data-gdgo]')){if(guideProfile(gdAns(U.gd.d||{})))U.gd={mode:'list'};scrollTo(0,0)}
  else if(q('[data-gdx]')){U.gd=null;scrollTo(0,0)}
  else if(b=q('[data-gdt]')){const c=cleanGuide(S.house.guide);guideSet(b.dataset.gdt,c&&c.ok[b.dataset.gdt]?'':'ok',gdToday())}
  else if(b=q('[data-gdn]')){guideSet(b.dataset.gdn,b.dataset.m==='na'?'na':'',gdToday())}
