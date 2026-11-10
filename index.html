@@ -174,6 +174,8 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .cz-stage{position:relative;margin:0 -16px}
 .cz{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:16px calc(50% - 98px) 22px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}.cz::-webkit-scrollbar{display:none}.cz:focus-visible{outline:3px solid var(--olive);outline-offset:-3px;border-radius:12px}
 .cc{flex:none;width:196px;aspect-ratio:3/4;border-radius:20px;overflow:hidden;position:relative;scroll-snap-align:center;transform:scale(var(--s,1));opacity:var(--o,1);transition:transform .18s,opacity .18s;box-shadow:0 12px 26px rgba(40,30,20,.2);cursor:pointer;background:var(--sand)}
+.cc .rp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.rpg{display:flex;gap:10px;overflow-x:auto;padding:4px 0 8px;margin:4px -4px 0;scroll-snap-type:x proximity}.rpg a{flex:none;width:132px;text-decoration:none;color:inherit;scroll-snap-align:start}.rpg img{width:132px;height:132px;object-fit:cover;border-radius:12px;display:block;background:var(--sand)}.rpg small{display:block;font-size:11px;line-height:1.3;color:var(--mute);margin-top:4px;overflow-wrap:anywhere}
 .cc svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .ct{position:absolute;inset:auto 0 0 0;padding:48px 14px 14px;background:linear-gradient(transparent,rgba(30,26,22,.8));color:#f7f3ec}.ct b{display:block;font:600 25px/1.05 "Cormorant Garamond",Georgia,serif}.ct small{font-size:12px;color:#e9e0d1}
 .cz-ar{display:none;position:absolute;top:calc(50% - 10px);transform:translateY(-50%);z-index:2;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:28px;line-height:1;padding:0 0 3px;cursor:pointer;box-shadow:0 4px 14px rgba(40,30,20,.15)}.cz-ar.l{left:12px}.cz-ar.r{right:12px}
@@ -495,7 +497,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1511';
+const APP_VER='20261110-1522';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -696,20 +698,46 @@ const RT={
 const rtScene=k=>{const t=RT[k],q=t.pal,p={a:q[3],d:q[4],g:q[5],c:q[6],m:q[2]};return `<svg viewBox="0 0 200 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="rg-${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${q[0]}"/><stop offset=".72" stop-color="${q[1]}"/></linearGradient></defs><rect width="200" height="260" fill="url(#rg-${k})"/><rect y="186" width="200" height="74" fill="${q[2]}"/><rect y="186" width="200" height="3" fill="${q[4]}" opacity=".16"/>${SC[k](p)}</svg>`};
 
 const roomsOf=k=>roomsOfKind(S.rooms,k);
+
+/* ---- fotos reais (Openverse: busca aberta, sem chave; só o termo de busca sai do aparelho) ---- */
+const RTQ={sala:'living room interior',jantar:'dining room interior',cozinha:'kitchen interior design',casal:'master bedroom interior',solteiro:'guest bedroom interior',crianca:'kids bedroom interior',escritorio:'home office interior',banheiro:'bathroom interior design',lavabo:'powder room small bathroom',lavanderia:'laundry room interior',varanda:'apartment balcony',closet:'walk-in closet',corredor:'hallway interior',despensa:'pantry kitchen shelves',garagem:'home garage interior',quintal:'backyard patio garden'};
+const RP_KEY='hth-rp1',RP_TTL=30*864e5,RP={ld:{},bad:{}};
+function rpRead(){try{const o=JSON.parse(localStorage.getItem(RP_KEY)||'{}');return o&&typeof o==='object'?o:{}}catch(e){return{}}}
+function rpWrite(o){try{localStorage.setItem(RP_KEY,JSON.stringify(o))}catch(e){}}
+const rpHttps=u=>typeof u==='string'&&/^https:\/\//i.test(u);
+function rpParse(j){const a=j&&Array.isArray(j.results)?j.results:[];return a.map(r=>({u:rpHttps(r.thumbnail)?r.thumbnail:(rpHttps(r.url)?r.url:''),ti:String(r.title||'').slice(0,80),cr:String(r.creator||'').slice(0,60),lic:((r.license||'')+(r.license_version?' '+r.license_version:'')).toUpperCase().slice(0,24),src:rpHttps(r.foreign_landing_url)?r.foreign_landing_url:(rpHttps(r.url)?r.url:'')})).filter(x=>x.u).slice(0,10)}
+const rpGet=k=>{const c=rpRead()[k];return c&&Array.isArray(c.p)&&c.p.length&&Date.now()-c.t<RP_TTL?c.p:null};
+async function rpLoad(k){if(!RTQ[k]||rpGet(k)||RP.ld[k]||RP.bad[k]&&Date.now()-RP.bad[k]<6e4)return;
+ RP.ld[k]=1;rpPaint(k);
+ try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),12000);
+  const r=await fetch('https://api.openverse.org/v1/images/?q='+encodeURIComponent(RTQ[k])+'&page_size=12&category=photograph&mature=false&extension=jpg',{signal:ac.signal,headers:{Accept:'application/json'}});clearTimeout(tm);
+  if(!r.ok)throw new Error(String(r.status));const p=rpParse(await r.json());if(!p.length)throw new Error('vazio');
+  const o=rpRead();o[k]={t:Date.now(),p};rpWrite(o);delete RP.bad[k]}
+ catch(e){RP.bad[k]=Date.now()}
+ delete RP.ld[k];rpPaint(k)}
+function rpPaint(k){const x=RT_ORDER.indexOf(k);if(x<0)return;const p=rpGet(k),card=document.querySelector('#cz .cc[data-ci="'+x+'"]');
+ if(card&&p&&!card.querySelector('.rp')){const im=document.createElement('img');im.className='rp';im.alt='';im.decoding='async';im.referrerPolicy='no-referrer';im.onerror=()=>im.remove();im.src=p[0].u;const ct=card.querySelector('.ct');card.insertBefore(im,ct)}
+ if((U.czi||0)===x){const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(x)}}
+function rpBlock(k){const p=rpGet(k);
+ if(p)return `<p class="cap">Fotos reais de inspiração</p><div class="rpg">${p.map(f=>`<a href="${esc(f.src||f.u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(f.u)}" alt="${esc(f.ti||'Foto de inspiração')}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('a').remove()"><small>${esc(f.cr?'Foto: '+f.cr:'Autor não informado')}${f.lic?' · '+esc(f.lic):''}</small></a>`).join('')}</div><p class="note">Fotos de terceiros com licença aberta (Creative Commons), via Openverse. Toque para ver a página do autor.</p>`;
+ if(RP.ld[k])return `<p class="note" role="status">Buscando fotos reais…</p>`;
+ if(RP.bad[k])return `<p class="note" role="status">Não consegui buscar as fotos agora (precisa de internet). Tente de novo mais tarde ou use o link abaixo.</p><button class="lk" data-rpgo="${k}">Tentar de novo</button>`;
+ return ''}
 function czInfo(x){const k=RT_ORDER[x],t=RT[k],have=roomsOf(k),last=U.czm&&U.czm.k===k?U.czm:null;
  return `<h4>${esc(t.n)}</h4><p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>
 <p class="note">${have.length?'Já na sua casa: '+have.map(r=>esc(r.name)).join(', ')+'.':'Ainda não está na sua casa.'}</p>
 ${last?`<p class="warn ok" role="status">${esc(last.name)} foi adicionado. <button class="lk" data-room="${last.id}">Abrir e medir</button></p>`:''}
+${rpBlock(k)}
 <div class="acts"><button class="btn" data-czadd="${k}">${have.length?'Adicionar mais um':'Adicionar à minha casa'}</button><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver fotos de inspiração</a></div>`}
 function picker(){const n=RT_ORDER.length,cur=Math.min(Math.max(U.czi||0,0),n-1);
  return `<section class="cz-wrap" aria-labelledby="czh"><h3 id="czh">Escolha seus cômodos</h3><p class="note">Deslize e toque em “Adicionar”. Depois você muda o nome e coloca as medidas.</p>
-<div class="cz-stage"><button class="cz-ar l" data-czs="-1" aria-label="Cômodo anterior">‹</button><div class="cz" id="cz" role="group" aria-roledescription="carrossel" aria-label="Tipos de cômodo" tabindex="0">${RT_ORDER.map((k,x)=>{const h=roomsOf(k).length;return `<article class="cc" data-ci="${x}" aria-roledescription="slide" aria-label="${x+1} de ${n}: ${esc(RT[k].n)}">${rtScene(k)}<div class="ct"><b>${esc(RT[k].n)}</b>${h?`<small>Na sua casa: ${h}</small>`:''}</div></article>`}).join('')}</div><button class="cz-ar r" data-czs="1" aria-label="Próximo cômodo">›</button></div>
+<div class="cz-stage"><button class="cz-ar l" data-czs="-1" aria-label="Cômodo anterior">‹</button><div class="cz" id="cz" role="group" aria-roledescription="carrossel" aria-label="Tipos de cômodo" tabindex="0">${RT_ORDER.map((k,x)=>{const h=roomsOf(k).length;return `<article class="cc" data-ci="${x}" aria-roledescription="slide" aria-label="${x+1} de ${n}: ${esc(RT[k].n)}">${rtScene(k)}${(()=>{const p=rpGet(k);return p?`<img class="rp" src="${esc(p[0].u)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''})()}<div class="ct"><b>${esc(RT[k].n)}</b>${h?`<small>Na sua casa: ${h}</small>`:''}</div></article>`}).join('')}</div><button class="cz-ar r" data-czs="1" aria-label="Próximo cômodo">›</button></div>
 <div class="cz-info" id="czinfo" aria-live="polite">${czInfo(cur)}</div></section>`}
 function czGo(d,abs){const c=document.getElementById('cz');if(!c)return;const k=c.children.length,x=Math.min(k-1,Math.max(0,abs!=null?abs:(U.czi||0)+d)),e=c.children[x],rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;c.scrollTo({left:e.offsetLeft+e.offsetWidth/2-c.clientWidth/2,behavior:rm?'auto':'smooth'})}
 function czBind(){const c=document.getElementById('cz');if(!c)return;const cards=[...c.children];let raf=0;
  const upd=()=>{raf=0;const m=c.scrollLeft+c.clientWidth/2;let best=0,bd=1e9;cards.forEach((e,x)=>{const d=Math.abs(e.offsetLeft+e.offsetWidth/2-m),r=Math.min(1,d/(e.offsetWidth*1.1));e.style.setProperty('--s',(1-.14*r).toFixed(3));e.style.setProperty('--o',(1-.5*r).toFixed(3));if(d<bd){bd=d;best=x}});
   cards.forEach((e,x)=>e.setAttribute('aria-current',x===best?'true':'false'));
-  if(best!==(U.czi||0)){U.czi=best;U.czm=null;const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(best)}};
+  if(best!==(U.czi||0)){U.czi=best;U.czm=null;const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(best)}clearTimeout(RP.tm);RP.tm=setTimeout(()=>rpLoad(RT_ORDER[best]),450)};
  c.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(upd)},{passive:true});
  const x=Math.min(cards.length-1,Math.max(0,U.czi||0)),e=cards[x];c.scrollLeft=e.offsetLeft+e.offsetWidth/2-c.clientWidth/2;upd()}
 function addRoomKind(k){const t=RT[k];if(!t)return;const name=uniqueRoomName(t.n,S.rooms),r=mkRoom(name,[],null,k);U.czm={k,id:r.id,name}}
@@ -776,7 +804,7 @@ ${T?`<h4>Fornecedor</h4><div class="two"><label>Nome<input list="sl" value="${es
 <h4>Prazos</h4><div class="two">${dfield('Início previsto',i.start,'data-f="start" data-id="'+i.id+'"')}${dfield('Fim previsto',i.end,'data-f="end" data-id="'+i.id+'"')}</div>`:''}
 <h4>Pagamentos</h4><p class="fin">Contratado ${c.hasC?R(i.contracted):'—'} · Pago ${R(c.paid)}${c.refunded?' (já descontado o estorno de '+R(c.refunded)+')':''} · Restante ${c.hasC?R(c.pending):'—'}${c.sched?' · Agendado '+R(c.sched):''}${c.unsched?' · Sem parcela definida '+R(c.unsched):''}</p>
 ${c.refundPending?`<p class="fin">Estorno pendente: ${R(c.refundPending)} (ainda não reduz o valor pago)</p>`:''}${i.returned&&c.sched?`<p class="warn">Há ${R(c.sched)} em parcelas agendadas de um item devolvido. Exclua as que não valem mais.</p>`:''}${c.over?`<p class="warn">Pago acima do contratado em ${R(c.paid-i.contracted)}. Confira o valor contratado.</p>`:c.excess?`<p class="warn">Parcelas agendadas passam do contratado em ${R(c.excess)}.</p>`:''}${dup?'<p class="warn">Há pagamentos com mesmo valor e mesma data. Se for engano, exclua um deles.</p>':''}
-${E?purForm(i):''}${ps.map(p=>{const rf=p.kind==='refund';return `<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><span><b>${rf?'−':''}${R(p.amount)}</b><small>${[rf?'Estorno':'',METHOD_SHORT[p.method]||'',p.of>1?'parcela '+p.inst+'/'+p.of:''].filter(Boolean).join(' · ')}</small></span><button class="st" data-tp="${p.id}">${rf?(p.paid?'Estornado':'Pendente'):(p.paid?'Pago':'Agendado')}</button><button class="lk" data-dp="${p.id}">${U.arm==='dp:'+p.id?'Confirmar':'Excluir'}</button></div>`}).join('')||'<small>Nenhum pagamento registrado.</small>'}
+${E?purForm(i):''}${ps.map(p=>{const rf=p.kind==='refund';return `<div class="pr"><span>${p.date?fdate(p.date):'sem data'}</span><span><b>${rf?'−':''}${R(p.amount)}</b><small>${[rf?'Estorno':'',METHOD_SHORT[p.method]||'',p.of>1?'parcela '+p.inst+'/'+p.of:''].filter(Boolean).join(' · ')}</small></span><button class="st" data-tp="${p.id}">${rf?(p.paid?'Estornado':'Pendente'):(p.paid?'Pago':'Agendado')}</button><button class="lk" data-pe="${p.id}" aria-expanded="${U.pe===p.id}">${U.pe===p.id?'Fechar':'Editar'}</button><button class="lk" data-dp="${p.id}">${U.arm==='dp:'+p.id?'Confirmar':'Excluir'}</button></div>`+(U.pe===p.id?payEdit(p):'')}).join('')||'<small>Nenhum pagamento registrado.</small>'}
 <form class="pf" data-pf="${i.id}"><input name="amount" inputmode="decimal" required placeholder="Valor (R$)" aria-label="Valor do pagamento">${dfield('Data','','name="date"')}<label>Modalidade<select name="method"><option value="">Não informada</option>${Object.entries(METHODS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label><label class="chk"><input type="checkbox" name="paid" checked> Já pago</label><button class="btn full">Registrar pagamento</button></form>
 <details><summary>Registrar estorno (valor devolvido)</summary><form class="pf" data-rf="${i.id}"><input name="amount" inputmode="decimal" required placeholder="Valor estornado (R$)" aria-label="Valor do estorno">${dfield('Data','','name="date"')}<label class="chk full"><input type="checkbox" name="paid" checked> Já estornado (reduz o valor pago)</label><button class="btn full">Registrar estorno</button></form></details>
 ${T?`<h4>Observações</h4><textarea rows="3" data-f="notes" data-id="${i.id}" placeholder="Combinados, medidas, garantias…">${esc(i.notes)}</textarea>
@@ -823,6 +851,7 @@ function area(t){const RR=U.rf&&S.rooms.find(r=>r.id===U.rf),Q=_nm(U.q).trim(),L
 const toIn=c=>(c/100).toFixed(2).replace('.',',');
 const dmsg=k=>U.dmk===k&&U.dm?`<p class="warn" role="alert">${esc(U.dm)}</p>`:'';
 const CK='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function payEdit(p){const rf=p.kind==='refund';return `<form class="pf pedit" data-pedit="${p.id}" data-full="1">${dmsg('pe:'+p.id)}<label>${rf?'Valor estornado (R$)':'Valor (R$)'}<input name="amount" inputmode="decimal" required value="${toIn(p.amount)}"></label>${dfield(rf?'Data':'Data do pagamento',p.date,'name="date"')}<label>Modalidade<select name="method"><option value="">Não informada</option>${Object.entries(METHODS).map(([k,v])=>`<option value="${k}" ${p.method===k?'selected':''}>${v}</option>`).join('')}</select></label><label class="chk"><input type="checkbox" name="paid" ${p.paid?'checked':''}> ${rf?'Já estornado':'Já pago'}</label><button class="btn">Salvar alterações</button></form>`}
 function parcelRow(p,idx,n){const late=!p.paid&&p.date&&p.date<todayStr();
  return `<div class="pcl${p.paid?' ok':''}${late?' late':''}"><button class="ck" data-tp="${p.id}" role="checkbox" aria-checked="${!!p.paid}" aria-label="Parcela ${idx} de ${n}, ${p.date?fdate(p.date):'sem data'}: ${p.paid?'desmarcar como paga':'marcar como paga'}">${p.paid?CK:''}</button><div class="pl"><b>${p.date?fdate(p.date):'sem data'}</b><small>Parcela ${idx}/${n}${p.paid?' · paga':late?' · vencida':''}</small></div><span class="pv">${R(p.amount)}</span><button class="lk" data-pe="${p.id}" aria-expanded="${U.pe===p.id}">${U.pe===p.id?'Fechar':'Editar'}</button></div>`
  +(U.pe===p.id?`<form class="pf pedit" data-pedit="${p.id}">${dmsg('pe:'+p.id)}<label>Valor (R$)<input name="amount" inputmode="decimal" required value="${toIn(p.amount)}"></label>${dfield('Vencimento',p.date,'name="date"')}<button class="btn">Salvar</button><button type="button" class="lk" data-dp="${p.id}">${U.arm==='dp:'+p.id?'Toque de novo para excluir':'Excluir parcela'}</button></form>`:'')}
@@ -930,6 +959,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('[data-rfclear]'))U.rf=null;
  else if(b=q('[data-czs]')){czGo(+b.dataset.czs);return}
  else if(b=q('.cc')){czGo(0,+b.dataset.ci);return}
+ else if(b=q('[data-rpgo]')){delete RP.bad[b.dataset.rpgo];rpLoad(b.dataset.rpgo);return}
  else if(b=q('[data-czadd]'))addRoomKind(b.dataset.czadd)
  else if(b=q('[data-pe]')){U.pe=U.pe===b.dataset.pe?null:b.dataset.pe;U.dm=''}
  else if(q('[data-updchk]')){updCheck();return}
@@ -994,6 +1024,9 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
    const lb=(GRPS.find(x=>x[0]===grp)||[0,''])[1];log(id,`${qty} parcela(s) de ${R(amt)} adicionada(s) em “${lb}”, a partir de ${fdate(first)}${pn?` (${pn} já paga(s))`:''}`);U.gop[id+':'+grp]=true;U.dmk='';U.dpa=null}}
  else if(f.dataset.pedit){const id=f.dataset.pedit,p=S.pays.find(x=>x.id===id),amt=parse(d.get('amount')),iso=parseBR(d.get('date'));U.dm='';U.dmk='pe:'+id;
   if(!p)return;if(!amt)U.dm='Informe o valor da parcela.';else if(iso===null)U.dm='Data inválida. Use dd/mm/aaaa.';
+  else if(f.dataset.full){const mt=d.get('method')||'',pd2=d.get('paid')==='on',rf=p.kind==='refund',o=`${R(p.amount)}${p.date?' em '+fdate(p.date):''}${p.method?' · '+METHOD_SHORT[p.method]:''}${p.paid?'':' (agendado)'}`;
+   p.amount=amt;p.date=iso||'';p.paid=pd2;if(mt&&METHODS[mt])p.method=mt;else delete p.method;
+   log(p.itemId,`${rf?'Estorno':'Pagamento'} alterado: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}${p.method?' · '+METHOD_SHORT[p.method]:''}${pd2?'':' (agendado)'}`);U.pe=null;U.dmk=''}
   else{const o=`${R(p.amount)}${p.date?' em '+fdate(p.date):''}`;p.amount=amt;p.date=iso||'';log(p.itemId,`Parcela alterada: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}`);U.pe=null;U.dmk=''}}
  else if(f.dataset.nf){const text=d.get('text').trim();U.msg='';
   const ph=await storePhotos(f.querySelector('input[type=file]').files);
