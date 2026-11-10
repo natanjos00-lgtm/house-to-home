@@ -164,6 +164,7 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .pbig{margin:10px 0 2px}.pbig img{width:100%;max-height:420px;object-fit:contain;border-radius:12px;background:var(--sand);display:block}
 .rfbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:6px 14px;margin:8px 0;font-size:14px}.rfbar b{color:var(--brown)}
 .rsum{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}.rsum>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.rsum span{font-size:13px;color:var(--mute)}.rsum .bar{margin:6px 0 2px}
+.srch{margin:12px 0 4px}.srch input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:0 14px;font:inherit;font-size:16px;-webkit-appearance:none}.srch input:focus-visible{outline:2px solid var(--olive);outline-offset:1px}
 details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margin:0 0 14px}
 .chips{display:block;margin:4px 0 0 34px}.chips .cr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font-size:13px;color:var(--mute);margin-top:3px}
 .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--sand);color:var(--brown);font-size:12px;font-weight:700}
@@ -466,10 +467,10 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261105-1009';
+const APP_VER='20261110-1442';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
-const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,scw:false,orc:false,sco:false,obErr:''};
+const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',scw:false,orc:false,sco:false,obErr:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dt=ts=>new Date(ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
@@ -669,20 +670,23 @@ function shopGroups(L,all,mode){const pr=p=>`${p.d} de ${p.n} comprados · ${p.p
  return [...new Set(L.map(i=>i.cat))].sort(catSort).map(c=>{const a=all.filter(i=>i.cat===c&&!i.returned),d=a.filter(i=>pstat(i)==='bought').length,p={n:a.length,d,pct:a.length?Math.round(d/a.length*100):0};
   return `<div class="gh"><h3>${esc(c||'Sem categoria')}</h3><span>${pr(p)}</span></div>${bar(p)}`+L.filter(i=>i.cat===c).map(i=>shopHtml(i,'cat')).join('')}).join('')}
 const addBox=(t,form,empty)=>{const o=U.addOpen[t]===undefined?empty:U.addOpen[t];return `<details class="addbox" data-addbox="${t}" ${o?'open':''}><summary>${t==='obra'?'Adicionar item da obra':'Adicionar item ao enxoval'}</summary>${form}</details>`};
-function area(t){const RR=U.rf&&S.rooms.find(r=>r.id===U.rf),L=act().filter(i=>i.area===t&&(!RR||i.roomId===RR.id)),T=t==='obra',
+function srchBox(){return `<div class="srch"><input id="qs" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Buscar item pelo nome…" aria-label="Buscar item" value="${esc(U.q)}"></div>`}
+const itemHit=(i,q)=>{const r=S.rooms.find(x=>x.id===i.roomId);return _nm([i.name,i.cat,i.store,i.notes,r&&r.name].join(' ')).includes(q)};
+function area(t){const RR=U.rf&&S.rooms.find(r=>r.id===U.rf),Q=_nm(U.q).trim(),Lb=act().filter(i=>i.area===t&&(!RR||i.roomId===RR.id)),L=Q?Lb.filter(i=>itemHit(i,Q)):Lb,qn=Q?`<p class="cap" role="status">${L.length?L.length+(L.length===1?' item encontrado':' itens encontrados')+' para “'+esc(U.q.trim())+'”':''}</p>`:'',T=t==='obra',
  ro=`<option value="">${T?'Geral':'Sem ambiente'}</option>`+S.rooms.map(r=>`<option value="${r.id}"${RR&&RR.id===r.id?' selected':''}>${esc(r.name)}</option>`).join(''),
  sec=(n,a)=>a.length?`<h3>${esc(n)}</h3>`+a.map(itemHtml).join(''):'';
  const head=crumb()+`<h2 class="pt">${T?'Obra':'Enxoval'}</h2>${warns(t)}${RR?`<div class="rfbar"><span>Só itens de <b>${esc(RR.name)}</b></span><button class="lk" data-rfclear>Ver tudo</button></div>`:''}`;
  if(!T){const p=prog(),f=U.flt,cnt=k=>k==='all'?L.length:L.filter(i=>estat(i)===k).length,Lf=f==='all'?L:L.filter(i=>estat(i)===f),tt=tot(t),flts=FLT.filter(([k])=>k!=='returned'||cnt(k)>0||f==='returned');
   const form=`<form class="add" id="af"><input class="full" name="name" required placeholder="Ex.: Sofá de 3 lugares" aria-label="Nome do item"><select name="room" aria-label="Ambiente">${ro}</select><select name="cat" aria-label="Categoria"><option value="">Automática</option>${ENX_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input name="qty" inputmode="numeric" placeholder="Quantidade" aria-label="Quantidade necessária"><input name="planned" inputmode="decimal" placeholder="Previsto (R$)" aria-label="Valor previsto"><button class="btn full">Adicionar</button></form>`;
   const seg=(a,k,cur,w)=>`<div class="seg${w?' w':''}" role="group">${a.map(([v,l])=>`<button ${k}="${v}" aria-pressed="${cur===v}">${l}</button>`).join('')}</div>`;
-  const body=!L.length?`<p class="empty">${RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:!Lf.length?`<p class="empty">Nenhum item com a situação “${(FLT.find(x=>x[0]===f)||[0,''])[1]}”.</p>`:shopGroups(Lf,L,U.view);
+  const body=!L.length?`<p class="empty">${Q?'Nenhum item encontrado para “'+esc(U.q.trim())+'”.':RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:!Lf.length?`<p class="empty">Nenhum item com a situação “${(FLT.find(x=>x[0]===f)||[0,''])[1]}”.</p>`:shopGroups(Lf,L,U.view);
   return head+(RR?'':`<div class="card"><div class="prog"><b>${p.pct}%</b><span>${p.n?`${p.d} de ${p.n} itens comprados`:'Nenhum item na lista ainda'}</span></div><div class="bar" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${p.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p.pct}%"></i></div></div>`+
-   grid(tt,S.budget[t],'Orçamento do enxoval',[['Total investido (pago, líquido de estornos)',R(tt.paid)],['Estornado',R(tt.refunded)]])+budgetEdit('enxoval'))+addBox(t,form,!L.length)+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+body}
+   grid(tt,S.budget[t],'Orçamento do enxoval',[['Total investido (pago, líquido de estornos)',R(tt.paid)],['Estornado',R(tt.refunded)]])+budgetEdit('enxoval'))+addBox(t,form,!Lb.length)+srchBox()+'<div id="lst">'+(L.some(i=>!i.cat&&!i.returned)?`<button class="btn alt" data-autocat style="width:100%;margin:6px 0">Sugerir categorias (${L.filter(i=>!i.cat&&!i.returned).length} sem categoria)</button>`:'')+'<h3>Lista de compras</h3><p class="cap">Mostrar</p>'+seg(flts.map(([k,l])=>[k,`${l} (${cnt(k)})`]),'data-flt',f,1)+'<p class="cap">Agrupar por</p>'+seg([['room','Ambiente e categoria'],['cat','Categoria']],'data-view',U.view)+qn+body+'</div>'}
  const form=`<form class="add" id="af"><select name="kind" aria-label="Tipo"><option value="servico">Serviço</option><option value="material">Material</option></select><select name="room" aria-label="Ambiente">${ro}</select><input class="full" name="name" required placeholder="Ex.: Assentar piso da sala" aria-label="Nome"><input name="cat" list="cl" placeholder="Categoria" aria-label="Categoria"><datalist id="cl">${[...new Set(L.map(i=>i.cat).filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input name="planned" inputmode="decimal" placeholder="Estimado (R$)" aria-label="Valor estimado"><button class="btn full">Adicionar</button></form>`;
- const body=!L.length?`<p class="empty">${RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
- return head+(RR?'':grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra'))+addBox(t,form,!L.length)+body}
+ const body=!L.length?`<p class="empty">${Q?'Nenhum item encontrado para “'+esc(U.q.trim())+'”.':RR?'Nenhum item neste ambiente.':'Nenhum item ainda. Adicione o primeiro acima.'}</p>`:sec('Serviços',L.filter(i=>i.kind!=='material'))+sec('Materiais',L.filter(i=>i.kind==='material'));
+ return head+(RR?'':grid(tot(t),S.budget[t],'Orçamento da obra')+budgetEdit('obra'))+addBox(t,form,!Lb.length)+srchBox()+'<div id="lst">'+qn+body+'</div>'}
 
+function updList(){const o=document.getElementById('lst');if(!o)return;const d=document.createElement('div');d.innerHTML=area(U.tab);const n=d.querySelector('#lst');if(n){o.innerHTML=n.innerHTML;hydrate()}}
 function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
@@ -717,7 +721,7 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
  else if(b=q('[data-room]')){U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
@@ -758,7 +762,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-st]')){const i=item(b.dataset.st);setField(i.id,'status',ST[(ST.indexOf(i.status)+1)%3])}
  else if(b=q('[data-op]'))U.open=U.open===b.dataset.op?null:b.dataset.op;
  else if(b=q('[data-del]')){const id=b.dataset.del;if(was===id){delItem(id);if(U.open===id)U.open=null}else U.arm=id}
- else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
+ else if(b=q('[data-rfgo]')){const [a2,id]=b.dataset.rfgo.split(':');U.tab=a2;U.q='';U.rf=id;U.room=null;U.open=null;U.flt='all';scrollTo(0,0)}
  else if(q('[data-rfclear]'))U.rf=null;
  else if(q('[data-updchk]')){updCheck();return}
  else if(q('[data-updgo]')){updGo();return}
@@ -810,7 +814,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
   const ph=await storePhotos(f.querySelector('input[type=file]').files);
   if(!text&&!ph.length){render();return}addNote(f.dataset.nf,text,ph)}
  save();render()});
-document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.wipein!==undefined){const g=document.getElementById('wipego');if(g)g.disabled=el.value.trim()!=='APAGAR';return}if(el.dataset&&el.dataset.d!==undefined){const m=maskBR(el.value);if(m!==el.value)el.value=m;el.removeAttribute('aria-invalid');const w=el.closest('label'),er=w&&w.querySelector('.derr');if(er)er.hidden=true}});
+document.addEventListener('input',e=>{const el=e.target;if(el.id==='qs'){U.q=el.value;updList();return}if(el.dataset&&el.dataset.wipein!==undefined){const g=document.getElementById('wipego');if(g)g.disabled=el.value.trim()!=='APAGAR';return}if(el.dataset&&el.dataset.d!==undefined){const m=maskBR(el.value);if(m!==el.value)el.value=m;el.removeAttribute('aria-invalid');const w=el.closest('label'),er=w&&w.querySelector('.derr');if(er)er.hidden=true}});
 document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=()=>S.rooms.find(r=>r.id===U.room);let dv=el.value;
  if(d.nat!==undefined){const tx=el.closest('.df').querySelector('.dt');tx.value=toBR(el.value);tx.dispatchEvent(new Event('change',{bubbles:true}));return}
  if(d.d!==undefined){const iso=parseBR(el.value),bad=iso===null,er=el.closest('label').querySelector('.derr');el.setAttribute('aria-invalid',bad);if(er)er.hidden=!bad;if(bad)return;dv=iso;if(!d.f)return}
