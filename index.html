@@ -182,6 +182,12 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 @media (hover:hover) and (min-width:560px){.cz-ar{display:block}}
 .cc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cc-b{position:absolute;inset:0;width:100%;height:100%;border:0;background:none;padding:0;cursor:pointer;z-index:1}.cc .ct{z-index:2;pointer-events:none}.cc-x{position:absolute;top:10px;right:10px;z-index:3;min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(30,26,22,.62);color:#f7f3ec;font:600 18px/1 Figtree,sans-serif;padding:0 10px;cursor:pointer}.cc-x:hover{background:rgba(30,26,22,.85)}
 .dedup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:14px 0}.dedup h3{margin:0 0 6px}.dedup p{margin:6px 0}
+.stc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:16px 0}.stc h3{margin:2px 0 2px;font-size:26px}.stc p{margin:4px 0}.stc .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.stc>.btn{margin-top:10px}
+.pal{display:inline-flex;border-radius:8px;overflow:hidden;margin:6px 0;vertical-align:middle}.pal i{display:block;width:34px;height:22px}.pal.sm i{width:22px;height:14px}.pal.big{display:flex;border-radius:12px;margin:12px 0}.pal.big i{flex:1;height:44px;width:auto}
+.qq{font-size:30px;line-height:1.1;margin:14px 0 14px}.qg{display:grid;gap:10px}.qg.vis{grid-template-columns:1fr 1fr}
+.qo{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-height:56px;color:var(--ink);font:inherit;cursor:pointer}.qo:active,.qo:hover{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.qo b{font-weight:600;font-size:16px;line-height:1.3}.qo .pal{margin:0}
+.qo.v{padding:0;overflow:hidden}.qo.v b{padding:0 12px 12px;font-size:14px}.qo .qimg{display:block;width:100%;aspect-ratio:4/3;position:relative}.qo .qimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sb{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin:6px 0}.sb .bar{margin:0}.chips2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.stip{background:var(--sand);border-radius:12px;padding:8px 12px;margin:6px 0 10px}.stip p{margin:4px 0}
 .kch{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.kch .kb{border:1px solid var(--line);cursor:pointer;font:600 14px Figtree,sans-serif;padding:9px 14px;min-height:40px}.kch .kb:active{background:var(--sand)}
 #rptips p{margin:6px 0}#rptips .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
 .cz-info{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}.cz-info h4{font:600 26px/1.1 "Cormorant Garamond",Georgia,serif;margin:0 0 6px;color:var(--brown)}.cz-info p{margin:6px 0}.cz-info .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.cz-info .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.cz-info .btn{min-width:190px}
@@ -277,6 +283,12 @@ const METHODS={pix:'Pix',cash:'Dinheiro',debit:'Cartão de débito',credit:'Cart
 const METHOD_SHORT={pix:'Pix',cash:'Dinheiro',debit:'Débito',credit:'Crédito',transfer:'Transferência',boleto:'Boleto',other:'Outro'};
 const estat=i=>i.returned?'returned':pstat(i);
 const FLT=[['all','Todos'],['pending','Pendente'],['partial','Parcialmente comprado'],['researching','Pesquisando'],['bought','Comprado'],['returned','Devolvido']];
+const STY_IDS=['escandinavo','industrial','contemporaneo','minimalista','rustico','classico','boho','japandi'];
+function cleanStyle(o){if(!o||typeof o!=='object'||!Array.isArray(o.profiles))return null;const ps=o.profiles.slice(0,2).map(p=>{if(!p||typeof p!=='object')return null;const sc={};STY_IDS.forEach(k=>{const v=Number(p.sc&&p.sc[k]);sc[k]=isFinite(v)&&v>0?Math.min(Math.round(v),999):0});return{name:String(p.name==null?'':p.name).replace(/\s+/g,' ').trim().slice(0,30),sc,ts:typeof p.ts==='string'?p.ts.slice(0,30):''}}).filter(Boolean);return ps.length?{profiles:ps}:null}
+function styleTotals(st){const t={};STY_IDS.forEach(k=>t[k]=0);((st&&st.profiles)||[]).forEach(p=>{const m=Math.max(1,...STY_IDS.map(k=>p.sc[k]||0));STY_IDS.forEach(k=>t[k]+=(p.sc[k]||0)/m)});return t}
+function styleRank(st){const t=styleTotals(st);return STY_IDS.slice().sort((a,b)=>t[b]-t[a]||STY_IDS.indexOf(a)-STY_IDS.indexOf(b))}
+function saveProfile(name,sc){const nm=String(name||'').replace(/\s+/g,' ').trim().slice(0,30),st=cleanStyle(S.house.style)||{profiles:[]},ts=new Date().toISOString(),p={name:nm,sc,ts},ix=st.profiles.findIndex(x=>_nm(x.name)===_nm(nm));
+ if(ix>=0)st.profiles[ix]=p;else{st.profiles.push(p);if(st.profiles.length>2)st.profiles.shift()}S.house.style=cleanStyle(st);return S.house.style}
 function setHouseName(n){n=String(n==null?'':n).replace(/\s+/g,' ').trim().slice(0,60);S.house.name=n;S.house.done=true;return n}
 function pstat(i){if(i.qtyBought>=i.qtyNeed)return'bought';if(i.qtyBought>0)return'partial';return i.researching?'researching':'pending'}
 function syncStatus(i){const s=pstat(i);i.status=s==='bought'?'done':s==='pending'?'todo':'doing'}
@@ -409,7 +421,7 @@ function migrate(o){const s=Object.assign(EMPTY(),o);
   return n});
  s.rooms=s.rooms.map(r=>Object.assign({img:[],w:null,l:null,h:null,decor:'',kind:null},r));
  const h=o.house||{},hasData=s.items.length>0||s.notes.length>0||!!o.cover||Object.values(s.budget).some(v=>v!=null),nm=typeof h.name==='string'?h.name.slice(0,60):'';
- s.house={name:nm,cover:(typeof h.cover==='string'&&h.cover)?h.cover:((typeof o.cover==='string'&&o.cover)?o.cover:null),done:o.house?(!!h.done||!!nm||hasData):hasData};delete s.cover;
+ s.house={name:nm,cover:(typeof h.cover==='string'&&h.cover)?h.cover:((typeof o.cover==='string'&&o.cover)?o.cover:null),done:o.house?(!!h.done||!!nm||hasData):hasData};{const sy=cleanStyle(h.style);if(sy)s.house.style=sy}delete s.cover;
  s.v=4;return s}
 function fromV2(o){S=EMPTY();S.budget=Object.assign(S.budget,o.budget||{});seedRooms();
  (o.items||[]).forEach(i=>{const E=i.area==='enxoval';
@@ -465,7 +477,7 @@ function unmarkSynced(sy,d){d.up.forEach(u=>{if(u.c==='_meta'){sy.meta=null;retu
  d.del.forEach(x=>{(sy.rec[x.c]=sy.rec[x.c]||{})[x.id]='?'})}
 function applyRemote(s,sy,c,type,id,data){
  if(c==='_meta'){if(type==='removed'||!data)return false;const b=ck(metaRec(s));
-  s.house=Object.assign({name:'',cover:null,done:false},data.house||{});s.budget=Object.assign({total:null,obra:null,enxoval:null},data.budget||{});s.meta=s.meta||{lastExport:null};s.meta.legacyAck=!!data.legacyAck;
+  s.house=Object.assign({name:'',cover:null,done:false},data.house||{});if(s.house.style!==undefined){const sy=cleanStyle(s.house.style);if(sy)s.house.style=sy;else delete s.house.style}s.budget=Object.assign({total:null,obra:null,enxoval:null},data.budget||{});s.meta=s.meta||{lastExport:null};s.meta.legacyAck=!!data.legacyAck;
   sy.meta=ck(metaRec(s));return sy.meta!==b}
  if(!COLLS.includes(c))return false;const arr=s[c],ix=arr.findIndex(x=>x.id===id);sy.rec[c]=sy.rec[c]||{};sy.ord[c]=sy.ord[c]||{};
  if(type==='removed'){delete sy.rec[c][id];delete sy.ord[c][id];if(ix<0)return false;arr.splice(ix,1);return true}
@@ -508,7 +520,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1551';
+const APP_VER='20261110-1558';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -593,7 +605,7 @@ function home(){const h=S.house,ob=act().filter(i=>i.area==='obra'),dn=ob.filter
  hero=h.cover?`<header class="hero">${imgEl(h.cover,'Foto de capa da casa')}${pick}<div><h1>${ttl}</h1><p class="mt">${sub}</p></div></header>`
   :`<header class="hero none">${ROOF}<div><h1>${ttl}</h1><p class="mt">${sub}</p>${pick}</div></header>`,
  inv=h.name?'':`<form class="hnf" data-hform="0" style="margin:12px 0 0"><label class="inv">Como você quer chamar a sua casa?<input name="hname" maxlength="60" placeholder="Ex.: Casa dos Sonhos" autocomplete="off"></label><p class="note">Dê um nome à sua casa. Você pode mudar quando quiser.</p><button class="btn alt" style="padding:8px 16px;min-height:40px">Salvar nome</button></form>`;
- return hero+inv+settings()+
+ return hero+inv+settings()+styleCard()+
 `<div class="pg" role="group" aria-label="Andamento"><b>Obra</b><span>${ob.length?dn+' de '+ob.length+' itens concluídos · '+pct+'%':'Nenhum item de obra ainda'}</span><div class="bar full" style="grid-column:1/-1" role="progressbar" aria-label="Andamento da obra" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
 <b>Enxoval</b><span>${pe.n?pe.d+' de '+pe.n+' itens comprados · '+pe.pct+'%':'Nenhum item de enxoval ainda'}</span><div class="bar full" style="grid-column:1/-1" role="progressbar" aria-label="Andamento do enxoval" aria-valuenow="${pe.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pe.pct}%"></i></div></div>
 ${S.budget.total!=null&&!S.meta.legacyAck?`<div class="card" style="margin-top:14px"><p class="fin" style="margin:0 0 8px">Você tinha um <b>orçamento total de ${R(S.budget.total)}</b> cadastrado. O app agora trabalha só com orçamentos separados de obra e enxoval, e esse valor antigo não entra mais nos cálculos. Ele foi mantido nos seus dados e no backup. Defina o orçamento de cada área nas abas Obra e Enxoval.</p><button class="btn alt" data-legack style="padding:8px 16px;min-height:40px">Entendi</button></div>`:''}
@@ -716,10 +728,67 @@ const RT={
 };
 const rtScene=k=>{const t=RT[k],q=t.pal,p={a:q[3],d:q[4],g:q[5],c:q[6],m:q[2]};return `<svg viewBox="0 0 200 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><defs><linearGradient id="rg-${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${q[0]}"/><stop offset=".72" stop-color="${q[1]}"/></linearGradient></defs><rect width="200" height="260" fill="url(#rg-${k})"/><rect y="186" width="200" height="74" fill="${q[2]}"/><rect y="186" width="200" height="3" fill="${q[4]}" opacity=".16"/>${SC[k](p)}</svg>`};
 
+/* ---------- Estilo da casa: estilos, perguntas e pontuação ---------- */
+const STY={
+escandinavo:{n:'Escandinavo',tag:'Claro, leve e funcional',d:'Muita luz natural, paredes claras e madeira clara. O conforto vem de têxteis macios e de poucas peças bem escolhidas.',pal:['#F4F1EC','#D9D2C5','#B9A88F','#7B8B8F','#2F3A3E'],mat:['Madeira clara','Linho e algodão','Lã e mantas','Cerâmica'],luz:'Luz natural com cortinas leves e, à noite, luz quente de abajur.',itens:['Sofá claro e simples','Tapete de textura macia','Mesa de madeira clara','Plantas em vasos de cerâmica'],evitar:['Excesso de objetos','Cores escuras em tudo'],
+ amb:{sala:'Sofá claro, mesa de centro de madeira e uma manta sobre o braço. Cortinas de linho deixam a luz entrar.',quarto:'Roupa de cama em tons claros e naturais, uma camada de manta e luz de cabeceira quente.',cozinha:'Armários claros ou brancos, bancada de madeira e utensílios de cerâmica à vista.',banheiro:'Branco com toalhas em tom natural e uma planta ou um cesto de fibra.',geral:'Poucas peças, tons claros e madeira clara.'},q:'scandinavian living room interior'},
+industrial:{n:'Industrial',tag:'Urbano, cru e com personalidade',d:'Inspirado em lofts: materiais aparentes como cimento, tijolo e metal. Cores escuras e peças com ar de uso.',pal:['#2B2B2B','#5A5A5A','#9A9A96','#B5653A','#E8E4DC'],mat:['Cimento queimado','Tijolo aparente','Metal preto','Madeira de demolição','Couro'],luz:'Pendentes de metal, spots direcionáveis e lâmpadas de filamento.',itens:['Sofá de couro ou grafite','Estante de ferro e madeira','Luminárias pretas','Banquetas altas'],evitar:['Enfeites delicados demais','Muito branco sem contraste'],
+ amb:{sala:'Parede de tijolo ou cimento, sofá escuro e estante de ferro com madeira. Pendentes pretos criam o clima.',quarto:'Cabeceira de madeira rústica, roupa de cama em cinza ou verde-musgo e luminárias articuladas.',cozinha:'Armários escuros, bancada de cimento ou madeira e prateleiras abertas de ferro.',banheiro:'Cuba escura, metais pretos e um espelho com moldura fina de metal.',geral:'Materiais aparentes, cores escuras e metal preto.'},q:'industrial loft living room interior'},
+contemporaneo:{n:'Contemporâneo',tag:'Atual, elegante e confortável',d:'Linhas limpas com toques de design e materiais nobres. Mistura neutros com um ou dois contrastes marcantes.',pal:['#EDE7DD','#B7A58E','#5C4636','#1F1F1F','#C9A25E'],mat:['Madeira com veios aparentes','Mármore ou porcelanato marmorizado','Veludo','Metais dourados ou pretos'],luz:'Iluminação em camadas: fita de LED embutida, spots e um abajur de destaque.',itens:['Sofá modular','Aparador com nichos','Espelho grande','Quadros de grandes dimensões'],evitar:['Misturar muitos estilos','Móveis pesados e ornamentados'],
+ amb:{sala:'Sofá grande em tom neutro, painel de madeira atrás da TV com luz embutida e um tapete amplo.',quarto:'Cabeceira estofada, cortina do teto ao chão e luz indireta atrás da cama.',cozinha:'Marcenaria até o teto, bancada contínua e fita de LED sob os armários.',banheiro:'Revestimento de uma textura só, metais discretos e nicho iluminado.',geral:'Linhas limpas, neutros e um contraste marcante.'},q:'contemporary living room interior'},
+minimalista:{n:'Minimalista',tag:'Menos, porém melhor',d:'Poucos móveis, superfícies livres e cores calmas. Cada peça tem uma função e um lugar.',pal:['#FFFFFF','#EFEDE8','#CFCBC3','#8C8A85','#2B2B2B'],mat:['Madeira lisa','Concreto claro','Vidro','Linho'],luz:'Muita luz natural e luz embutida discreta.',itens:['Sofá de linhas retas','Armários sem puxadores aparentes','Uma obra de arte grande','Um vaso de planta'],evitar:['Objetos soltos sobre as superfícies','Estampas chamativas'],
+ amb:{sala:'Sofá de linhas retas, uma mesa de centro e nada além do necessário. Esconda fios e guarde tudo em nichos fechados.',quarto:'Cama baixa, criado-mudo simples e roupa de cama em uma só cor.',cozinha:'Armários lisos, bancada livre e eletrodomésticos embutidos ou em cor neutra.',banheiro:'Branco ou cinza claro, uma prateleira só e toalhas da mesma cor.',geral:'Poucas peças, superfícies livres e cores calmas.'},q:'minimalist living room interior'},
+rustico:{n:'Rústico',tag:'Acolhedor, de campo e feito para durar',d:'Madeira, pedra, ferro e tecidos naturais. Peças com marcas do tempo e cores da terra.',pal:['#F1E6D3','#C9A97B','#8A5A3B','#5B6B3C','#3C2A1E'],mat:['Madeira maciça','Pedra','Ferro','Palha e algodão cru','Cerâmica artesanal'],luz:'Luz quente de abajures e pendentes de palha ou ferro.',itens:['Mesa de madeira maciça','Banco ou baú','Panelas e cestos à mostra','Tapete de fibra natural'],evitar:['Plástico e brilho em excesso','Cores frias'],
+ amb:{sala:'Sofá em tecido cru, mesa de centro de madeira maciça e cestos de palha para guardar mantas.',quarto:'Cabeceira de madeira, colcha de algodão e um baú aos pés da cama.',cozinha:'Armários de madeira, bancada de pedra e panelas e cerâmicas à mostra.',banheiro:'Bancada de madeira tratada, cuba de pedra ou cerâmica e toalhas de algodão cru.',geral:'Madeira, pedra e tecidos naturais.'},q:'rustic living room interior'},
+classico:{n:'Clássico',tag:'Elegante, simétrico e atemporal',d:'Formas tradicionais, simetria e detalhes como molduras e cortinas encorpadas. Cores ricas e acabamento refinado.',pal:['#F3EDE2','#D8C9A8','#1F2D4A','#7A2F3A','#B08D4A'],mat:['Madeira escura','Veludo e seda','Mármore','Metais dourados'],luz:'Lustre central e arandelas ou abajures em pares.',itens:['Sofá com detalhes em capitonê','Aparador com espelho','Cortinas longas e encorpadas','Quadros com moldura'],evitar:['Peças modernas demais sem equilíbrio','Ambientes vazios'],
+ amb:{sala:'Sofá e poltronas em simetria, cortina até o chão e um lustre como destaque.',quarto:'Cabeceira estofada alta, criados-mudos iguais com abajures em par e cortina encorpada.',cozinha:'Armários com frisos, puxadores dourados e bancada de pedra clara.',banheiro:'Mármore claro, metais dourados e um espelho com moldura.',geral:'Simetria, cores ricas e acabamento refinado.'},q:'classic traditional living room interior'},
+boho:{n:'Boho',tag:'Livre, cheio de textura e de vida',d:'Mistura de texturas, tapetes, plantas e objetos de viagem. Cores quentes, peças artesanais e muita personalidade.',pal:['#F2E6D5','#D9A66B','#B5603C','#6F7D4C','#5A3E2B'],mat:['Rattan e palha','Macramê','Cerâmica','Madeira envelhecida','Tecidos étnicos'],luz:'Luz quente e baixa, com pendentes de palha e luminárias de mesa.',itens:['Tapetes sobrepostos','Cadeira de rattan','Muitas plantas','Almofadas de texturas variadas'],evitar:['Tudo combinando demais','Superfícies vazias'],
+ amb:{sala:'Sofá com almofadas de texturas diferentes, tapete estampado e plantas em alturas variadas.',quarto:'Cabeceira de rattan, roupa de cama em camadas e macramê na parede.',cozinha:'Prateleiras abertas com cerâmicas, ervas em vasos e cestos de fibra.',banheiro:'Cesto de fibra, plantas que gostam de umidade e toalhas em tons terrosos.',geral:'Texturas, plantas e peças artesanais.'},q:'bohemian living room interior'},
+japandi:{n:'Japandi',tag:'Calmo, quente e feito à mão',d:'Mistura a simplicidade japonesa com o aconchego escandinavo. Madeira, tons terrosos, poucas peças e muita calma.',pal:['#EFE8DC','#CDBBA0','#9B7B5A','#5E5A47','#2A211B'],mat:['Madeira clara e média','Linho e algodão','Cerâmica artesanal','Rattan e bambu','Pedra'],luz:'Luz quente e indireta: fita de LED escondida, abajures e luminárias de papel ou linho.',itens:['Sofá baixo e firme','Mesa de madeira de linhas simples','Cerâmicas artesanais','Uma planta de porte'],evitar:['Cores berrantes','Objetos demais à mostra'],
+ amb:{sala:'Sofá baixo em tom neutro, mesa de madeira, tapete de fibra natural e luz indireta nas paredes.',quarto:'Cama baixa, roupa de cama de linho em tom terroso e luz quente em abajur ou fita de LED atrás da cabeceira.',cozinha:'Marcenaria em madeira, bancada clara e poucos objetos à vista, só cerâmicas e uma planta.',banheiro:'Pedra ou revestimento fosco, madeira, toalhas de algodão e uma vela ou difusor.',geral:'Madeira, tons terrosos e poucas peças.'},q:'japandi living room interior'}};
+const QZ=[
+{q:'Qual destas salas faz você se sentir em casa?',vis:1,o:[
+ {t:'Clara, leve, com madeira clara',w:{escandinavo:3},k:'escandinavo'},{t:'Tijolo, metal e cimento aparentes',w:{industrial:3},k:'industrial'},{t:'Madeira maciça, pedra e cara de campo',w:{rustico:3},k:'rustico'},{t:'Simétrica, com lustre e cortinas longas',w:{classico:3},k:'classico'}]},
+{q:'E entre estas?',vis:1,o:[
+ {t:'Vazia e calma, só o necessário',w:{minimalista:3},k:'minimalista'},{t:'Elegante, com painel e luz embutida',w:{contemporaneo:3},k:'contemporaneo'},{t:'Cheia de plantas, tapetes e texturas',w:{boho:3},k:'boho'},{t:'Madeira, tons terrosos e luz quente',w:{japandi:3},k:'japandi'}]},
+{q:'Quais cores acalmam você?',o:[
+ {t:'Brancos, cinzas claros e madeira clara',w:{escandinavo:2,minimalista:2,contemporaneo:1},pal:['#F4F1EC','#D9D2C5','#B9A88F']},
+ {t:'Tons de terra e madeira mais escura',w:{japandi:2,rustico:2,boho:2},pal:['#CDBBA0','#9B7B5A','#5A3E2B']},
+ {t:'Preto, grafite e cimento',w:{industrial:3,contemporaneo:1},pal:['#2B2B2B','#5A5A5A','#9A9A96']},
+ {t:'Azul-marinho, vinho e dourado',w:{classico:3,contemporaneo:1},pal:['#1F2D4A','#7A2F3A','#B08D4A']}]},
+{q:'Como você gosta dos móveis?',o:[
+ {t:'Poucos, funcionais e sem excesso',w:{minimalista:3,escandinavo:1,japandi:2}},
+ {t:'Com história: herdados, de brechó ou feitos à mão',w:{rustico:2,boho:2,classico:1}},
+ {t:'Peças de design que chamam atenção',w:{contemporaneo:3,industrial:1}},
+ {t:'Confortáveis, fofos e cheios de almofadas',w:{escandinavo:2,boho:2,japandi:1}}]},
+{q:'Como é a iluminação ideal para você?',o:[
+ {t:'Muita luz natural e cortinas leves',w:{escandinavo:2,minimalista:2}},
+ {t:'Luz quente e indireta, abajures e fita de LED',w:{japandi:3,contemporaneo:1,boho:1}},
+ {t:'Pendentes de metal e spots',w:{industrial:3,contemporaneo:1}},
+ {t:'Lustre e arandelas, em pares',w:{classico:3,rustico:1}}]},
+{q:'Que materiais você mais gosta de tocar?',o:[
+ {t:'Madeira clara e linho',w:{escandinavo:2,japandi:2,minimalista:1}},
+ {t:'Metal, tijolo e couro',w:{industrial:3}},
+ {t:'Palha, rattan e plantas',w:{boho:3,japandi:1,rustico:1}},
+ {t:'Mármore, veludo e vidro',w:{classico:2,contemporaneo:2}}]},
+{q:'Sua casa ideal parece…',o:[
+ {t:'Um refúgio calmo, quase um spa',w:{japandi:3,minimalista:2}},
+ {t:'Um loft na cidade',w:{industrial:3,contemporaneo:2}},
+ {t:'Uma casa de campo',w:{rustico:3,escandinavo:1}},
+ {t:'Um lugar cheio de vida e de histórias',w:{boho:3,classico:1}}]},
+{q:'E os objetos de decoração?',o:[
+ {t:'Quase nenhum, tudo guardado',w:{minimalista:3,japandi:1}},
+ {t:'Poucos, bem escolhidos',w:{escandinavo:2,contemporaneo:2,japandi:2}},
+ {t:'Muitos: quadros, plantas e lembranças',w:{boho:3,rustico:1,classico:1}},
+ {t:'Peças marcantes e de aparência antiga',w:{classico:2,industrial:1,rustico:2}}]}];
+function qzScore(ans){const sc={};Object.keys(STY).forEach(k=>sc[k]=0);ans.forEach((a,i)=>{const o=QZ[i]&&QZ[i].o[a];if(o)for(const k in o.w)sc[k]+=o.w[k]});return sc}
+const roomGroup=k=>({sala:'sala',jantar:'sala',varanda:'sala',corredor:'sala',escritorio:'sala',casal:'quarto',solteiro:'quarto',crianca:'quarto',closet:'quarto',cozinha:'cozinha',despensa:'cozinha',lavanderia:'cozinha',banheiro:'banheiro',lavabo:'banheiro'})[k]||'geral';
+
 const roomsOf=k=>roomsOfKind(S.rooms,k);
 
 /* ---- fotos reais (Openverse: busca aberta, sem chave; só o termo de busca sai do aparelho) ---- */
 const RTQ={sala:'living room interior',jantar:'dining room interior',cozinha:'kitchen interior design',casal:'master bedroom interior',solteiro:'guest bedroom interior',crianca:'kids bedroom interior',escritorio:'home office interior',banheiro:'bathroom interior design',lavabo:'powder room small bathroom',lavanderia:'laundry room interior',varanda:'apartment balcony',closet:'walk-in closet',corredor:'hallway interior',despensa:'pantry kitchen shelves',garagem:'home garage interior',quintal:'backyard patio garden'};
+Object.keys(STY).forEach(k=>{RTQ['st_'+k]=STY[k].q});
 const RP_KEY='hth-rp1',RP_TTL=30*864e5,RP={ld:{},bad:{}};
 function rpRead(){try{const o=JSON.parse(localStorage.getItem(RP_KEY)||'{}');return o&&typeof o==='object'?o:{}}catch(e){return{}}}
 function rpWrite(o){try{localStorage.setItem(RP_KEY,JSON.stringify(o))}catch(e){}}
@@ -736,6 +805,8 @@ async function rpLoad(k){if(!RTQ[k]||rpGet(k)||RP.ld[k]||RP.bad[k]&&Date.now()-R
  delete RP.ld[k];rpPaint(k)}
 function rpPaint(k){const p=rpGet(k);
  if(p)document.querySelectorAll('#cz .cc[data-kind="'+k+'"]:not(.own)').forEach(card=>{if(card.querySelector('.rp'))return;const im=document.createElement('img');im.className='rp';im.alt='';im.decoding='async';im.referrerPolicy='no-referrer';im.onerror=()=>im.remove();im.src=p[0].u;card.insertBefore(im,card.querySelector('.cc-b'))});
+ if(p)document.querySelectorAll('.qimg[data-k="'+k+'"]').forEach(el=>{if(el.querySelector('img'))return;const im=document.createElement('img');im.alt='';im.decoding='async';im.referrerPolicy='no-referrer';im.onerror=()=>im.remove();im.src=p[0].u;el.appendChild(im)});
+ const g=document.getElementById('stg');if(g&&g.dataset.k===k)g.innerHTML=rpBlock(k);
  const el=document.getElementById('rptips');if(el&&el.dataset.k===k)el.innerHTML=tipsInner(k)}
 function rpBlock(k){const p=rpGet(k);
  if(p)return `<p class="cap">Fotos reais de inspiração</p><div class="rpg">${p.map(f=>`<a href="${esc(f.src||f.u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(f.u)}" alt="${esc(f.ti||'Foto de inspiração')}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('a').remove()"><small>${esc(f.cr?'Foto: '+f.cr:'Autor não informado')}${f.lic?' · '+esc(f.lic):''}</small></a>`).join('')}</div><p class="note">Fotos de terceiros com licença aberta (Creative Commons), via Openverse. Toque para ver a página do autor.</p>`;
@@ -743,7 +814,36 @@ function rpBlock(k){const p=rpGet(k);
  if(RP.bad[k])return `<p class="note" role="status">Não consegui buscar as fotos agora (precisa de internet). Tente de novo mais tarde ou use o link abaixo.</p><button class="lk" data-rpgo="${k}">Tentar de novo</button>`;
  return ''}
 const rkind=r=>r.kind&&RT[r.kind]?r.kind:(roomKinds(r.name)[0]||null);
-function tipsInner(k){const t=RT[k];return `<p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>${rpBlock(k)}<p><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver mais fotos de inspiração</a></p>`}
+function styleInfo(){const st=cleanStyle(S.house.style);if(!st)return null;const rk=styleRank(st);return{st,top:rk[0],rk,tot:styleTotals(st)}}
+const palRow=(a,cls)=>`<span class="pal${cls?' '+cls:''}" aria-hidden="true">${a.map(c=>`<i style="background:${c}"></i>`).join('')}</span>`;
+function styleCard(){const si=styleInfo();
+ return `<section class="stc" aria-label="Estilo da casa">${si?`<p class="cap">${si.st.profiles.length>1?'Estilo do casal':'Estilo da casa'}</p><h3>${esc(STY[si.top].n)}</h3><p>${esc(STY[si.top].tag)}.</p>${palRow(STY[si.top].pal)}<div class="acts"><button class="btn alt" data-qzopen="r">Ver dicas do meu estilo</button>${si.st.profiles.length<2?'<button class="lk" data-qzopen="s">Outra pessoa responder</button>':''}</div>`
+ :`<h3>Descubra o estilo da casa</h3><p>8 perguntas rápidas, sem resposta certa. No fim você recebe dicas de decoração para cada ambiente.</p><button class="btn" data-qzopen="s">Descobrir o estilo</button>`}</section>`}
+function qOpt(o,i,vis){const pal=o.pal||(o.k?STY[o.k].pal.slice(0,3):null),p=o.k?rpGet('st_'+o.k):null;
+ return `<button class="qo${vis?' v':''}" data-qa="${i}">${vis?`<span class="qimg" data-k="st_${o.k}" style="background:linear-gradient(135deg,${pal.join(',')})">${p?`<img src="${esc(p[0].u)}" alt="" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()">`:''}</span>`:(pal?palRow(pal,'sm'):'')}<b>${esc(o.t)}</b></button>`}
+function resultPage(){const si=styleInfo(),back='<button class="lk back" data-qzx>← Voltar</button>';if(!si)return back+'<p class="empty">Ainda não há resultado. Responda o quiz para descobrir o estilo.</p><button class="btn" data-qzopen="s">Começar o quiz</button>';
+ const T=STY[si.top],mx=si.tot[si.top]||1,couple=si.st.profiles.length>1,own=p=>STY_IDS.slice().sort((a,b)=>(p.sc[b]||0)-(p.sc[a]||0)||STY_IDS.indexOf(a)-STY_IDS.indexOf(b))[0],tops=si.st.profiles.map(own),diff=couple&&tops[0]!==tops[1];
+ const grp=[['sala','Sala e áreas sociais'],['quarto','Quartos'],['cozinha','Cozinha e lavanderia'],['banheiro','Banheiros']];
+ return back+`<p class="cap">${couple?'Estilo do casal':'Seu estilo'}</p><h2 class="pt">${esc(T.n)}</h2><p class="lead">${esc(T.tag)}</p><p>${esc(T.d)}</p>${palRow(T.pal,'big')}
+${couple?`<h3>Cada um</h3><ul class="mem">${si.st.profiles.map((p,x)=>`<li><span>${esc(p.name||'Pessoa '+(x+1))}</span><b>${esc(STY[tops[x]].n)}</b></li>`).join('')}</ul><p class="note">${diff?'Vocês preferem estilos diferentes. O resultado do casal soma os dois gostos, e as dicas abaixo servem como ponto de encontro.':'Vocês combinam no estilo.'}</p>`:''}
+<h3>Como ficou a pontuação</h3>${si.rk.slice(0,4).map(k=>`<div class="sb"><span>${esc(STY[k].n)}</span><div class="bar" aria-hidden="true"><i style="width:${Math.round(si.tot[k]/mx*100)}%"></i></div></div>`).join('')}
+<h3>Materiais e luz</h3><div class="chips2">${T.mat.map(m=>`<span class="pill">${esc(m)}</span>`).join('')}</div><p>${esc(T.luz)}</p>
+<h3>Peças que mais ajudam</h3><div class="chips2">${T.itens.map(m=>`<span class="pill">${esc(m)}</span>`).join('')}</div>
+<p class="cap">Melhor evitar</p><div class="chips2">${T.evitar.map(m=>`<span class="pill">${esc(m)}</span>`).join('')}</div>
+<h3>Dicas por ambiente</h3>${grp.map(([k,l])=>`<div class="rsum"><b>${l}</b><p style="margin:6px 0 0">${esc(T.amb[k])}</p></div>`).join('')}
+<h3>Fotos de inspiração</h3><div id="stg" data-k="st_${si.top}">${rpBlock('st_'+si.top)}</div><p><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent('decoração estilo '+T.n)}" target="_blank" rel="noopener noreferrer">Ver mais fotos de inspiração</a></p>
+<div class="acts" style="margin-top:18px"><button class="btn alt" data-qzagain>${si.st.profiles.length<2?'Outra pessoa responder':'Refazer o quiz'}</button></div>`}
+function quizPage(){const z=U.qz,back='<button class="lk back" data-qzx>← Sair do quiz</button>';
+ if(z.step<0){const np=(cleanStyle(S.house.style)||{profiles:[]}).profiles.length;
+  return back+`<h2 class="pt">Qual é o estilo de vocês?</h2><p class="note">8 perguntas, uns 2 minutos. Não existe resposta certa: escolha o que mais combina com você. ${np?'Já há resultado de '+np+' pessoa(s). Cada pessoa responde na sua vez e o app mostra o estilo do casal.':'Se forem duas pessoas, cada uma responde na sua vez.'}</p>
+<form class="add" data-qzstart><label class="full">Quem está respondendo?<input name="who" maxlength="30" placeholder="Ex.: Roger" value="${esc(z.who||'')}" autocomplete="off"></label><button class="btn full">Começar</button></form>${np?'<p><button class="lk" data-qzopen="r">Ver o resultado atual</button></p>':''}`}
+ if(z.step>=QZ.length)return resultPage();
+ const q=QZ[z.step],n=QZ.length;
+ return back+`<p class="cap">Pergunta ${z.step+1} de ${n}${z.who?' · '+esc(z.who):''}</p><div class="bar" role="progressbar" aria-label="Andamento do quiz" aria-valuenow="${z.step}" aria-valuemin="0" aria-valuemax="${n}"><i style="width:${Math.round(z.step/n*100)}%"></i></div><h2 class="qq">${esc(q.q)}</h2>
+<div class="qg${q.vis?' vis':''}">${q.o.map((o,i)=>qOpt(o,i,q.vis)).join('')}</div>${z.step>0?'<button class="lk" data-qzprev style="margin-top:10px">← Voltar uma pergunta</button>':''}`}
+function quizBind(){const z=U.qz;if(!z)return;let ks=[];if(z.step>=0&&z.step<QZ.length&&QZ[z.step].vis)ks=QZ[z.step].o.map(o=>'st_'+o.k);else if(z.step>=QZ.length){const si=styleInfo();if(si)ks=['st_'+si.top]}
+ ks.forEach((k,x)=>setTimeout(()=>{if(U.qz)rpLoad(k)},250*x))}
+function tipsInner(k){const t=RT[k],si=styleInfo(),sty=si?`<div class="stip"><p class="cap">Para o estilo ${esc(STY[si.top].n)}</p><p>${esc(STY[si.top].amb[roomGroup(k)])}</p></div>`:`<p class="note">Quer dicas no estilo de vocês? <button class="lk" data-qzopen="s">Descobrir o estilo</button></p>`;return sty+`<p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>${rpBlock(k)}<p><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver mais fotos de inspiração</a></p>`}
 function tipsBox(r){const k=rkind(r);if(!k)return '';return `<details class="addbox" data-addbox="tips" ${U.addOpen.tips?'open':''}><summary>Dicas e fotos de inspiração</summary><div id="rptips" data-k="${k}">${tipsInner(k)}</div></details>`}
 function tipsBind(){const el=document.getElementById('rptips');if(el)rpLoad(el.dataset.k)}
 function roomCard(r){const k=rkind(r),n=act().filter(i=>i.roomId===r.id).length,pe=prog(r.id),p=!r.img[0]&&k?rpGet(k):null,arm=U.arm==='room:'+r.id;
@@ -901,8 +1001,8 @@ function render(){
  if(C.mode&&C.view!=='app'){document.body.classList.add('ob');document.getElementById('app').innerHTML=cloudScreen();paintSync();return}
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
  const ob=!S.house.done||U.ob>=2;document.body.classList.toggle('ob',ob);
- document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
- czBind();if(U.addOpen.tips)tipsBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
+ document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.qz?quizPage():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
+ czBind();if(U.addOpen.tips)tipsBind();quizBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
 
 /* ---------- Exportar e restaurar ---------- */
 let DL;try{window.claude&&claude.use&&claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
@@ -931,7 +1031,7 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){U.qz=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
  else if(b=q('[data-room]')){U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
@@ -987,6 +1087,11 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-arc]'))U.arc=U.arc===b.dataset.arc?null:b.dataset.arc;
  else if(b=q('[data-tp]'))togglePay(b.dataset.tp);
  else if(b=q('[data-dp]')){const id=b.dataset.dp;if(was==='dp:'+id)delPay(id);else U.arm='dp:'+id}
+ else if(b=q('[data-qzopen]')){U.qz=b.dataset.qzopen==='r'?{step:QZ.length,ans:[],who:''}:{step:-1,ans:[],who:''};scrollTo(0,0)}
+ else if(q('[data-qzx]')){U.qz=null;scrollTo(0,0)}
+ else if(q('[data-qzagain]')){U.qz={step:-1,ans:[],who:''};scrollTo(0,0)}
+ else if(q('[data-qzprev]')){if(U.qz&&U.qz.step>0)U.qz.step--;scrollTo(0,0)}
+ else if(b=q('[data-qa]')){const z=U.qz;if(!z||z.step<0||z.step>=QZ.length)return;z.ans[z.step]=+b.dataset.qa;z.step++;if(z.step>=QZ.length)saveProfile(z.who,qzScore(z.ans));scrollTo(0,0)}
  else if(b=q('[data-dedup]')){if(!recentBackup())return;if(was==='dedup'){const n=dedupeArchive();U.bmsg=n+' item(ns) repetido(s) arquivado(s). Veja em Itens excluídos para restaurar.'}else U.arm='dedup'}
  else if(b=q('[data-exp]')){doExport(b.dataset.exp);return}
  else if(q('[data-impt]')){readImport(document.getElementById('pastebox').value);return}
@@ -1046,6 +1151,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
    p.amount=amt;p.date=iso||'';p.paid=pd2;if(mt&&METHODS[mt])p.method=mt;else delete p.method;
    log(p.itemId,`${rf?'Estorno':'Pagamento'} alterado: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}${p.method?' · '+METHOD_SHORT[p.method]:''}${pd2?'':' (agendado)'}`);U.pe=null;U.dmk=''}
   else{const o=`${R(p.amount)}${p.date?' em '+fdate(p.date):''}`;p.amount=amt;p.date=iso||'';log(p.itemId,`Parcela alterada: ${o} → ${R(amt)}${iso?' em '+fdate(iso):''}`);U.pe=null;U.dmk=''}}
+ else if(f.dataset.qzstart!==undefined){if(!U.qz)return;U.qz.who=String(d.get('who')||'').replace(/\s+/g,' ').trim().slice(0,30);U.qz.ans=[];U.qz.step=0;scrollTo(0,0)}
  else if(f.dataset.nf){const text=d.get('text').trim();U.msg='';
   const ph=await storePhotos(f.querySelector('input[type=file]').files);
   if(!text&&!ph.length){render();return}addNote(f.dataset.nf,text,ph)}
