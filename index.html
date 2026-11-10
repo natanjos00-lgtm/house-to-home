@@ -180,6 +180,9 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .ct{position:absolute;inset:auto 0 0 0;padding:48px 14px 14px;background:linear-gradient(transparent,rgba(30,26,22,.8));color:#f7f3ec}.ct b{display:block;font:600 25px/1.05 "Cormorant Garamond",Georgia,serif}.ct small{font-size:12px;color:#e9e0d1}
 .cz-ar{display:none;position:absolute;top:calc(50% - 10px);transform:translateY(-50%);z-index:2;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:28px;line-height:1;padding:0 0 3px;cursor:pointer;box-shadow:0 4px 14px rgba(40,30,20,.15)}.cz-ar.l{left:12px}.cz-ar.r{right:12px}
 @media (hover:hover) and (min-width:560px){.cz-ar{display:block}}
+.cc>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cc-b{position:absolute;inset:0;width:100%;height:100%;border:0;background:none;padding:0;cursor:pointer;z-index:1}.cc .ct{z-index:2;pointer-events:none}.cc-x{position:absolute;top:10px;right:10px;z-index:3;min-width:34px;height:34px;border-radius:17px;border:0;background:rgba(30,26,22,.62);color:#f7f3ec;font:600 18px/1 Figtree,sans-serif;padding:0 10px;cursor:pointer}.cc-x:hover{background:rgba(30,26,22,.85)}
+.kch{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.kch .kb{border:1px solid var(--line);cursor:pointer;font:600 14px Figtree,sans-serif;padding:9px 14px;min-height:40px}.kch .kb:active{background:var(--sand)}
+#rptips p{margin:6px 0}#rptips .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
 .cz-info{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}.cz-info h4{font:600 26px/1.1 "Cormorant Garamond",Georgia,serif;margin:0 0 6px;color:var(--brown)}.cz-info p{margin:6px 0}.cz-info .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.cz-info .acts{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}.cz-info .btn{min-width:190px}
 @media (min-width:760px){.cc{width:232px}.cz{padding:16px calc(50% - 116px) 22px}.cz-stage{margin:0}}
 @media (prefers-reduced-motion:reduce){.cc{transition:none}}
@@ -497,7 +500,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-1522';
+const APP_VER='20261110-1530';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -715,35 +718,32 @@ async function rpLoad(k){if(!RTQ[k]||rpGet(k)||RP.ld[k]||RP.bad[k]&&Date.now()-R
   const o=rpRead();o[k]={t:Date.now(),p};rpWrite(o);delete RP.bad[k]}
  catch(e){RP.bad[k]=Date.now()}
  delete RP.ld[k];rpPaint(k)}
-function rpPaint(k){const x=RT_ORDER.indexOf(k);if(x<0)return;const p=rpGet(k),card=document.querySelector('#cz .cc[data-ci="'+x+'"]');
- if(card&&p&&!card.querySelector('.rp')){const im=document.createElement('img');im.className='rp';im.alt='';im.decoding='async';im.referrerPolicy='no-referrer';im.onerror=()=>im.remove();im.src=p[0].u;const ct=card.querySelector('.ct');card.insertBefore(im,ct)}
- if((U.czi||0)===x){const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(x)}}
+function rpPaint(k){const p=rpGet(k);
+ if(p)document.querySelectorAll('#cz .cc[data-kind="'+k+'"]:not(.own)').forEach(card=>{if(card.querySelector('.rp'))return;const im=document.createElement('img');im.className='rp';im.alt='';im.decoding='async';im.referrerPolicy='no-referrer';im.onerror=()=>im.remove();im.src=p[0].u;card.insertBefore(im,card.querySelector('.cc-b'))});
+ const el=document.getElementById('rptips');if(el&&el.dataset.k===k)el.innerHTML=tipsInner(k)}
 function rpBlock(k){const p=rpGet(k);
  if(p)return `<p class="cap">Fotos reais de inspiração</p><div class="rpg">${p.map(f=>`<a href="${esc(f.src||f.u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(f.u)}" alt="${esc(f.ti||'Foto de inspiração')}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('a').remove()"><small>${esc(f.cr?'Foto: '+f.cr:'Autor não informado')}${f.lic?' · '+esc(f.lic):''}</small></a>`).join('')}</div><p class="note">Fotos de terceiros com licença aberta (Creative Commons), via Openverse. Toque para ver a página do autor.</p>`;
  if(RP.ld[k])return `<p class="note" role="status">Buscando fotos reais…</p>`;
  if(RP.bad[k])return `<p class="note" role="status">Não consegui buscar as fotos agora (precisa de internet). Tente de novo mais tarde ou use o link abaixo.</p><button class="lk" data-rpgo="${k}">Tentar de novo</button>`;
  return ''}
-function czInfo(x){const k=RT_ORDER[x],t=RT[k],have=roomsOf(k),last=U.czm&&U.czm.k===k?U.czm:null;
- return `<h4>${esc(t.n)}</h4><p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>
-<p class="note">${have.length?'Já na sua casa: '+have.map(r=>esc(r.name)).join(', ')+'.':'Ainda não está na sua casa.'}</p>
-${last?`<p class="warn ok" role="status">${esc(last.name)} foi adicionado. <button class="lk" data-room="${last.id}">Abrir e medir</button></p>`:''}
-${rpBlock(k)}
-<div class="acts"><button class="btn" data-czadd="${k}">${have.length?'Adicionar mais um':'Adicionar à minha casa'}</button><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver fotos de inspiração</a></div>`}
-function picker(){const n=RT_ORDER.length,cur=Math.min(Math.max(U.czi||0,0),n-1);
- return `<section class="cz-wrap" aria-labelledby="czh"><h3 id="czh">Escolha seus cômodos</h3><p class="note">Deslize e toque em “Adicionar”. Depois você muda o nome e coloca as medidas.</p>
-<div class="cz-stage"><button class="cz-ar l" data-czs="-1" aria-label="Cômodo anterior">‹</button><div class="cz" id="cz" role="group" aria-roledescription="carrossel" aria-label="Tipos de cômodo" tabindex="0">${RT_ORDER.map((k,x)=>{const h=roomsOf(k).length;return `<article class="cc" data-ci="${x}" aria-roledescription="slide" aria-label="${x+1} de ${n}: ${esc(RT[k].n)}">${rtScene(k)}${(()=>{const p=rpGet(k);return p?`<img class="rp" src="${esc(p[0].u)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''})()}<div class="ct"><b>${esc(RT[k].n)}</b>${h?`<small>Na sua casa: ${h}</small>`:''}</div></article>`}).join('')}</div><button class="cz-ar r" data-czs="1" aria-label="Próximo cômodo">›</button></div>
-<div class="cz-info" id="czinfo" aria-live="polite">${czInfo(cur)}</div></section>`}
+const rkind=r=>r.kind&&RT[r.kind]?r.kind:(roomKinds(r.name)[0]||null);
+function tipsInner(k){const t=RT[k];return `<p>${esc(t.d)}</p><p class="cap">O que costuma ter</p><div class="chips">${t.it.map(i=>`<span class="pill">${esc(i)}</span>`).join('')}</div>${rpBlock(k)}<p><a class="lk" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t.n+' decoração ideias')}" target="_blank" rel="noopener noreferrer">Ver mais fotos de inspiração</a></p>`}
+function tipsBox(r){const k=rkind(r);if(!k)return '';return `<details class="addbox" data-addbox="tips" ${U.addOpen.tips?'open':''}><summary>Dicas e fotos de inspiração</summary><div id="rptips" data-k="${k}">${tipsInner(k)}</div></details>`}
+function tipsBind(){const el=document.getElementById('rptips');if(el)rpLoad(el.dataset.k)}
+function roomCard(r){const k=rkind(r),n=act().filter(i=>i.roomId===r.id).length,pe=prog(r.id),p=!r.img[0]&&k?rpGet(k):null,arm=U.arm==='room:'+r.id;
+ return `<article class="cc${r.img[0]?' own':''}" data-kind="${k||''}" role="group" aria-roledescription="slide" aria-label="${esc(r.name)}">${r.img[0]?imgEl(r.img[0],''):(k?rtScene(k):'')}${p?`<img class="rp" src="${esc(p[0].u)}" alt="" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<button class="cc-b" data-room="${r.id}" aria-label="Abrir ${esc(r.name)}"></button><div class="ct"><b>${esc(r.name)}</b><small>${n} ${n===1?'item':'itens'}${pe.n?' · enxoval '+pe.pct+'%':''}</small></div><button class="cc-x" data-delroom="${r.id}" aria-label="${arm?'Toque de novo para excluir '+esc(r.name):'Excluir '+esc(r.name)}">${arm?'Excluir?':'×'}</button></article>`}
+function picker(){if(!S.rooms.length)return `<p class="empty">Nenhum ambiente ainda. Adicione abaixo.</p>`;
+ return `<section class="cz-wrap" aria-label="Seus ambientes"><div class="cz-stage"><button class="cz-ar l" data-czs="-1" aria-label="Ambiente anterior">‹</button><div class="cz" id="cz" role="group" aria-roledescription="carrossel" aria-label="Seus ambientes" tabindex="0">${S.rooms.map(roomCard).join('')}</div><button class="cz-ar r" data-czs="1" aria-label="Próximo ambiente">›</button></div></section>`}
 function czGo(d,abs){const c=document.getElementById('cz');if(!c)return;const k=c.children.length,x=Math.min(k-1,Math.max(0,abs!=null?abs:(U.czi||0)+d)),e=c.children[x],rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;c.scrollTo({left:e.offsetLeft+e.offsetWidth/2-c.clientWidth/2,behavior:rm?'auto':'smooth'})}
 function czBind(){const c=document.getElementById('cz');if(!c)return;const cards=[...c.children];let raf=0;
  const upd=()=>{raf=0;const m=c.scrollLeft+c.clientWidth/2;let best=0,bd=1e9;cards.forEach((e,x)=>{const d=Math.abs(e.offsetLeft+e.offsetWidth/2-m),r=Math.min(1,d/(e.offsetWidth*1.1));e.style.setProperty('--s',(1-.14*r).toFixed(3));e.style.setProperty('--o',(1-.5*r).toFixed(3));if(d<bd){bd=d;best=x}});
-  cards.forEach((e,x)=>e.setAttribute('aria-current',x===best?'true':'false'));
-  if(best!==(U.czi||0)){U.czi=best;U.czm=null;const i=document.getElementById('czinfo');if(i)i.innerHTML=czInfo(best)}clearTimeout(RP.tm);RP.tm=setTimeout(()=>rpLoad(RT_ORDER[best]),450)};
+  cards.forEach((e,x)=>e.setAttribute('aria-current',x===best?'true':'false'));U.czi=best;
+  const k=cards[best]&&!cards[best].classList.contains('own')&&cards[best].dataset.kind;clearTimeout(RP.tm);if(k)RP.tm=setTimeout(()=>rpLoad(k),450)};
  c.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(upd)},{passive:true});
  const x=Math.min(cards.length-1,Math.max(0,U.czi||0)),e=cards[x];c.scrollLeft=e.offsetLeft+e.offsetWidth/2-c.clientWidth/2;upd()}
-function addRoomKind(k){const t=RT[k];if(!t)return;const name=uniqueRoomName(t.n,S.rooms),r=mkRoom(name,[],null,k);U.czm={k,id:r.id,name}}
-function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2>${picker()}<h3>Seus ambientes (${S.rooms.length})</h3><div class="rg">${S.rooms.map(r=>{const n=act().filter(i=>i.roomId===r.id).length;
- const pe=prog(r.id);return `<button class="rc${r.img[0]?'':' none'}" data-room="${r.id}">${r.img[0]?imgEl(r.img[0],''):''}<span><b>${esc(r.name)}</b><small>${n} ${n===1?'item':'itens'}${pe.n?' · enxoval '+pe.pct+'%':''}</small></span></button>`}).join('')}</div>
-<details class="addbox" data-addbox="room" ${U.addOpen.room?'open':''}><summary>Criar ambiente com outro nome</summary><form class="add" id="rf"><input class="full" name="name" required placeholder="Novo ambiente (ex.: Sala de TV)" aria-label="Nome do ambiente"><button class="btn full">Adicionar ambiente</button></form></details>`}
+function addRoomKind(k){const t=RT[k];if(!t)return;const r=mkRoom(uniqueRoomName(t.n,S.rooms),[],null,k);U.room=r.id;U.ri=0}
+function rooms(){return crumb()+`<h2 class="pt">Ambientes</h2><p class="note">Toque num cartão para abrir o ambiente. Use o × para excluir um que você não precisa.</p>${picker()}
+<details class="addbox" data-addbox="room" ${U.addOpen.room?'open':''}><summary>Adicionar cômodo</summary><p class="note">Escolha um tipo. Depois você muda o nome e coloca as medidas.</p><div class="kch">${RT_ORDER.map(k=>`<button type="button" class="pill kb" data-addkind="${k}">${esc(RT[k].n)}</button>`).join('')}</div><p class="cap">Ou use outro nome</p><form class="add" id="rf"><input class="full" name="name" required placeholder="Novo ambiente (ex.: Sala de TV)" aria-label="Nome do ambiente"><button class="btn full">Adicionar ambiente</button></form></details>`}
 const mini=i=>`<button class="mini" data-go="${i.id}"><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'} · ${stLabel(i)}</small></span><span>${R(ic(i).commit)}</span></button>`;
 function roomPage(){const r=S.rooms.find(x=>x.id===U.room);if(!r){U.room=null;return rooms()}
  const pr=prog(r.id),its=act().filter(i=>i.roomId===r.id),ar=r.w&&r.l?(r.w*r.l).toFixed(2).replace('.',',')+' m²':'—',ri=Math.min(U.ri,Math.max(0,r.img.length-1)),cur=r.img[ri];
@@ -754,6 +754,7 @@ ${r.img.length?'<label style="margin-top:6px">Substituir esta foto<input type="f
 <input class="rn" value="${esc(r.name)}" data-rn aria-label="Nome do ambiente">
 <h3>Medidas</h3><div class="three">${[['w','Largura (m)'],['l','Comprimento (m)'],['h','Pé-direito (m)']].map(([k,l])=>`<label>${l}<input inputmode="decimal" value="${fvm(r[k])}" data-rm="${k}"></label>`).join('')}</div><p class="fin">Área: ${ar}</p>
 <h3>Referências e decisões</h3><textarea rows="4" data-rd placeholder="Cores, materiais, móveis desejados, decisões tomadas…">${esc(r.decor)}</textarea>
+${tipsBox(r)}
 <h3>Itens deste ambiente</h3>${[['enxoval','Enxoval'],['obra','Obra']].map(([ar,nm])=>{const li=its.filter(i=>i.area===ar);if(!li.length)return '';const d=li.filter(i=>ar==='enxoval'?pstat(i)==='bought':i.status==='done').length,pc=Math.round(d/li.length*100);return `<div class="rsum"><div><b>${nm}</b><span>${d} de ${li.length} ${ar==='enxoval'?'comprados':'concluídos'} · ${pc}%</span></div><div class="bar" aria-hidden="true"><i style="width:${pc}%"></i></div><button class="lk" data-rfgo="${ar}:${r.id}">Ver itens do ${nm.toLowerCase()} deste ambiente</button></div>`}).join('')||'<p class="empty">Nenhum item vinculado a este ambiente. Escolha o ambiente ao adicionar um item no Enxoval ou na Obra.</p>'}
 <button class="lk" data-delroom="${r.id}" style="margin-top:14px">${U.arm==='room:'+r.id?'Toque de novo para excluir o ambiente':'Excluir ambiente'}</button>${its.length?'<p class="note">Os itens vinculados continuam cadastrados, apenas sem ambiente.</p>':''}`}
 
@@ -885,7 +886,7 @@ function render(){
  document.querySelectorAll('#nv button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===U.tab?'page':'false'));
  const ob=!S.house.done||U.ob>=2;document.body.classList.toggle('ob',ob);
  document.getElementById('app').innerHTML=(U.msg?`<p class="warn">${esc(U.msg)}</p>`:'')+(ob?onboarding():U.tab==='home'?home():U.tab==='rooms'?(U.room?roomPage():rooms()):U.tab==='backup'?backupPage():U.tab==='compra'?dealTab():area(U.tab));
- czBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
+ czBind();if(U.addOpen.tips)tipsBind();hydrate();paintSync();if(U.sco){U.sco=false;const c=document.getElementById('orc');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scw){U.scw=false;const c=document.getElementById('wipego')||document.getElementById('dz');if(c&&c.scrollIntoView)c.scrollIntoView({block:'center'})}if(U.scb){U.scb=false;const c=document.getElementById('bkp');if(c&&c.scrollIntoView)c.scrollIntoView()}if(U.scr){U.scr=false;const c=document.getElementById('cfg');if(c&&c.scrollIntoView)c.scrollIntoView()}}
 
 /* ---------- Exportar e restaurar ---------- */
 let DL;try{window.claude&&claude.use&&claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
@@ -960,7 +961,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(b=q('[data-czs]')){czGo(+b.dataset.czs);return}
  else if(b=q('.cc')){czGo(0,+b.dataset.ci);return}
  else if(b=q('[data-rpgo]')){delete RP.bad[b.dataset.rpgo];rpLoad(b.dataset.rpgo);return}
- else if(b=q('[data-czadd]'))addRoomKind(b.dataset.czadd)
+ else if(b=q('[data-addkind]'))addRoomKind(b.dataset.addkind)
  else if(b=q('[data-pe]')){U.pe=U.pe===b.dataset.pe?null:b.dataset.pe;U.dm=''}
  else if(q('[data-updchk]')){updCheck();return}
  else if(q('[data-updgo]')){updGo();return}
@@ -982,7 +983,7 @@ document.addEventListener('click',e=>{const q=s=>e.target.closest(s),was=U.arm;U
  else if(q('.addph,.cam'))return;
  else if(!was)return;
  save();render()});
-document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.pend!==undefined)U.pendOpen=t.open;if(t&&t.dataset&&t.dataset.gk!==undefined)U.gop[t.dataset.gk]=t.open;if(t&&t.dataset&&t.dataset.pa!==undefined)U.dpa=t.open?t.dataset.pa:null;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
+document.addEventListener('toggle',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.addbox!==undefined)U.addOpen[t.dataset.addbox]=t.open;if(t.dataset.addbox==='tips'&&t.open)tipsBind();if(t&&t.dataset&&t.dataset.gone!==undefined)U.goneOpen=t.open;if(t&&t.dataset&&t.dataset.pend!==undefined)U.pendOpen=t.open;if(t&&t.dataset&&t.dataset.gk!==undefined)U.gop[t.dataset.gk]=t.open;if(t&&t.dataset&&t.dataset.pa!==undefined)U.dpa=t.open?t.dataset.pa:null;if(t&&t.dataset&&t.dataset.more!==undefined)U.more=t.open?t.dataset.more:(U.more===t.dataset.more?null:U.more)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.wipe){U.wipe=false;U.wipeErr='';render()}});
 document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=new FormData(f);
  if(f.id==='af'){const name=d.get('name').trim();if(!name)return;const T=U.tab==='obra';
