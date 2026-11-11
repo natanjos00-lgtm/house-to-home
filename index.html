@@ -211,6 +211,10 @@ details.addbox[open]>summary::before{content:"–"}details.addbox form.add{margi
 .rc{aspect-ratio:1/1}
 @media (min-width:760px){body{max-width:780px}#nv{max-width:780px}.rg{grid-template-columns:repeat(3,1fr)}.fin2 dl{grid-template-columns:repeat(3,1fr)}h2{font-size:32px}}
 .acct{margin:12px 0}.acct h2{margin:0 0 4px}
+/* capa: nunca passa de uma parte da altura da tela */
+.hero:not(.none){max-height:min(44vh,360px)}
+html[data-hero=below] .hero:not(.none){max-height:none}
+html[data-hero=below] .hero:not(.none) img{max-height:min(38vh,320px);width:100%;object-fit:cover}
 /* personalidade por visual */
 .card,.tile,.item,.stc,.rsum{box-shadow:var(--cs)}
 html[data-hero=below] .hero:not(.none){margin:14px 0 0;aspect-ratio:auto;overflow:visible;background:none}
@@ -658,7 +662,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261111-0848';
+const APP_VER='20261111-0903';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
