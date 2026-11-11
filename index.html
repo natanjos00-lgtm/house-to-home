@@ -219,6 +219,7 @@ html[data-hero=below] .hero:not(.none){aspect-ratio:auto;max-height:none;width:1
 html[data-hero=below] .hero:not(.none) img{aspect-ratio:16/9;max-height:min(42vh,360px);width:100%;object-fit:cover}
 html[data-hero=below] .hero:not(.none) div{padding-top:18px}
 html[data-hero=below] .hero:not(.none) h1{font-size:calc(34px*var(--hz))}
+.pkp .pkr{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.pkp .pkr label{flex:1;min-width:0;display:flex;align-items:center;gap:12px;min-height:44px;cursor:pointer}.pkp .pkr input{width:22px;height:22px;flex:none;accent-color:var(--olive)}.pkp .pkr b{display:block;font-weight:600;font-size:15px;overflow-wrap:anywhere}.pkp .pkr small{color:var(--mute);font-size:12px}.pkp .pkm{display:flex;gap:4px;flex:none}.pkp .pkm .lk{min-width:44px;min-height:44px;font-size:16px;text-decoration:none}.pkp .pkm .lk:disabled{opacity:.3}.pkl{max-height:340px;overflow:auto;overscroll-behavior:contain}.pkp h4{margin:14px 0 4px}
 /* foto de capa inteira */
 .lb{position:fixed;inset:0;z-index:100;background:rgba(10,8,6,.94);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}.lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
 .lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;min-height:44px;padding:8px 18px;border-radius:999px;border:1px solid rgba(247,243,236,.5);background:rgba(30,26,22,.7);color:#f7f3ec;font:600 15px var(--bf);cursor:pointer}.lbx:focus-visible,.lbn:focus-visible{outline:3px solid #fff;outline-offset:2px}.lbn{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:56px;border-radius:14px;border:1px solid rgba(247,243,236,.5);background:rgba(30,26,22,.7);color:#f7f3ec;font:400 34px/1 var(--bf);cursor:pointer;padding:0}.lbp{left:10px}.lbs{right:10px}.lbc{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(30,26,22,.7);color:#f7f3ec;font:600 14px var(--bf);padding:6px 14px;border-radius:999px}
@@ -244,7 +245,7 @@ const IMG={"sala": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHB
 /* Valores em centavos (inteiros). Cada valor existe em um só lugar; totais são sempre calculados. */
 const KEY='minha-casa-v4',PREV='minha-casa-prev',BAD='minha-casa-corrompido';
 const EMPTY=()=>({v:4,budget:{total:null,obra:null,enxoval:null},house:{name:'',cover:null,done:false},meta:{lastExport:null},rooms:[],sup:[],items:[],pays:[],log:[],notes:[]});
-const BLANK=()=>({id:null,area:'obra',kind:'servico',name:'',cat:'',roomId:null,supId:null,planned:0,contracted:null,status:'todo',start:null,end:null,notes:'',deleted:null,qtyNeed:1,qtyBought:0,store:'',buyDate:null,researching:false,returned:false,img:[]});
+const BLANK=()=>({id:null,area:'obra',kind:'servico',name:'',cat:'',roomId:null,supId:null,planned:0,contracted:null,status:'todo',start:null,end:null,notes:'',deleted:null,qtyNeed:1,qtyBought:0,store:'',buyDate:null,researching:false,returned:false,pin:null,img:[]});
 let S=EMPTY(),ok=true,C={mode:false};
 const uid=()=>(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const parse=s=>{s=String(s==null?'':s).replace(/[R$\s]/g,'');if(!s)return null;
@@ -669,7 +670,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261111-0942';
+const APP_VER='20261111-1653';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -708,13 +709,21 @@ const nextOb=from=>from<=1&&S.budget.obra==null?2:from<=2&&S.budget.enxoval==nul
 const bin=(k,l,c)=>`<label class="tile${c?' '+c:''}">${l}<input inputmode="decimal" placeholder="0,00" value="${fv(S.budget[k])}" data-b="${k}"></label>`;
 
 const stLabel=i=>i.area==='enxoval'?PS[estat(i)]:LBL.obra[ST.indexOf(i.status)];
+const pinList=()=>act().filter(i=>i.status!=='done'&&Number.isFinite(i.pin)).sort((a,b)=>a.pin-b.pin);
+function pinSet(id,on){const i=item(id);if(!i||i.deleted)return;if(on){if(Number.isFinite(i.pin))return;const m=Math.max(0,...S.items.filter(x=>Number.isFinite(x.pin)).map(x=>x.pin));i.pin=m+1}else i.pin=null}
+function pinMove(id,dir){const L=pinList(),x=L.findIndex(i=>i.id===id),y=x+dir;if(x<0||y<0||y>=L.length)return;const a=L[x],b=L[y],t=a.pin;a.pin=b.pin;b.pin=t}
+function pinClear(){S.items.forEach(i=>{if(i.pin!=null)i.pin=null})}
 function pend(){const today=todayStr(),open=act().filter(i=>i.status!=='done'),
- its=[...open.filter(i=>i.end).sort((a,b)=>a.end.localeCompare(b.end)),...open.filter(i=>!i.end)].slice(0,4),
+ pins=pinList(),its=pins.length?pins:[...open.filter(i=>i.end).sort((a,b)=>a.end.localeCompare(b.end)),...open.filter(i=>!i.end)].slice(0,4),
  ps=S.pays.filter(p=>!p.paid&&p.kind!=='refund'&&p.date&&item(p.itemId)&&!item(p.itemId).deleted&&!item(p.itemId).returned).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3),late=d=>d&&d<today;
  const rows=its.map(i=>`<button class="mini" data-go="${i.id}"><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'} · ${i.end?'prazo '+fdate(i.end):'sem prazo'}</small></span><span class="${late(i.end)?'neg':''}">${late(i.end)?'Atrasado':stLabel(i)}</span></button>`)
  .concat(ps.map(p=>{const i=item(p.itemId);return `<button class="mini" data-go="${i.id}"><span><b>Parcela de ${R(p.amount)}</b><small>${esc(i.name)}${p.seg?' · '+esc((GRPS.find(x=>x[0]===p.seg)||[0,''])[1]):''} · vence ${fdate(p.date)}</small></span><span class="${late(p.date)?'neg':''}">${late(p.date)?'Vencida':'A pagar'}</span></button>`}));
  return rows}
-function pendBox(){const r=pend();if(!r.length)return '';return `<details class="addbox gonebox" data-pend ${U.pendOpen?'open':''}><summary>Próximas pendências (${r.length})</summary>${r.join('')}</details>`}
+function pickRow(i,pinned,pos,n){return `<div class="pkr"><label><input type="checkbox" data-pkid="${i.id}" ${pinned?'checked':''}><span><b>${esc(i.name)}</b><small>${i.area==='obra'?'Obra':'Enxoval'}</small></span></label>${pinned?`<span class="pkm"><button class="lk" data-pkm="${i.id}:-1" aria-label="Subir ${esc(i.name)}" ${pos===0?'disabled':''}>▲</button><button class="lk" data-pkm="${i.id}:1" aria-label="Descer ${esc(i.name)}" ${pos===n-1?'disabled':''}>▼</button></span>`:''}</div>`}
+function pickPanel(){const open=act().filter(i=>i.status!=='done'),pins=pinList(),rest=open.filter(i=>!Number.isFinite(i.pin)).sort((a,b)=>(a.area===b.area?0:a.area==='obra'?-1:1)||a.name.localeCompare(b.name,'pt-BR'));
+ return `<div class="pkp"><p class="note">Marque os itens que você quer ver aqui. Use as setas para mudar a ordem. ${pins.length?'Enquanto houver itens marcados, só eles aparecem (as parcelas a vencer continuam).':'Sem nenhum marcado, o app mostra sozinho os 4 mais próximos.'}</p>${pins.length?`<h4>Escolhidas (${pins.length})</h4>${pins.map((i,x)=>pickRow(i,true,x,pins.length)).join('')}`:''}${rest.length?`<h4>${pins.length?'Outros itens':'Itens em aberto'}</h4><div class="pkl">${rest.map(i=>pickRow(i,false)).join('')}</div>`:''}<div class="acts">${pins.length?'<button class="lk" data-pkclr>Voltar ao automático</button>':''}<button class="lk" data-pkdone>Concluir</button></div></div>`}
+function pendBox(){const r=pend(),pk=U.pendPick,n=act().filter(i=>i.status!=='done').length;if(!r.length&&!(pk&&n))return !n?'':`<details class="addbox gonebox" data-pend ${U.pendOpen?'open':''}><summary>Próximas pendências</summary><p class="note">Nada pendente agora.</p></details>`;
+ const pins=pinList().length;return `<details class="addbox gonebox" data-pend ${U.pendOpen||pk?'open':''}><summary>Próximas pendências (${r.length})</summary>${pk?pickPanel():r.join('')+`<div class="acts"><button class="lk" data-pkopen>${pins?'Mudar a escolha':'Escolher quais aparecem'}</button>${pins?'<span class="note">Escolhidas por você</span>':''}</div>`}</details>`}
 
 function histHtml(id){const lg=S.log.filter(l=>l.itemId===id).slice().reverse();return lg.map(l=>`<div class="lg"><small>${dt(l.ts)}</small>${esc(l.txt)}</div>`).join('')}
 function archive(){const g=S.items.filter(i=>i.deleted).sort((x,y)=>String(y.deleted).localeCompare(String(x.deleted)));if(!g.length)return '';
@@ -1347,6 +1356,10 @@ document.addEventListener('click',e=>{if(LB){const nb=e.target.closest('.lbn');i
   save();render();return}
  else if(b=q('[data-rmimg]')){const k=b.dataset.rmimg;if(was==='img:'+k){rmRoomImg(U.room,k);gc(k)}else U.arm='img:'+k}
  else if(b=q('[data-delroom]')){const id=b.dataset.delroom;if(was==='room:'+id){delRoom(id).forEach(gc);U.room=null}else U.arm='room:'+id}
+ else if(b=q('[data-pkopen]')){U.pendPick=true;U.pendOpen=true}
+ else if(b=q('[data-pkdone]')){U.pendPick=false;U.pendOpen=true}
+ else if(b=q('[data-pkclr]')){pinClear()}
+ else if(b=q('[data-pkm]')){const v=b.dataset.pkm,x=v.lastIndexOf(':');pinMove(v.slice(0,x),+v.slice(x+1))}
  else if(b=q('[data-go]')){const i=item(b.dataset.go);if(i){U.tab=i.area;U.open=i.id;U.room=null;scrollTo(0,0)}}
  else if(b=q('[data-st]')){const i=item(b.dataset.st);setField(i.id,'status',ST[(ST.indexOf(i.status)+1)%3])}
  else if(b=q('[data-op]'))U.open=U.open===b.dataset.op?null:b.dataset.op;
@@ -1454,6 +1467,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target
  save();render()});
 document.addEventListener('input',e=>{const el=e.target;if(el.id==='qs'){U.q=el.value;updList();return}if(el.dataset&&el.dataset.wipein!==undefined){const g=document.getElementById('wipego');if(g)g.disabled=el.value.trim()!=='APAGAR';return}if(el.dataset&&el.dataset.d!==undefined){const m=maskBR(el.value);if(m!==el.value)el.value=m;el.removeAttribute('aria-invalid');const w=el.closest('label'),er=w&&w.querySelector('.derr');if(er)er.hidden=true}});
 document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=()=>S.rooms.find(r=>r.id===U.room);let dv=el.value;
+ if(d.pkid){pinSet(d.pkid,el.checked);U.pendPick=true;U.pendOpen=true;save();render();return}
  if(d.lkpick!==undefined){lkSet(el.value);if(el.closest('#cfg'))U.cfg=true;applyLook(true);render();return}
  if(d.nat!==undefined){const tx=el.closest('.df').querySelector('.dt');tx.value=toBR(el.value);tx.dispatchEvent(new Event('change',{bubbles:true}));return}
  if(d.d!==undefined){const iso=parseBR(el.value),bad=iso===null,er=el.closest('label').querySelector('.derr');el.setAttribute('aria-invalid',bad);if(er)er.hidden=!bad;if(bad)return;dv=iso;if(!d.f)return}
