@@ -221,7 +221,7 @@ html[data-hero=below] .hero:not(.none) div{padding-top:18px}
 html[data-hero=below] .hero:not(.none) h1{font-size:calc(34px*var(--hz))}
 /* foto de capa inteira */
 .lb{position:fixed;inset:0;z-index:100;background:rgba(10,8,6,.94);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}.lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
-.lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;min-height:44px;padding:8px 18px;border-radius:999px;border:1px solid rgba(247,243,236,.5);background:rgba(30,26,22,.7);color:#f7f3ec;font:600 15px var(--bf);cursor:pointer}.lbx:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;min-height:44px;padding:8px 18px;border-radius:999px;border:1px solid rgba(247,243,236,.5);background:rgba(30,26,22,.7);color:#f7f3ec;font:600 15px var(--bf);cursor:pointer}.lbx:focus-visible,.lbn:focus-visible{outline:3px solid #fff;outline-offset:2px}.lbn{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:56px;border-radius:14px;border:1px solid rgba(247,243,236,.5);background:rgba(30,26,22,.7);color:#f7f3ec;font:400 34px/1 var(--bf);cursor:pointer;padding:0}.lbp{left:10px}.lbs{right:10px}.lbc{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(30,26,22,.7);color:#f7f3ec;font:600 14px var(--bf);padding:6px 14px;border-radius:999px}
 /* personalidade por visual */
 .card,.tile,.item,.stc,.rsum{box-shadow:var(--cs)}
 html[data-hero=below] .hero:not(.none){margin:14px 0 0;aspect-ratio:auto;overflow:visible;background:none}
@@ -669,7 +669,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261111-0927';
+const APP_VER='20261111-0942';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -1167,7 +1167,7 @@ ${P.rows?(P.rows.length?P.rows.map((r,k)=>`<div class="full pr3">${dfield('Parce
 ${P.err?`<p class="warn full" role="alert">${esc(P.err)}</p>`:''}<button type="button" class="lk full" data-purx>Cancelar</button></form>`}
 const MAXPH=6;
 const camLabel=(i,txt,cls)=>`<label class="${cls}">${CAM}<span>${txt}</span><input type="file" accept="image/*" multiple data-itemimg="${i.id}" aria-label="Adicionar foto a ${esc(i.name)}"></label>`;
-const thumb=i=>{const k=(i.img||[])[0];return k?`<button class="pth" data-op="${i.id}" aria-label="Ver fotos de ${esc(i.name)}">${imgEl(k,'Foto de '+esc(i.name))}${i.img.length>1?`<b>${i.img.length}</b>`:''}</button>`:''};
+const thumb=i=>{const k=(i.img||[])[0];return k?`<button class="pth" data-lbi="${i.id}" aria-label="Abrir foto de ${esc(i.name)}">${imgEl(k,'Foto de '+esc(i.name))}${i.img.length>1?`<b>${i.img.length}</b>`:''}</button>`:''};
 function photosSection(i){const im=i.img||[],pv=U.pv&&U.pv.startsWith(i.id+':')?+U.pv.split(':')[1]:-1,k=im[pv],full=im.length>=MAXPH;
  return `<h4>Fotos</h4><div class="ph-row">${im.map((g,x)=>`<button class="pth" data-pvi="${i.id}:${x}" aria-label="${x===pv?'Fechar':'Ampliar'} foto ${x+1}" aria-pressed="${x===pv}">${imgEl(g,'Foto '+(x+1)+' de '+esc(i.name))}</button>`).join('')}${full?'':camLabel(i,im.length?'Mais':'Adicionar foto','addph')}</div>${k?`<div class="pbig">${imgEl(k,'Foto ampliada de '+esc(i.name))}<div class="acts"><button class="lk" data-pvi="">Fechar</button><button class="lk" data-rmiimg="${i.id}:${pv}">${U.arm==='pi:'+i.id+':'+pv?'Toque de novo para remover':'Remover esta foto'}</button></div></div>`:''}${full?'<p class="note">Limite de '+MAXPH+' fotos por item.</p>':''}`}
 function dadosItem(i){const T=i.area==='obra',D=`data-id="${i.id}"`;
@@ -1303,9 +1303,12 @@ function undoImport(){try{const p=localStorage.getItem(PREV);if(p){S=migrate(JSO
 
 let LB=null;
 function lbClose(){if(!LB)return;const f=LB.from;LB.el.remove();LB=null;document.body.style.overflow='';if(f&&f.isConnected&&f.focus)try{f.focus()}catch(x){}}
-function lbOpen(img){if(LB||!img||!img.src)return;const el=document.createElement('div');el.className='lb';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Foto de capa inteira');el.innerHTML='<img alt="Foto de capa da casa, inteira"><button class="lbx" type="button" aria-label="Fechar foto">Fechar</button>';el.firstChild.src=img.src;document.body.appendChild(el);document.body.style.overflow='hidden';LB={el,from:img};el.querySelector('.lbx').focus()}
-document.addEventListener('keydown',e=>{if(LB){if(e.key==='Escape'){lbClose();e.preventDefault()}else if(e.key==='Tab'){e.preventDefault();LB.el.querySelector('.lbx').focus()}return}if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.hero > img')){e.preventDefault();lbOpen(e.target)}});
-document.addEventListener('click',e=>{if(LB){lbClose();return}const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;if(q('.hero > img')){lbOpen(e.target.closest('.hero > img'));return}
+function lbShow(n){if(!LB)return;const L=LB.list;LB.n=(n+L.length)%L.length;const im=LB.el.querySelector('img');im.alt=LB.alt+(L.length>1?', foto '+(LB.n+1)+' de '+L.length:'');im.removeAttribute('src');(IMG[L[LB.n]]?Promise.resolve(IMG[L[LB.n]]):pget(L[LB.n])).then(d=>{if(LB&&LB.list===L&&d)im.src=d});const c=LB.el.querySelector('.lbc');if(c)c.textContent=(LB.n+1)+' / '+L.length}
+function lbOpenList(list,n,alt,from){if(LB||!list||!list.length)return;const el=document.createElement('div');el.className='lb';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',alt);const many=list.length>1;el.innerHTML='<img alt=""><button class="lbx" type="button" aria-label="Fechar foto">Fechar</button>'+(many?'<button class="lbn lbp" type="button" aria-label="Foto anterior">&#8249;</button><button class="lbn lbs" type="button" aria-label="Próxima foto">&#8250;</button><span class="lbc" aria-live="polite"></span>':'');document.body.appendChild(el);document.body.style.overflow='hidden';LB={el,from,list,n:0,alt};lbShow(n);el.querySelector('.lbx').focus()}
+function lbOpen(img){if(!img||!S.house.cover)return;const el0=img;lbOpenList([S.house.cover],0,'Foto de capa da casa, inteira',el0)}
+function lbOpenItem(id,from){const i=item(id);if(i&&i.img&&i.img.length)lbOpenList(i.img.slice(),0,'Fotos de '+i.name,from)}
+document.addEventListener('keydown',e=>{if(LB){if(e.key==='Escape'){lbClose();e.preventDefault()}else if(e.key==='ArrowRight'){lbShow(LB.n+1);e.preventDefault()}else if(e.key==='ArrowLeft'){lbShow(LB.n-1);e.preventDefault()}else if(e.key==='Tab'){e.preventDefault();LB.el.querySelector('.lbx').focus()}return}if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.hero > img')){e.preventDefault();lbOpen(e.target)}});
+document.addEventListener('click',e=>{if(LB){const nb=e.target.closest('.lbn');if(nb){lbShow(LB.n+(nb.classList.contains('lbs')?1:-1));return}lbClose();return}const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;if(q('.hero > img')){lbOpen(e.target.closest('.hero > img'));return}if(b=q('[data-lbi]')){lbOpenItem(b.dataset.lbi,b);return}
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
  else if(b=q('#nv button')){if(U.pl)cancelAnimationFrame(U.pl.raf);U.pl=null;U.qz=null;U.gd=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
