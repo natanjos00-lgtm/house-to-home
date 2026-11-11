@@ -277,8 +277,8 @@ const act=()=>S.items.filter(i=>!i.deleted&&i.area!=='compra');
 const dealItems=()=>S.items.filter(i=>!i.deleted&&i.area==='compra');
 const AREA_NM={obra:'Obra',enxoval:'Enxoval',compra:'Compra'};
 const log=(id,txt)=>S.log.push({id:uid(),itemId:id,ts:new Date().toISOString(),txt});
-const FN={planned:'Previsto',contracted:'Contratado',status:'Status',start:'Início previsto',end:'Fim previsto',qtyNeed:'Quantidade necessária',qtyBought:'Quantidade comprada',store:'Loja',buyDate:'Data da compra',cat:'Categoria',roomId:'Ambiente'};
-const fmt=(i,f,v)=>f==='status'?LBL[i.area][ST.indexOf(v)]:(f==='start'||f==='end'||f==='buyDate')?fdate(v):f==='contracted'?(v==null?'não contratado':R(v)):f==='planned'?R(v):f==='roomId'?((S.rooms.find(r=>r.id===v)||{}).name||'—'):(v==null||v==='')?'—':String(v);
+const FN={planned:'Previsto',contracted:'Contratado',status:'Status',start:'Início previsto',end:'Fim previsto',qtyNeed:'Quantidade necessária',qtyBought:'Quantidade comprada',store:'Loja',buyDate:'Data da compra',cat:'Categoria',roomId:'Ambiente',name:'Nome',kind:'Tipo'};
+const fmt=(i,f,v)=>f==='status'?LBL[i.area][ST.indexOf(v)]:(f==='start'||f==='end'||f==='buyDate')?fdate(v):f==='contracted'?(v==null?'não contratado':R(v)):f==='planned'?R(v):f==='roomId'?((S.rooms.find(r=>r.id===v)||{}).name||'—'):f==='kind'?(KIND[v]||'—'):(v==null||v==='')?'—':String(v);
 const ENX_CATS=['Móveis','Eletrodomésticos','Cama, mesa e banho','Utensílios','Decoração','Outros'];
 /* Sugestão automática de categoria pelo nome do item (regras simples, sem internet). Tudo o que não se encaixa vira "Outros". */
 const _nm=s=>String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -658,7 +658,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261110-2114';
+const APP_VER='20261111-0848';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -1159,10 +1159,12 @@ const camLabel=(i,txt,cls)=>`<label class="${cls}">${CAM}<span>${txt}</span><inp
 const thumb=i=>{const k=(i.img||[])[0];return k?`<button class="pth" data-op="${i.id}" aria-label="Ver fotos de ${esc(i.name)}">${imgEl(k,'Foto de '+esc(i.name))}${i.img.length>1?`<b>${i.img.length}</b>`:''}</button>`:''};
 function photosSection(i){const im=i.img||[],pv=U.pv&&U.pv.startsWith(i.id+':')?+U.pv.split(':')[1]:-1,k=im[pv],full=im.length>=MAXPH;
  return `<h4>Fotos</h4><div class="ph-row">${im.map((g,x)=>`<button class="pth" data-pvi="${i.id}:${x}" aria-label="${x===pv?'Fechar':'Ampliar'} foto ${x+1}" aria-pressed="${x===pv}">${imgEl(g,'Foto '+(x+1)+' de '+esc(i.name))}</button>`).join('')}${full?'':camLabel(i,im.length?'Mais':'Adicionar foto','addph')}</div>${k?`<div class="pbig">${imgEl(k,'Foto ampliada de '+esc(i.name))}<div class="acts"><button class="lk" data-pvi="">Fechar</button><button class="lk" data-rmiimg="${i.id}:${pv}">${U.arm==='pi:'+i.id+':'+pv?'Toque de novo para remover':'Remover esta foto'}</button></div></div>`:''}${full?'<p class="note">Limite de '+MAXPH+' fotos por item.</p>':''}`}
+function dadosItem(i){const T=i.area==='obra',D=`data-id="${i.id}"`;
+ return `<h4>Dados do item</h4><div class="two"><label class="full">Nome<input value="${esc(i.name)}" maxlength="120" data-f="name" ${D} aria-label="Nome do item"></label>${T?`<label>Tipo<select data-f="kind" ${D}>${Object.keys(KIND).filter(k=>k!=='produto').map(k=>`<option value="${k}" ${i.kind===k?'selected':''}>${KIND[k]}</option>`).join('')}</select></label><label>Ambiente<select data-f="roomId" ${D}><option value="">Sem ambiente</option>${S.rooms.map(r=>`<option value="${r.id}" ${r.id===i.roomId?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label><label class="full">Categoria<input list="cl" value="${esc(i.cat||'')}" maxlength="60" data-f="cat" ${D} placeholder="Ex.: Pintura, Elétrica"></label>`:''}</div>`}
 function detail(i,c){const T=i.area==='obra',ps=pd(i.id).sort((a,b)=>(a.date||'9').localeCompare(b.date||'9')),s=S.sup.find(x=>x.id===i.supId),
  nt=S.notes.filter(n=>n.itemId===i.id).slice().reverse(),dup=dupItems().has(i.id);
  const E=!T;const F=(l,f,v,ph)=>`<label>${l}<input inputmode="decimal" placeholder="${ph}" value="${fv(v)}" data-f="${f}" data-id="${i.id}"></label>`;
- return `<div class="det">${T?`<h4>Valores</h4><div class="two">${F('Previsto','planned',i.planned,'0,00')}${F('Contratado','contracted',i.contracted,'Não contratado')}</div>`:quickBlock(i,c)+photosSection(i)+`<details class="more" data-more="${i.id}" ${U.more===i.id?'open':''}><summary>Mais opções (loja, ambiente, parcelas, pagamentos, histórico)</summary>`+shopMore(i)+(unitPrice(i)?`<p class="note">Informativo: ≈ ${R(unitPrice(i))} por unidade (previsto ÷ quantidade). O previsto é o total do item e não é multiplicado.</p>`:'')}
+ return `<div class="det">${dadosItem(i)}${T?`<h4>Valores</h4><div class="two">${F('Previsto','planned',i.planned,'0,00')}${F('Contratado','contracted',i.contracted,'Não contratado')}</div>`:quickBlock(i,c)+photosSection(i)+`<details class="more" data-more="${i.id}" ${U.more===i.id?'open':''}><summary>Mais opções (loja, ambiente, parcelas, pagamentos, histórico)</summary>`+shopMore(i)+(unitPrice(i)?`<p class="note">Informativo: ≈ ${R(unitPrice(i))} por unidade (previsto ÷ quantidade). O previsto é o total do item e não é multiplicado.</p>`:'')}
 ${T?`<h4>Fornecedor</h4><div class="two"><label>Nome<input list="sl" value="${esc(s?s.name:'')}" data-sup="${i.id}" placeholder="Quem executa"></label><label>Contato<input value="${esc(s?s.contact:'')}" data-ct="${i.id}" placeholder="${s?'Telefone ou e-mail':'Informe o fornecedor'}" ${s?'':'disabled'}></label></div><datalist id="sl">${S.sup.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist>
 <h4>Prazos</h4><div class="two">${dfield('Início previsto',i.start,'data-f="start" data-id="'+i.id+'"')}${dfield('Fim previsto',i.end,'data-f="end" data-id="'+i.id+'"')}</div>`:''}
 <h4>Pagamentos</h4><p class="fin">Contratado ${c.hasC?R(i.contracted):'—'} · Pago ${R(c.paid)}${c.refunded?' (já descontado o estorno de '+R(c.refunded)+')':''} · Restante ${c.hasC?R(c.pending):'—'}${c.sched?' · Agendado '+R(c.sched):''}${c.unsched?' · Sem parcela definida '+R(c.unsched):''}</p>
@@ -1450,6 +1452,8 @@ document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=(
   else if(f==='contracted')setField(d.id,f,parse(v));
   else if(f==='qtyNeed'||f==='qtyBought')setQty(d.id,f,qint(v));
   else if(f==='notes')setField(d.id,f,v);
+  else if(f==='name'){const n=v.replace(/\s+/g,' ').trim().slice(0,120);if(n)setField(d.id,f,n)}
+  else if(f==='kind'){if(v==='servico'||v==='material')setField(d.id,f,v)}
   else if(f==='store'||f==='cat')setField(d.id,f,v.trim());
   else setField(d.id,f,v||null)}
  else if(d.sup)setSupplier(d.sup,el.value);
