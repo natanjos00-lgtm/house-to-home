@@ -245,7 +245,7 @@ const IMG={"sala": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHB
 /* Valores em centavos (inteiros). Cada valor existe em um só lugar; totais são sempre calculados. */
 const KEY='minha-casa-v4',PREV='minha-casa-prev',BAD='minha-casa-corrompido';
 const EMPTY=()=>({v:4,budget:{total:null,obra:null,enxoval:null},house:{name:'',cover:null,done:false},meta:{lastExport:null},rooms:[],sup:[],items:[],pays:[],log:[],notes:[]});
-const BLANK=()=>({id:null,area:'obra',kind:'servico',name:'',cat:'',roomId:null,supId:null,planned:0,contracted:null,status:'todo',start:null,end:null,notes:'',deleted:null,qtyNeed:1,qtyBought:0,store:'',buyDate:null,researching:false,returned:false,pin:null,img:[]});
+const BLANK=()=>({id:null,area:'obra',kind:'servico',name:'',cat:'',roomId:null,supId:null,planned:0,contracted:null,status:'todo',start:null,end:null,notes:'',deleted:null,qtyNeed:1,qtyBought:0,store:'',buyDate:null,researching:false,returned:false,pin:null,payMethod:null,payN:null,img:[]});
 let S=EMPTY(),ok=true,C={mode:false};
 const uid=()=>(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const parse=s=>{s=String(s==null?'':s).replace(/[R$\s]/g,'');if(!s)return null;
@@ -289,8 +289,8 @@ const act=()=>S.items.filter(i=>!i.deleted&&i.area!=='compra');
 const dealItems=()=>S.items.filter(i=>!i.deleted&&i.area==='compra');
 const AREA_NM={obra:'Obra',enxoval:'Enxoval',compra:'Compra'};
 const log=(id,txt)=>S.log.push({id:uid(),itemId:id,ts:new Date().toISOString(),txt});
-const FN={planned:'Previsto',contracted:'Contratado',status:'Status',start:'Início previsto',end:'Fim previsto',qtyNeed:'Quantidade necessária',qtyBought:'Quantidade comprada',store:'Loja',buyDate:'Data da compra',cat:'Categoria',roomId:'Ambiente',name:'Nome',kind:'Tipo'};
-const fmt=(i,f,v)=>f==='status'?LBL[i.area][ST.indexOf(v)]:(f==='start'||f==='end'||f==='buyDate')?fdate(v):f==='contracted'?(v==null?'não contratado':R(v)):f==='planned'?R(v):f==='roomId'?((S.rooms.find(r=>r.id===v)||{}).name||'—'):f==='kind'?(KIND[v]||'—'):(v==null||v==='')?'—':String(v);
+const FN={planned:'Previsto',contracted:'Contratado',status:'Status',start:'Início previsto',end:'Fim previsto',qtyNeed:'Quantidade necessária',qtyBought:'Quantidade comprada',store:'Loja',buyDate:'Data da compra',cat:'Categoria',roomId:'Ambiente',name:'Nome',kind:'Tipo',payMethod:'Como foi pago',payN:'Parcelas'};
+const fmt=(i,f,v)=>f==='status'?LBL[i.area][ST.indexOf(v)]:(f==='start'||f==='end'||f==='buyDate')?fdate(v):f==='contracted'?(v==null?'não contratado':R(v)):f==='planned'?R(v):f==='roomId'?((S.rooms.find(r=>r.id===v)||{}).name||'—'):f==='kind'?(KIND[v]||'—'):f==='payMethod'?(METHODS[v]||'—'):(v==null||v==='')?'—':String(v);
 const ENX_CATS=['Móveis','Eletrodomésticos','Cama, mesa e banho','Utensílios','Decoração','Outros'];
 /* Sugestão automática de categoria pelo nome do item (regras simples, sem internet). Tudo o que não se encaixa vira "Outros". */
 const _nm=s=>String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -302,9 +302,9 @@ const CAT_RULES=[
  ['Utensílios',/panela|frigideira|talher|prato|copo|xicara|caneca|\bpotes?\b|peneira|ralador|abridor|concha|espatula|escumadeira|tabua|saleiro|acucareiro|pimenteira|escorredor|\bformas?\b|luvas? termica|lixeira|balde|\brodo\b|vassoura|pa de lixo|varal|cesto|pregador|faca|jarra|travessa|garrafa|panos? de chao|assadeira|colher|garfo|tigela|marmita|funil|descascador|coador|chaleira|\bbule\b|esponja|bacia/]];
 const suggestCat=name=>{const n=_nm(name);for(const [c,re] of CAT_RULES)if(re.test(n))return c;return 'Outros'};
 const qint=s=>{const n=parseInt(String(s==null?'':s).replace(/\D/g,''),10);return isFinite(n)?n:null};
-function setField(id,f,v){const i=item(id);if(!i||i.deleted||i[f]===v)return false;if(f==='status'&&i.area==='enxoval')return false;const old=i[f];i[f]=v;if(FN[f])log(id,`${FN[f]}: ${fmt(i,f,old)} → ${fmt(i,f,v)}`);return true}
+function setField(id,f,v){const i=item(id);if(!i||i.deleted||i[f]===v)return false;if(f==='status'&&i.area==='enxoval')return false;const old=i[f];i[f]=v;if(FN[f])log(id,`${FN[f]}: ${fmt(i,f,old)} → ${fmt(i,f,v)}`);if(f==='payMethod'&&v!=='credit'&&i.payN!=null){const n=i.payN;i.payN=null;log(id,`${FN.payN}: ${n} → —`)}return true}
 /* Lista de compras. Situação da COMPRA é calculada pelas quantidades (Pendente, Parcialmente comprado, Comprado); só "Pesquisando" é escolhido à mão
-   e só vale enquanto nada foi comprado. A situação FINANCEIRA é outra coisa e vem dos pagamentos. Marcar como comprado nunca cria pagamento. */
+   e só vale enquanto nada foi comprado. A situação FINANCEIRA é outra coisa e vem dos pagamentos. Comprado (com valor informado) conta como pago sem criar lançamento; a forma de pagamento fica no item. */
 const PS={pending:'Pendente',researching:'Pesquisando',partial:'Parcialmente comprado',bought:'Comprado',returned:'Devolvido'};
 const FS={unpaid:'Não pago',partial:'Parcialmente pago',paid:'Pago',nototal:'Pago, sem total contratado',refunded:'Estornado'};
 const METHODS={pix:'Pix',cash:'Dinheiro',debit:'Cartão de débito',credit:'Cartão de crédito',transfer:'Transferência',boleto:'Boleto',other:'Outro'};
@@ -479,7 +479,8 @@ function togglePay(pid){const p=S.pays.find(x=>x.id===pid),r=p.kind==='refund';p
 function delPay(pid){const p=S.pays.find(x=>x.id===pid),r=p.kind==='refund';S.pays=S.pays.filter(x=>x.id!==pid);log(p.itemId,`${r?'Estorno':'Pagamento'} excluído: ${R(p.amount)} (${p.paid?(r?'estornado':'pago'):(r?'pendente':'agendado')}${p.date?', '+fdate(p.date):''})`)}
 function payWarn(id,amount,date){const i=item(id),w=[],c=ic(i);
  if(pd(id).some(p=>p.kind!=='refund'&&p.amount===amount&&(p.date||'')===(date||'')))w.push('Já existe um pagamento com o mesmo valor e a mesma data neste item.');
- if(c.hasC&&c.paid+c.sched+amount>i.contracted)w.push(`Com este valor, pagamentos e parcelas somam ${R(c.paid+c.sched+amount)}, acima do contratado (${R(i.contracted)}).`);
+ const pa=c.paid-autoPaid(i);/* o pagamento automático some quando o primeiro lançamento é feito à mão */
+ if(c.hasC&&pa+c.sched+amount>i.contracted)w.push(`Com este valor, pagamentos e parcelas somam ${R(pa+c.sched+amount)}, acima do contratado (${R(i.contracted)}).`);
  return w}
 function refundWarn(id,amount,date,paid){const c=ic(item(id)),w=[];
  if(pd(id).some(p=>p.kind==='refund'&&p.amount===amount&&(p.date||'')===(date||'')))w.push('Já existe um estorno com o mesmo valor e a mesma data neste item.');
@@ -508,7 +509,7 @@ function registerPurchase(id,spec){const e=checkPlan(id,spec);if(e)return e;cons
  b.kept.slice().sort((x,y)=>(x.date||'9').localeCompare(y.date||'9')).forEach((p,k)=>{p.grp=gid;p.inst=k+1;p.of=N});
  rows.forEach((r,k)=>S.pays.push({id:uid(),itemId:id,amount:r.amount,date:r.date,paid:!!r.paid,kind:'pay',method:spec.method,inst:P+k+1,of:N,grp:gid}));
  log(id,`Compra registrada: total ${R(spec.total)} · ${METHOD_SHORT[spec.method]} · ${N} parcela(s) (${P} já paga(s) mantida(s), ${rows.length} nova(s))`);return null}
-function paySummary(i){const ps=pd(i.id).filter(p=>p.kind!=='refund');if(!ps.length)return'';const cnt={};
+function paySummary(i){const ps=pd(i.id).filter(p=>p.kind!=='refund');if(!ps.length)return autoPaid(i)&&METHODS[i.payMethod]?METHOD_SHORT[i.payMethod]+(i.payMethod==='credit'&&i.payN>1?' em '+i.payN+'x':''):'';const cnt={};
  ps.forEach(p=>{if(METHODS[p.method])cnt[p.method]=(cnt[p.method]||0)+1});
  const ms=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(m=>METHOD_SHORT[m]),of=Math.max(0,...ps.map(p=>p.of||0)),parts=[];
  if(ms.length)parts.push(ms.join(' + '));if(of>1)parts.push(`${ps.filter(p=>p.paid&&p.inst).length}/${of} parcelas`);return parts.join(' · ')}
@@ -530,8 +531,11 @@ function restoreItem(id){const i=item(id);if(i&&i.deleted){i.deleted=null;log(id
 function addNote(id,text,photos){S.notes.push({id:uid(),itemId:id,ts:new Date().toISOString(),text,photos:photos||[]})}
 
 /* Comprometido de um item = contratado (ou previsto, se não contratado), nunca menor que o já pago. O pago NÃO é somado ao contratado. */
+/* Enxoval: tudo que foi comprado conta como PAGO. Vale quando há quantidade comprada e valor comprado e ainda não existe nenhum pagamento lançado
+   à mão; se houver lançamentos (Mais opções), valem eles. Não grava nada: é só conta. "Como foi pago" e "Parcelas" ficam no próprio item. */
+const autoPaid=i=>i.area==='enxoval'&&!i.deleted&&!i.returned&&i.qtyBought>0&&Number.isInteger(i.contracted)&&i.contracted>0&&!pd(i.id).some(p=>p.kind!=='refund')?i.contracted:0;
 function ic(i){const ps=pd(i.id),P=ps.filter(p=>p.kind!=='refund'),Rf=ps.filter(p=>p.kind==='refund'),sum=a=>a.reduce((s,p)=>s+p.amount,0),
- gross=sum(P.filter(p=>p.paid)),sched=sum(P.filter(p=>!p.paid)),refunded=sum(Rf.filter(p=>p.paid)),refundPending=sum(Rf.filter(p=>!p.paid)),
+ gross=sum(P.filter(p=>p.paid))+autoPaid(i),sched=sum(P.filter(p=>!p.paid)),refunded=sum(Rf.filter(p=>p.paid)),refundPending=sum(Rf.filter(p=>!p.paid)),
  paid=Math.max(0,gross-refunded),hasC=i.contracted!=null,base={paid,gross,refunded,refundPending,sched,hasC};
  if(i.returned)return Object.assign(base,{commit:paid,pending:0,unsched:0,over:false,excess:0,plannedEff:0,contractedEff:0});
  const pending=hasC?Math.max(0,i.contracted-paid):0;
@@ -552,7 +556,8 @@ function checkData(d){const e=[],ids=new Set(d.items.map(i=>i.id));
  [...d.pays,...d.log,...d.notes].forEach(x=>{if(!ids.has(x.itemId))e.push('órfão '+x.id)});
  d.items.forEach(i=>{if(i.roomId&&!d.rooms.some(r=>r.id===i.roomId))e.push('ambiente '+i.id);if(i.supId&&!d.sup.some(s=>s.id===i.supId))e.push('fornecedor '+i.id);
   if(!Number.isInteger(i.qtyNeed)||i.qtyNeed<1||!Number.isInteger(i.qtyBought)||i.qtyBought<0)e.push('quantidade '+i.id);
-  if(!Number.isInteger(i.planned)||i.planned<0||(i.contracted!=null&&(!Number.isInteger(i.contracted)||i.contracted<0)))e.push('valor '+i.id)});
+  if(!Number.isInteger(i.planned)||i.planned<0||(i.contracted!=null&&(!Number.isInteger(i.contracted)||i.contracted<0)))e.push('valor '+i.id);
+  if(i.payMethod!=null&&!METHODS[i.payMethod])e.push('forma de pagamento '+i.id);if(i.payN!=null&&(!Number.isInteger(i.payN)||i.payN<1||i.payN>60))e.push('parcelas '+i.id)});
  d.pays.forEach(p=>{if(!Number.isInteger(p.amount)||p.amount<=0)e.push('valor do pagamento '+p.id);
   if(p.kind!==undefined&&p.kind!=='pay'&&p.kind!=='refund')e.push('tipo do pagamento '+p.id);if(p.seg!==undefined&&!GRP_OK(p.seg))e.push('tipo da parcela '+p.id);if(p.method&&!METHODS[p.method])e.push('modalidade '+p.id)});
  const gi=new Set();d.pays.forEach(p=>{if(p.grp&&p.inst){const k=p.itemId+'|'+p.grp+'|'+p.inst;if(gi.has(k))e.push('parcela duplicada '+p.id);gi.add(k)}});
@@ -670,7 +675,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261111-1653';
+const APP_VER='20261114-1210';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -1154,16 +1159,18 @@ function quickBlock(i,c){const D=`data-id="${i.id}"`,sg=suggestCat(i.name),cats=
  F=(l,f,v,ph)=>`<label>${l}<input inputmode="decimal" placeholder="${ph}" value="${fv(v)}" data-f="${f}" ${D}></label>`,
  rest=c.hasC?Math.max(0,i.contracted-c.paid-c.sched):0,qe=U.qerr&&U.qerr.id===i.id?U.qerr.msg:'';
  const diff=c.hasC&&i.planned>0&&!i.returned?(i.contracted<i.planned?`<p class="fin pos">${R(i.planned-i.contracted)} abaixo do previsto</p>`:i.contracted>i.planned?`<p class="fin neg">${R(i.contracted-i.planned)} acima do previsto</p>`:'<p class="fin">Exatamente o previsto</p>'):'';
- const st=i.returned?'':!c.hasC?'<p class="note">Informe o valor comprado para registrar como foi pago.</p>':c.paid>=i.contracted?`<p class="fin pos"><b>Pago ${R(c.paid)}</b> ✓</p>`:`<p class="fin">Pago ${R(c.paid)} · falta ${R(i.contracted-c.paid)}${c.sched?' (já agendado '+R(c.sched)+')':''}</p>`;
- const chips=!i.returned&&c.hasC&&rest>0?`<p class="cap">${c.paid>0?'Pagar o restante':'Como pagou'} (${R(rest)})</p><div class="qpay">${[['pix','Pix'],['debit','Débito'],['credit','Crédito'],['cash','Dinheiro'],['boleto','Boleto (a pagar)']].map(([k,l])=>`<button type="button" class="btn alt" data-qpay="${i.id}:${k}">${l}</button>`).join('')}</div>`:'';
+ const auto=autoPaid(i)>0,real=pd(i.id).some(p=>p.kind!=='refund'),
+ st=i.returned?'':!c.hasC?'<p class="note">Informe o valor comprado. Tudo que foi comprado conta como pago.</p>':auto?`<p class="fin pos"><b>Pago ${R(c.paid)}</b> ✓ <small>comprado conta como pago</small></p>`:i.qtyBought===0&&!real?'<p class="note">Ao informar a quantidade comprada, o valor conta como pago.</p>':c.paid>=i.contracted?`<p class="fin pos"><b>Pago ${R(c.paid)}</b> ✓</p>`:`<p class="fin">Pago ${R(c.paid)} · falta ${R(i.contracted-c.paid)}${c.sched?' (já agendado '+R(c.sched)+')':''}</p>`;
+ const how=auto?`<div class="two"><label>Como foi pago<select data-f="payMethod" ${D}><option value="">Escolha…</option>${Object.entries(METHODS).map(([k,v])=>`<option value="${k}" ${i.payMethod===k?'selected':''}>${v}</option>`).join('')}</select></label>${i.payMethod==='credit'?`<label>Em quantas vezes<input inputmode="numeric" placeholder="1" value="${i.payN||''}" data-f="payN" ${D} aria-label="Número de parcelas no cartão de crédito"></label>`:''}</div>`:'';
+ const chips=!i.returned&&real&&c.hasC&&rest>0?`<p class="cap">${c.paid>0?'Pagar o restante':'Como pagou'} (${R(rest)})</p><div class="qpay">${[['pix','Pix'],['debit','Débito'],['credit','Crédito'],['cash','Dinheiro'],['boleto','Boleto (a pagar)']].map(([k,l])=>`<button type="button" class="btn alt" data-qpay="${i.id}:${k}">${l}</button>`).join('')}</div>`:'';
  return `<div class="quick"><div class="two">${F('Previsto (R$)','planned',i.planned,'0,00')}${F('Comprado por (R$)','contracted',i.contracted,'Valor pago')}</div>${diff}
 <div class="two"><label>Qtd. comprada <small>(de ${i.qtyNeed})</small><span class="stp"><input inputmode="numeric" value="${i.qtyBought}" data-f="qtyBought" ${D}><button type="button" class="m" data-qd="${i.id}" aria-label="Diminuir quantidade comprada">−</button><button type="button" class="p" data-qu="${i.id}" aria-label="Aumentar quantidade comprada">+</button></span></label>
 ${dfield('Data da compra',i.buyDate,'data-f="buyDate" '+D)}</div>
-${st}${chips}${qe?`<p class="warn" role="alert">${esc(qe)}</p>`:''}
+${st}${how}${chips}${qe?`<p class="warn" role="alert">${esc(qe)}</p>`:''}
 <label>Categoria<select data-f="cat" ${D}><option value="">Sem categoria</option>${cats.map(c=>`<option ${c===i.cat?'selected':''}>${esc(c)}</option>`).join('')}</select></label>${!i.cat?`<p class="note">Sugestão: <b>${esc(sg)}</b> <button type="button" class="lk" data-suggcat="${i.id}">Usar</button></p>`:''}
 <label>Observações<textarea rows="2" data-f="notes" ${D} placeholder="Modelo, cor, medidas, link…">${esc(i.notes)}</textarea></label></div>`}
 function purForm(i){const P=U.pur,b=planBase(i.id);
- if(!P||P.id!==i.id)return `<button class="btn alt" data-pur="${i.id}" style="width:100%;margin:8px 0 2px">Registrar compra e parcelas</button><p class="note">Marcar como comprado não registra pagamento. Informe aqui a modalidade, o total e as parcelas.</p>`;
+ if(!P||P.id!==i.id)return `<button class="btn alt" data-pur="${i.id}" style="width:100%;margin:8px 0 2px">Registrar compra e parcelas</button><p class="note">Opcional: para controlar parcelas com datas. Se lançar pagamentos aqui, passam a valer eles no lugar do pagamento automático.</p>`;
  const f=P.f;
  return `<form class="pf" data-purf="${i.id}"><label>Modalidade<select name="method"><option value="">Escolha…</option>${Object.entries(METHODS).map(([k,v])=>`<option value="${k}" ${f.method===k?'selected':''}>${v}</option>`).join('')}</select></label>
 <label>Total da compra (R$)<input name="total" inputmode="decimal" value="${esc(f.total)}" placeholder="0,00"></label>
@@ -1487,6 +1494,8 @@ document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=(
   else if(f==='name'){const n=v.replace(/\s+/g,' ').trim().slice(0,120);if(n)setField(d.id,f,n)}
   else if(f==='kind'){if(v==='servico'||v==='material')setField(d.id,f,v)}
   else if(f==='store'||f==='cat')setField(d.id,f,v.trim());
+  else if(f==='payMethod')setField(d.id,f,METHODS[v]?v:null);
+  else if(f==='payN'){const n=qint(v);setField(d.id,f,n!=null&&n>=1&&n<=60?n:null)}
   else setField(d.id,f,v||null)}
  else if(d.sup)setSupplier(d.sup,el.value);
  else if(d.ct)setContact(d.ct,el.value);
