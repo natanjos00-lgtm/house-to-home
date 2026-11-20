@@ -678,7 +678,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261117-0903';
+const APP_VER='20261120-1750';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -1270,7 +1270,10 @@ function plGlDraw(P,svg){const G=P.gl;if(!G||G.dead)return false;const gl=G.gl,c
  if(svg){const f=n=>n.toFixed(1),prj=(x,y,z)=>{const v=[x,z,y,1],o=[0,0,0,0];for(let r=0;r<4;r++)o[r]=VP[r]*v[0]+VP[4+r]*v[1]+VP[8+r]*v[2]+VP[12+r]*v[3];return[(o[0]/o[3]*.5+.5)*W,(1-(o[1]/o[3]*.5+.5))*H]};
   svg.setAttribute('viewBox','0 0 '+f(W)+' '+f(H));svg.setAttribute('preserveAspectRatio','none');let g='';const fs=Math.max(11,Math.min(14,W/30));
   if(sc.lot){const r=sc.lot.rua,c=prj(r[0]+r[2]/2,r[1]+r[3]/2,0);g+=`<text x="${f(c[0])}" y="${f(c[1])}" text-anchor="middle" font-size="${f(fs*.9)}" font-family="Figtree,sans-serif" font-weight="600" fill="#f3eee4" stroke="#5f5c58" stroke-width="${f(fs*.25)}" paint-order="stroke" pointer-events="none">Rua</text>`}
-  rs.forEach(o=>{const c=prj(o.x+o.w/2,o.y+o.l/2,.05);g+=`<text x="${f(c[0])}" y="${f(c[1])}" text-anchor="middle" font-size="${f(fs)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" stroke="#f8f2e7" stroke-width="${f(fs*.3)}" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${esc(o.r.name)}<tspan x="${f(c[0])}" dy="${f(fs*1.15)}" font-weight="500" font-size="${f(fs*.82)}">${o.none?'sem medidas':(o.w*o.l).toFixed(1).replace('.',',')+' m²'}</tspan></text>`});svg.innerHTML=g}
+  rs.forEach(o=>{const c=prj(o.x+o.w/2,o.y+o.l/2,.05),q=[prj(o.x,o.y,.05),prj(o.x+o.w,o.y,.05),prj(o.x+o.w,o.y+o.l,.05),prj(o.x,o.y+o.l,.05)],xs=q.map(v=>v[0]),ys=q.map(v=>v[1]),bw=Math.max(...xs)-Math.min(...xs),bh=Math.max(...ys)-Math.min(...ys);
+   const cap=Math.max(6,Math.floor(bw*.92/(fs*.6))),ln=[];String(o.r.name).split(' ').forEach(w=>{const l=ln[ln.length-1];if(l!=null&&(l+' '+w).length<=cap)ln[ln.length-1]=l+' '+w;else ln.push(w)});
+   const fr=Math.max(8.5,Math.min(fs,bw*.92/(Math.max(4,...ln.map(l=>l.length))*.6))),area=o.none?'sem medidas':(o.w*o.l).toFixed(1).replace('.',',')+' m²',show=bh>=fr*(ln.length+1.5)||bw>fr*7,y0=c[1]-(ln.length-1)*fr*.55;
+   g+=`<text x="${f(c[0])}" y="${f(y0)}" text-anchor="middle" font-size="${f(fr)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" stroke="#f8f2e7" stroke-width="${f(fr*.3)}" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${ln.map((l,i)=>`<tspan x="${f(c[0])}" dy="${i?f(fr*1.08):0}">${esc(l)}</tspan>`).join('')}${show?`<tspan x="${f(c[0])}" dy="${f(fr*1.15)}" font-weight="500" font-size="${f(fr*.82)}">${area}</tspan>`:''}</text>`});svg.innerHTML=g}
  return true}
 
 const roomsOf=k=>roomsOfKind(S.rooms,k);
