@@ -193,8 +193,21 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .qo.v{padding:0;overflow:hidden}.qo.v b{padding:0 12px 12px;font-size:14px}.qo .qimg{display:block;width:100%;aspect-ratio:4/3;position:relative}.qo .qimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .sb{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin:6px 0}.sb .bar{margin:0}.chips2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.stip{background:var(--sand);border-radius:var(--rs);padding:8px 12px;margin:6px 0 10px}.stip p{margin:4px 0}
 .seg{display:flex;gap:0;margin:8px 0}.seg button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}.seg button:first-child{border-radius:12px 0 0 12px}.seg button:last-child{border-radius:0 12px 12px 0;border-left:0}.seg button[aria-pressed=true]{background:var(--brown);color:var(--off);border-color:var(--brown)}
-.plbox{position:relative;background:radial-gradient(120% 90% at 50% 0,var(--card),var(--sand));border:1px solid var(--line);border-radius:var(--rc);overflow:hidden;touch-action:none;margin:8px 0}.plbox canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}.plbox svg{position:relative;display:block;width:100%;height:min(64vh,430px);user-select:none;-webkit-user-select:none}
-.plzm{display:flex;gap:8px;align-items:flex-end;margin:8px 0 4px}.plzo{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}.plzo button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:26px;line-height:1;font-weight:600;box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}.plfoc{flex:1;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute)}.plfoc select{min-height:44px}.plbox{touch-action:pan-y}
+.plbox{position:relative;background:radial-gradient(120% 90% at 50% 0,var(--card),var(--sand));border:1px solid var(--line);border-radius:var(--rc);overflow:hidden;touch-action:none;margin:8px 0}.plbox canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}.plbox svg{position:relative;display:block;width:100%;height:min(64vh,430px);height:clamp(380px,calc(100dvh - 290px),900px);user-select:none;-webkit-user-select:none}
+.plzm{display:flex;gap:8px;align-items:flex-end;margin:8px 0 4px}.plzo{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}.plzo .plfit{font-size:22px}.plzo button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:26px;line-height:1;font-weight:600;box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}.plfoc{flex:1;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute)}.plfoc select{min-height:44px}.plbox{touch-action:pan-y}
+/* planta 3D: mais espaço, tela cheia e painel de luz */
+.plwrap{display:block}.plbar{position:absolute;left:10px;top:10px;display:flex;gap:8px;z-index:6;flex-wrap:wrap;max-width:calc(100% - 76px)}
+.plpill{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--brown);font:600 14px var(--bf);box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}
+.pldr{display:none;position:absolute;z-index:7;left:0;right:0;bottom:0;max-height:44%;overflow:auto;background:var(--card);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:12px 14px 16px;box-shadow:0 -6px 18px rgba(40,25,10,.22);touch-action:pan-y}.pldr.open{display:block}
+.pldh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.pls{margin:10px 0}.pls>span,.pls label{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}.pls input[type=range]{width:100%;accent-color:var(--olive)}
+.plcs{display:flex;flex-wrap:wrap;gap:6px}.plc{min-height:38px;padding:0 12px;border-radius:19px;border:1px solid var(--line);background:var(--off);color:var(--ink);font:500 14px var(--bf);cursor:pointer}.plc[aria-pressed=true]{background:var(--olive);border-color:var(--olive);color:#fff}
+.plsw{display:flex;flex-wrap:wrap;gap:8px}.swb{display:flex;flex-direction:column;align-items:center;gap:3px;width:62px;background:none;border:0;padding:2px;cursor:pointer;color:var(--ink)}.swb i{display:block;width:40px;height:40px;border-radius:50%;border:2px solid var(--line)}.swb em{font:normal 11px/1.15 var(--bf);text-align:center;color:var(--mute)}.swb[aria-pressed=true] i{border-color:var(--olive);box-shadow:0 0 0 2px var(--olive)}.swb[aria-pressed=true] em{color:var(--ink);font-weight:600}
+@media (max-width:759px){body.plwide .plbox:not(.full){margin-inline:-16px;border-radius:0;border-inline:0}}
+@media (min-width:760px){body.plwide{max-width:1360px}body.plwide #nv{max-width:1360px}}
+@media (min-width:980px){.plwrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.plside{position:sticky;top:8px;max-height:calc(100dvh - 24px);overflow:auto}.plbox:not(.full) .pldr{left:auto;right:0;top:0;bottom:0;width:320px;max-height:none;border-radius:0;border-top:0;border-left:1px solid var(--line)}}
+.plbox.full{position:fixed;inset:0;z-index:90;margin:0;border-radius:0;border:0;height:100vh;height:100dvh}.plbox.full svg{height:100%}body.plfs{overflow:hidden}.plbox.full .pldr{max-height:44%}
+@media (min-width:760px){.plbox.full.dropen .plzo{right:350px}.plbox.full .pldr{left:auto;right:0;top:0;bottom:0;width:340px;max-height:none;border-radius:0;border-top:0;border-left:1px solid var(--line)}}
+
 .plctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}.plctl .btn{min-height:40px;padding:8px 16px}.plel{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute);flex:1;min-width:140px}.plel input{width:100%;accent-color:var(--gold)}
 .five{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}.five label{font-size:13px;color:var(--mute)}.five input{width:100%}
 .kch{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.kch .kb{border:1px solid var(--line);cursor:pointer;font:600 14px var(--bf);padding:9px 14px;min-height:40px}.kch .kb:active{background:var(--sand)}
@@ -692,7 +705,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261120-1823';
+const APP_VER='20261120-2218';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -980,7 +993,49 @@ function plSeams(ps){const o=[];for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.l
  if(Math.abs(a.y+a.l-b.y)<.005||Math.abs(b.y+b.l-a.y)<.005){const y=Math.abs(a.y+a.l-b.y)<.005?b.y:a.y,s=Math.max(a.x,b.x),f=Math.min(a.x+a.w,b.x+b.w);if(f-s>.01)o.push([s,y,f,y])}}return o}
 /* ---- Vista 3D em corte (como uma maquete): paredes grossas, pisos por tipo de cômodo, móveis ilustrativos, luz do alto à esquerda e sombras.
    Os móveis são só ilustração (não vêm da sua lista de itens). Medidas e posições dos ambientes vêm do app. ---- */
-const PL3={t:.16,curb:.28,k:.74,cell:1,L:(()=>{const a=[-.45,-.55,.7],n=Math.hypot(a[0],a[1],a[2]);return a.map(v=>v/n)})(),ext:'#eadfcd',topW:'#f8f2e7'};
+/* ---- Aparência e luz da planta 3D (escolhas só deste aparelho; não entram em backup nem na sincronização) ---- */
+const PLOPT0={floor:'auto',wall:'auto',amb:'dia',spots:false,pend:false,fita:false,temp:'quente',lum:70};
+const PLFLOORS=[['auto','Como está hoje'],['claro','Madeira clara'],['escuro','Madeira escura'],['porc','Porcelanato claro'],['cim','Cimento queimado']];
+const PLWALLS=[['auto','Por ambiente',null],['gelo','Branco gelo','#f2efe9'],['areia','Areia','#e4d5bd'],['salvia','Verde sálvia','#b8c4a4'],['cinza','Cinza claro','#cdcdc8'],['azul','Azul acinzentado','#b5c4cd'],['terra','Terracota suave','#d3a58b']];
+const PLAMBS=[['dia','Dia'],['tarde','Fim de tarde'],['noite','Noite']],PLTEMPS=[['quente','Quente'],['neutra','Neutra'],['fria','Fria']];
+function plOptClean(o){o=o&&typeof o==='object'?o:{};const has=(a,v)=>a.some(x=>x[0]===v),r=Object.assign({},PLOPT0);
+ if(has(PLFLOORS,o.floor))r.floor=o.floor;if(has(PLWALLS,o.wall))r.wall=o.wall;if(has(PLAMBS,o.amb))r.amb=o.amb;if(has(PLTEMPS,o.temp))r.temp=o.temp;
+ ['spots','pend','fita'].forEach(k=>{if(o[k]===true)r[k]=true});const l=Number(o.lum);if(Number.isFinite(l))r.lum=Math.max(20,Math.min(100,Math.round(l)));return r}
+function plOptLoad(){try{return plOptClean(JSON.parse(localStorage.getItem('h2h_plopt')||'null'))}catch(e){return plOptClean(null)}}
+const plOpt=()=>(U.pl&&U.pl.opt)||PLOPT0;
+function plOptSave(){try{localStorage.setItem('h2h_plopt',JSON.stringify(plOpt()))}catch(e){}}
+/* piso: [cor, material] — 1 madeira, 2 porcelanato, 11 cimento; molhados (banheiro, cozinha…) e áreas externas mantêm o piso próprio */
+function plFloorOf(r,o){const k=rkind(r),base=plK3(r)[0],wet=PLTILE.has(k),out=k==='varanda'||k==='quintal'||k==='garagem';
+ if(o.floor==='auto')return[base,PLWOOD.has(k)?1:wet?2:0];
+ if(wet)return[base,2];if(out)return[base,0];
+ if(o.floor==='porc')return['#e2dfd8',2];if(o.floor==='cim')return['#b4b1aa',11];
+ return[o.floor==='escuro'?'#7a5233':'#d6b98c',1]}
+function plWallOf(r,o){const w=PLWALLS.find(x=>x[0]===o.wall);return w&&w[2]?w[2]:plK3(r)[1]}
+function plOptSync(){const P=U.pl;if(!P||!P.opt)return;document.querySelectorAll('[data-plo]').forEach(b=>{const[k,v]=b.dataset.plo.split(':');b.setAttribute('aria-pressed',k==='reset'?'false':String(P.opt[k]===v))});
+ document.querySelectorAll('[data-plot]').forEach(b=>b.setAttribute('aria-pressed',String(!!P.opt[b.dataset.plot])));const r=document.getElementById('plolum');if(r)r.value=P.opt.lum}
+function plOptSet(s){const P=U.pl;if(!P)return;const[k,v]=s.split(':');let O=P.opt||plOptLoad();
+ if(k==='reset')O=plOptClean(null);else if(k==='tog'){O[v]=!O[v];if(O[v]&&O.amb==='dia')O.amb='noite'}else if(['floor','wall','amb','temp'].includes(k))O[k]=v;
+ P.opt=plOptClean(O);plOptSave();plOptSync();planDraw()}
+/* escolhe o ângulo que melhor preenche a tela (casa comprida em tela comprida) e para o giro */
+function plFitView(){const P=U.pl;if(!P)return;const bx=document.querySelector('.plbox');if(!bx)return;const r=bx.getBoundingClientRect();let W=r.width,H=r.height;
+ const d=document.getElementById('pldr');if(P.dr&&d&&getComputedStyle(d).display!=='none'){const q=d.getBoundingClientRect();if(q.width>=r.width*.95)H-=Math.min(.7*H,q.height);else W-=Math.min(.6*W,q.width)}
+ if(!(W>50&&H>50))return;const b=planBounds(S.rooms),its=plItems(),hh=Math.max(2.7,...its.map(o=>o.h))*PL3.k,asp=W/H,ce=Math.cos(P.el),se=Math.sin(P.el),cn=[];
+ [[b.x0,b.y0],[b.x1,b.y0],[b.x1,b.y1],[b.x0,b.y1]].forEach(([x,y])=>{cn.push([x,0,y],[x,hh,y])});let best=null;
+ for(let a=0;a<Math.PI*2;a+=.04){if(Math.abs(Math.sin(2*a))<.45)continue;const sa=Math.sin(a),ca=Math.cos(a),fw=[-ce*sa,-se,-ce*ca],rt=[ca,0,-sa],up=[rt[1]*fw[2]-rt[2]*fw[1],rt[2]*fw[0]-rt[0]*fw[2],rt[0]*fw[1]-rt[1]*fw[0]];
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;cn.forEach(q=>{const sx=q[0]*rt[0]+q[1]*rt[1]+q[2]*rt[2],sy=q[0]*up[0]+q[1]*up[1]+q[2]*up[2];x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy)});
+  const sc=Math.max((x1-x0)/asp,y1-y0);if(!best||sc<best.sc-1e-9)best={a,sc}}
+ if(!best)return;P.az=best.a;P.spin=false;P.zoom=1;P.foc=null;const bb=document.querySelector('[data-plspin]');if(bb)bb.textContent='Girar sozinha';const s=document.querySelector('[data-plfoc]');if(s)s.value='';planDraw()}
+function plApplyFull(){const P=U.pl;if(!P)return;const bx=document.querySelector('.plbox');if(bx)bx.classList.toggle('full',!!P.full);document.body.classList.toggle('plfs',!!P.full);const b=document.querySelector('[data-plfull]');if(b)b.textContent=P.full?'Sair da tela cheia':'Tela cheia';if(P.full&&P.mode==='3d')plFitView();else planDraw()}
+function plDrawer(P){const O=P.opt,ch=(g,v,l)=>`<button class="plc" data-plo="${g}:${v}" aria-pressed="${O[g]===v}">${l}</button>`,tg=(k,l)=>`<button class="plc" data-plot="${k}" aria-pressed="${!!O[k]}">${l}</button>`;
+ return `<div class="pldr ${P.dr?'open':''}" id="pldr" role="region" aria-label="Luz e acabamento"><div class="pldh"><b>Luz e acabamento</b><button class="plc" data-pldr>Fechar</button></div>
+ <div class="pls"><span>Piso</span><div class="plcs">${PLFLOORS.map(([v,l])=>ch('floor',v,l)).join('')}</div></div>
+ <div class="pls"><span>Paredes</span><div class="plsw">${PLWALLS.map(([v,l,c])=>`<button class="swb" data-plo="wall:${v}" aria-pressed="${O.wall===v}"><i style="background:${c||'conic-gradient(#f0e1c8,#e1e4d4,#e3e6e1,#dce7e7,#f0e1c8)'}"></i><em>${l}</em></button>`).join('')}</div></div>
+ <div class="pls"><span>Hora do dia</span><div class="plcs">${PLAMBS.map(([v,l])=>ch('amb',v,l)).join('')}</div></div>
+ <div class="pls"><span>Luzes</span><div class="plcs">${tg('spots','Spots no teto')}${tg('pend','Pendentes')}${tg('fita','Fita de LED')}</div></div>
+ <div class="pls"><span>Cor da luz</span><div class="plcs">${PLTEMPS.map(([v,l])=>ch('temp',v,l)).join('')}</div></div>
+ <div class="pls"><label>Força da luz<input type="range" id="plolum" min="20" max="100" step="5" value="${O.lum}" aria-label="Força da luz"></label></div>
+ <p class="note">As luzes aparecem melhor à noite (ao ligar uma, a hora vira Noite). Os móveis ainda são só ilustração.</p><button class="lk" data-plo="reset:1">Voltar ao padrão</button></div>`}
+const PL3={t:.2,curb:.28,k:.74,cell:1,L:(()=>{const a=[-.45,-.55,.7],n=Math.hypot(a[0],a[1],a[2]);return a.map(v=>v/n)})(),ext:'#eadfcd',topW:'#fcf9f2'};
 const PLK3={sala:['#c9a577','#f0e1c8'],jantar:['#c9a577','#f0e1c8'],casal:['#d2b58b','#e1e4d4'],solteiro:['#d2b58b','#e1e4d4'],crianca:['#d2b58b','#efdfc9'],escritorio:['#c3a075','#e4d8c5'],cozinha:['#dcd2c1','#efdcc0'],lavanderia:['#d7d9d2','#e3e6e1'],banheiro:['#c9d6d6','#dce7e7'],lavabo:['#c9d6d6','#dce7e7'],varanda:['#cdbfa5','#e9e0d0'],quintal:['#b9c79a','#e9e0d0'],closet:['#cfb995','#e6dac8'],corredor:['#d4c3a6','#eadfcf'],despensa:['#d8ccb7','#ebe1d1'],garagem:['#c9c4bb','#e1ddd5']};
 const PLWOOD=new Set(['sala','jantar','casal','solteiro','crianca','escritorio','closet','corredor']),PLTILE=new Set(['cozinha','banheiro','lavabo','lavanderia','despensa']);
 const plK3=r=>PLK3[rkind(r)]||['#d9ccb6','#eadfcf'];
@@ -1100,7 +1155,11 @@ function plView2(){const rs=plItems(),b=plExtent(),m=1.2,x0=b.x0-m,y0=b.y0-m,W=b
   g+=`<text x="${f(cx)}" y="${f(cy-fs2*.1)}" text-anchor="middle" font-size="${f(fs2)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" pointer-events="none">${esc(o.r.name)}<tspan x="${f(cx)}" dy="${f(fs2*1.2)}" font-weight="500" font-size="${f(fs2*.85)}">${o.none?'sem medidas':mp?o.area.toFixed(2).replace('.',',')+' m²':fvm(o.w)+' × '+fvm(o.l)+' m'}</tspan></text></g>`});
  return{vb:[x0,y0,W,H].map(f).join(' '),g}}
 function planDraw(){const svg=document.getElementById('plsvg');if(!svg||!U.pl)return;if(U.pl.mode==='3d'&&U.pl.gl){try{if(plGlDraw(U.pl,svg))return}catch(e){console.warn('3D realista falhou, voltando ao desenho simples:',e&&e.message);plGlDispose(U.pl);const cv=document.getElementById('plgl');if(cv)cv.style.display='none'}}const v=U.pl.mode==='2d'?plView2():plView3();svg.setAttribute('viewBox',v.vb);svg.innerHTML=v.g}
-function planBind(){const svg=document.getElementById('plsvg');if(!svg||!U.pl)return;const P=U.pl;plGlDispose(P);if(P.mode==='3d'){const cv=document.getElementById('plgl');P.gl=plGlInit(cv);if(!P.gl&&cv)cv.style.display='none'}planDraw();cancelAnimationFrame(P.raf);
+function planBind(){const svg=document.getElementById('plsvg'),pw=!!(svg&&U.pl);document.body.classList.toggle('plwide',pw);document.body.classList.toggle('plfs',pw&&!!U.pl.full);if(!pw)return;const P=U.pl;
+ if(!window.__plWin){window.__plWin=1;let rt=0;const rd=()=>{if(U.pl&&document.getElementById('plsvg')){cancelAnimationFrame(rt);rt=requestAnimationFrame(planDraw)}};addEventListener('resize',rd);addEventListener('orientationchange',rd);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&U.pl&&U.pl.full){U.pl.full=false;plApplyFull()}})}
+ plGlDispose(P);if(P.mode==='3d'){const cv=document.getElementById('plgl');P.gl=plGlInit(cv);if(!P.gl){if(cv)cv.style.display='none';['pldrbtn','pldr'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none'})}}planDraw();
+ const lm=document.getElementById('plolum');if(lm)lm.addEventListener('input',()=>{if(P.opt){P.opt.lum=Math.max(20,Math.min(100,+lm.value||70));plOptSave();planDraw()}});cancelAnimationFrame(P.raf);
  if(P.mode==='3d'){let last=null,drag=null;
   const ptr=new Map();let pd0=0,z0=1;const pdist=()=>{const a=[...ptr.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1};
   svg.addEventListener('pointerdown',e=>{ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptr.size===2){pd0=pdist();z0=P.zoom||1;drag=null}else drag={x:e.clientX,y:e.clientY};P.spin=false;try{svg.setPointerCapture(e.pointerId)}catch(x){}});
@@ -1150,7 +1209,7 @@ ${g&&!g.fits?'<p class="warn">A casa não cabe nesse terreno. Confira as medidas
 <p class="note">“Esquerda” e “direita” são vistas de quem está na rua olhando para a casa. A distância até a rua e até o vizinho é 0 se a casa encosta neles.</p>
 ${S.house&&S.house.lot?`<button class="lk" data-lotdel>${U.arm==='lotdel'?'Toque de novo para remover o terreno':'Remover terreno'}</button>`:''}</details>`}
 const sc0=()=>plItems().filter(o=>!o.none&&!o.sub);
-function planPage(){const P=U.pl,back='<button class="lk back" data-plx>← Ambientes</button>';
+function planPage(){const P=U.pl;if(!P.opt)P.opt=plOptLoad();const back='<button class="lk back" data-plx>← Ambientes</button>';
  if(!S.rooms.length)return back+'<h2 class="pt">Planta da casa</h2><p class="empty">Adicione ambientes primeiro. Depois você monta a planta aqui.</p>';
  const st=planStats(S.rooms),ov=planOverlaps(S.rooms),sel=S.rooms.find(r=>r.id===P.sel),nm=id=>{const r=S.rooms.find(x=>x.id===id);return r?esc(r.name):''};
  const F=(k,l,v)=>`<label>${l}<input inputmode="decimal" value="${fvm(v)}" data-plf="${k}" aria-label="${l}"></label>`;
@@ -1158,23 +1217,24 @@ function planPage(){const P=U.pl,back='<button class="lk back" data-plx>← Ambi
  return back+`<h2 class="pt">Planta da casa</h2>
 <p class="note">${P.mode==='3d'?'Arraste para girar a casa; use + e − ou dois dedos para ampliar. Os ambientes e as medidas vêm da página de cada ambiente; os móveis são só ilustração.':'Arraste os ambientes para montar a planta. Toque num ambiente para ajustar as medidas.'}</p>
 <div class="seg" role="group" aria-label="Modo"><button data-plmode="3d" aria-pressed="${P.mode==='3d'}">Ver em 3D</button><button data-plmode="2d" aria-pressed="${P.mode==='2d'}">Montar (de cima)</button></div>
-<div class="plbox">${P.mode==='3d'?'<canvas id="plgl" aria-hidden="true"></canvas>':''}<svg id="plsvg" role="img" aria-label="Planta da casa com ${S.rooms.length} ambientes" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid meet"></svg>${P.mode==='3d'?'<div class="plzo" role="group" aria-label="Ampliar"><button data-plzoom="+" aria-label="Ampliar">+</button><button data-plzoom="-" aria-label="Diminuir">−</button></div>':''}</div>
-${P.mode==='3d'?`<div class="plzm" role="group" aria-label="Ampliar"><label class="plfoc">Ampliar<select data-plfoc aria-label="Ampliar um ambiente"><option value="">A casa toda</option>${sc0().map(o=>`<option value="${o.r.id}" ${P.foc===o.r.id?'selected':''}>${esc(o.r.name)}</option>`).join('')}</select></label></div>
-<div class="plctl"><button class="btn alt" data-plspin>${P.spin?'Pausar giro':'Girar sozinha'}</button><label class="plel">Inclinação<input type="range" id="plel" min=".35" max="1.45" step=".01" value="${P.el}" aria-label="Inclinação da vista"></label></div>`
-:`${sel?`<div class="rsum"><b>${esc(sel.name)}</b><div class="five">${F('w','Largura (m)',sel.w)}${F('l','Compr. (m)',sel.l)}${F('h','Pé-direito (m)',sel.h)}${F('px','Posição X (m)',sel.px)}${F('py','Posição Y (m)',sel.py)}</div>${sel.parts?'<p class="note">Formato em L: largura e comprimento mostram a caixa que envolve tudo e não mudam aqui. Para voltar a retângulo, abra o ambiente.</p>':''}<div class="acts"><button class="lk" data-plrot>Girar 90°</button><button class="lk" data-room="${sel.id}">Abrir o ambiente</button></div></div>`:'<p class="note">Toque num ambiente para editar as medidas dele.</p>'}
-${ov.length?`<p class="warn">Há ambientes sobrepostos: ${ov.slice(0,3).map(([a,b])=>nm(a)+' e '+nm(b)).join('; ')}. Arraste um deles.</p>`:''}
-<button class="btn alt" data-plauto style="width:100%">${U.arm==='plauto'?'Toque de novo para reorganizar tudo':'Organizar automaticamente'}</button>`}
+ <div class="plwrap"><div class="plmain">
+ <div class="plbox${P.full?' full':''}${P.dr?' dropen':''}">${P.mode==='3d'?'<canvas id="plgl" aria-hidden="true"></canvas>':''}<svg id="plsvg" role="img" aria-label="Planta da casa com ${S.rooms.length} ambientes" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid meet"></svg>${P.mode==='3d'?'<div class="plzo" role="group" aria-label="Ampliar"><button data-plzoom="+" aria-label="Ampliar">+</button><button data-plzoom="-" aria-label="Diminuir">−</button><button data-plfit aria-label="Encaixar na tela" class="plfit">⤢</button></div>':''}<div class="plbar"><button class="plpill" data-plfull>${P.full?'Sair da tela cheia':'Tela cheia'}</button>${P.mode==='3d'?'<button class="plpill" data-pldr id="pldrbtn">Luz e acabamento</button>':''}</div>${P.mode==='3d'?plDrawer(P):''}</div>
+ ${P.mode==='3d'?`<div class="plzm" role="group" aria-label="Ampliar"><label class="plfoc">Ampliar<select data-plfoc aria-label="Ampliar um ambiente"><option value="">A casa toda</option>${sc0().map(o=>`<option value="${o.r.id}" ${P.foc===o.r.id?'selected':''}>${esc(o.r.name)}</option>`).join('')}</select></label></div>
+ <div class="plctl"><button class="btn alt" data-plspin>${P.spin?'Pausar giro':'Girar sozinha'}</button><label class="plel">Inclinação<input type="range" id="plel" min=".35" max="1.45" step=".01" value="${P.el}" aria-label="Inclinação da vista"></label></div>`:''}
+ </div><div class="plside">${P.mode==='3d'?'':`${sel?`<div class="rsum"><b>${esc(sel.name)}</b><div class="five">${F('w','Largura (m)',sel.w)}${F('l','Compr. (m)',sel.l)}${F('h','Pé-direito (m)',sel.h)}${F('px','Posição X (m)',sel.px)}${F('py','Posição Y (m)',sel.py)}</div>${sel.parts?'<p class="note">Formato em L: largura e comprimento mostram a caixa que envolve tudo e não mudam aqui. Para voltar a retângulo, abra o ambiente.</p>':''}<div class="acts"><button class="lk" data-plrot>Girar 90°</button><button class="lk" data-room="${sel.id}">Abrir o ambiente</button></div></div>`:'<p class="note">Toque num ambiente para editar as medidas dele.</p>'}
+ ${ov.length?`<p class="warn">Há ambientes sobrepostos: ${ov.slice(0,3).map(([a,b])=>nm(a)+' e '+nm(b)).join('; ')}. Arraste um deles.</p>`:''}
+ <button class="btn alt" data-plauto style="width:100%">${U.arm==='plauto'?'Toque de novo para reorganizar tudo':'Organizar automaticamente'}</button>`}
 <div class="rsum"><b>Resumo</b><p class="fin" style="margin:6px 0 0">Piso: <b>${st.area.toFixed(1).replace('.',',')} m²</b> em ${st.n} ambiente(s). Paredes: <b>${st.paredes.toFixed(0)} m²</b> (sem descontar portas e janelas; útil para estimar tinta).</p>${st.sem.length?`<p class="note">Sem medidas (desenhados como 3 × 3 m): ${st.sem.slice(0,8).map(r=>`<button class="lk" data-room="${r.id}">${esc(r.name)}</button>`).join(', ')}.</p>`:''}</div>
 ${lotBlock()}
 <details class="addbox" data-addbox="plimp" ${U.addOpen.plimp?'open':''}><summary>Tenho um rascunho no papel</summary>
 ${aiBlock(P)}<p class="cap">Ou peça para o Claude converter no chat</p>
 <ol class="note" style="padding-left:18px;margin:8px 0"><li>Tire uma foto do rascunho, com as medidas escritas.</li><li>Envie para o Claude no chat e peça: “converta em planta do app”.</li><li>Cole aqui o texto que ele devolver e toque em Ver o que será importado.</li></ol>
 <textarea id="plimp" rows="5" placeholder='Cole aqui o texto da planta' aria-label="Texto da planta">${esc(P.txt||'')}</textarea><button class="btn alt" data-plprev style="width:100%;margin-top:8px">Ver o que será importado</button>
-${imp?(imp.ok?`<div class="rsum"><b>Vai ser feito</b>${imp.ai?`<p class="warn">Lido por IA: ela pode errar. Confira cada medida antes de aplicar; depois você ajusta na planta.</p>${imp.skipped&&imp.skipped.length?`<p class="note">Não consegui ler as medidas de: ${imp.skipped.map(esc).join(', ')}.</p>`:''}${imp.duvidas&&imp.duvidas.length?`<p class="note">Dúvidas da IA: ${imp.duvidas.map(esc).join(' · ')}</p>`:''}`:''}<ul class="note" style="margin:6px 0;padding-left:18px">${planPreview(imp.rooms).map(({o,r})=>`<li>${esc(o.name)}: ${fvm(o.w)} × ${fvm(o.l)} m${o.parts?' (formato em L, '+o.parts.length+' partes)':''} — ${r?'atualiza o ambiente existente (fotos e itens ficam)':'cria um ambiente novo'}</li>`).join('')}</ul><button class="btn" data-plapply style="width:100%">Aplicar na planta</button></div>`:`<p class="warn" role="alert">${esc(imp.err)}</p>`):''}</details>`}
+${imp?(imp.ok?`<div class="rsum"><b>Vai ser feito</b>${imp.ai?`<p class="warn">Lido por IA: ela pode errar. Confira cada medida antes de aplicar; depois você ajusta na planta.</p>${imp.skipped&&imp.skipped.length?`<p class="note">Não consegui ler as medidas de: ${imp.skipped.map(esc).join(', ')}.</p>`:''}${imp.duvidas&&imp.duvidas.length?`<p class="note">Dúvidas da IA: ${imp.duvidas.map(esc).join(' · ')}</p>`:''}`:''}<ul class="note" style="margin:6px 0;padding-left:18px">${planPreview(imp.rooms).map(({o,r})=>`<li>${esc(o.name)}: ${fvm(o.w)} × ${fvm(o.l)} m${o.parts?' (formato em L, '+o.parts.length+' partes)':''} — ${r?'atualiza o ambiente existente (fotos e itens ficam)':'cria um ambiente novo'}</li>`).join('')}</ul><button class="btn" data-plapply style="width:100%">Aplicar na planta</button></div>`:`<p class="warn" role="alert">${esc(imp.err)}</p>`):''}</details></div></div>`}
 /* ---- Vista 3D realista (WebGL próprio, sem biblioteca): luz quente com sombras suaves, materiais (madeira, azulejo, tecido), oclusão nos cantos.
    Se o aparelho não tiver WebGL, a planta continua no desenho em corte (plView3). ---- */
 const GL_V=`attribute vec3 aPos;attribute vec3 aNor;attribute vec3 aCol;attribute float aMat;uniform mat4 uVP;uniform mat4 uLVP;varying vec3 vP;varying vec3 vN;varying vec3 vC;varying float vM;varying vec4 vL;void main(){vP=aPos;vN=aNor;vC=aCol;vM=aMat;vL=uLVP*vec4(aPos,1.);gl_Position=uVP*vec4(aPos,1.);}`;
-const GL_F=`precision highp float;varying vec3 vP;varying vec3 vN;varying vec3 vC;varying float vM;varying vec4 vL;uniform sampler2D uSh;uniform vec3 uLd;uniform vec3 uEye;uniform vec3 uBg;uniform float uTexel;uniform vec2 uCenter;uniform float uFade;
+const GL_F=`precision highp float;varying vec3 vP;varying vec3 vN;varying vec3 vC;varying float vM;varying vec4 vL;uniform sampler2D uSh;uniform vec3 uLd;uniform vec3 uEye;uniform vec3 uBg;uniform float uTexel;uniform vec2 uCenter;uniform float uFade;uniform vec3 uSun,uHT,uHB,uFill,uEmC,uCs,uCp,uCf;uniform float uExp,uEm,uLon;uniform sampler2D uLM;uniform vec4 uLR;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
 float unpack(vec4 c){return dot(c,vec4(1.,1./255.,1./65025.,1./16581375.));}
@@ -1182,6 +1242,7 @@ float shadow(float ndl){vec3 p=vL.xyz/vL.w*.5+.5;if(p.x<.0||p.x>1.||p.y<.0||p.y>
  for(int i=0;i<16;i++){float fi=float(i);float r=sqrt((fi+.5)/16.);float a=fi*2.39996+rot;vec2 o=vec2(cos(a),sin(a))*r*uTexel*3.4;s+=step(p.z-bias,unpack(texture2D(uSh,p.xy+o)));}return s/16.;}
 vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}
 void main(){vec3 N=normalize(vN);float m=vM;vec3 alb=vC;float spec=0.,shin=20.;vec2 w=vP.xz;
+ if(m>11.5){gl_FragColor=vec4(pow(aces(vC*uEmC*uEm),vec3(1./2.2)),1.);return;}
  if(m<.5){}
  else if(m<1.5){float row=floor(w.x/.16);float off=hash(vec2(row,3.))*1.3;float sg=floor((w.y+off)/1.1);vec2 id=vec2(row,sg);float tint=.84+.3*hash(id);float gr=vn(vec2(w.x*34.,(w.y+off)*2.4))*.16;float dx=fract(w.x/.16),dz=fract((w.y+off)/1.1);float e=smoothstep(.0,.05,dx)*smoothstep(.0,.05,1.-dx)*smoothstep(.0,.008,dz)*smoothstep(.0,.008,1.-dz);alb=vC*tint*(1.-gr)*mix(.5,1.,e);spec=.22;shin=36.;}
  else if(m<2.5){vec2 g=w/.6;vec2 f=fract(g);vec2 id2=floor(g);float e=smoothstep(.0,.018,f.x)*smoothstep(.0,.018,1.-f.x)*smoothstep(.0,.018,f.y)*smoothstep(.0,.018,1.-f.y);alb=vC*(.96+.06*hash(id2))*mix(.6,1.,e);spec=.5;shin=60.;}
@@ -1189,15 +1250,17 @@ void main(){vec3 N=normalize(vN);float m=vM;vec3 alb=vC;float spec=0.,shin=20.;v
  else if(m<4.5){float gr=vn(vec2(w.x*3.+w.y*3.,vP.y*26.));alb=vC*(.9+.18*gr);spec=.28;shin=30.;}
  else if(m<5.5){alb=vC*(.97+.06*vn(w*7.+vP.y*7.));spec=.55;shin=70.;}
  else if(m<6.5){spec=.7;shin=90.;}
- else if(m<7.5){alb=vC*(.97+.05*vn(w*26.+vP.y*26.));}
+ else if(m<7.5){alb=vC*(.97+.05*vn(w*26.+vP.y*26.));if(abs(N.y)<.5){float rod=1.-smoothstep(.075,.09,vP.y);alb=mix(alb,vec3(.94),rod*.92);float ln=smoothstep(.083,.09,vP.y)*(1.-smoothstep(.09,.098,vP.y));alb*=1.-.2*ln;}}
  else if(m<8.5){float s=fract((vP.x+vP.z)/.075);float e=smoothstep(.0,.2,s)*smoothstep(.0,.2,1.-s);alb=vC*mix(.55,1.,e)*(.92+.1*vn(vec2(vP.y*20.,vP.x*60.)));spec=.2;shin=30.;}
  else if(m<9.5){alb=vC*(.78+.4*vn(w*13.+vP.y*13.));spec=.1;shin=10.;}
+ else if(m>10.5&&m<11.5){float cn=vn(w*2.2)*.5+vn(w*7.)*.3+vn(w*23.)*.2;alb=vC*(.84+.3*cn);spec=.12;shin=16.;}
  vec3 L=normalize(uLd);float ndl=max(dot(N,L),0.);float sh=ndl>0.?shadow(ndl):0.;
  float ao=1.;if(N.y<.5)ao=mix(.6,1.,smoothstep(.0,1.3,vP.y));
- vec3 hemi=mix(vec3(.80,.66,.50),vec3(.80,.82,.88),N.y*.5+.5);vec3 fill=vec3(1.,.92,.80)*max(dot(N,normalize(vec3(.6,.35,.7))),0.)*.16;vec3 sun=vec3(1.,.93,.82)*1.12;
+ vec3 hemi=mix(uHB,uHT,N.y*.5+.5);vec3 fill=uFill*max(dot(N,normalize(vec3(.6,.35,.7))),0.);vec3 sun=uSun;
+ vec3 lg=vec3(0.);if(uLon>.5&&!(m>6.5&&m<7.5&&N.y>.5)){vec2 q=vP.xz+N.xz*.14;vec2 uv=(q-uLR.xy)*uLR.zw;if(uv.x>0.&&uv.x<1.&&uv.y>0.&&uv.y<1.){vec3 t=texture2D(uLM,uv).rgb;float up=clamp(N.y,0.,1.);float y=vP.y;vec3 wf=vec3(.6*exp(-y*.5),.45*exp(-y*.3),1.5*exp(-y*1.7));vec3 f=mix(wf,vec3(1.),up);lg=uCs*t.r*f.x+uCp*t.g*f.y+uCf*t.b*f.z;}}
  vec3 V=normalize(uEye-vP);vec3 H=normalize(L+V);float sp=spec*pow(max(dot(N,H),0.),shin)*sh*step(.0,ndl);
- vec3 col=alb*(hemi*.6*ao+sun*ndl*sh+fill)+vec3(1.,.95,.85)*sp;col=aces(col*1.28);col=pow(col,vec3(1./2.2));
- if(m>9.5){float d=length(vP.xz-uCenter);col=mix(col,uBg,smoothstep(uFade*.5,uFade,d));}
+ vec3 col=alb*(hemi*.6*ao+sun*ndl*sh+fill+lg)+vec3(1.,.95,.85)*sp;col=aces(col*uExp);col=pow(col,vec3(1./2.2));
+ if(m>9.5&&m<10.5){float d=length(vP.xz-uCenter);col=mix(col,uBg,smoothstep(uFade*.5,uFade,d));}
  gl_FragColor=vec4(col,1.);}`;
 const GL_SV=`attribute vec3 aPos;uniform mat4 uLVP;void main(){gl_Position=uLVP*vec4(aPos,1.);}`;
 const GL_SF=`precision highp float;vec4 pack(float d){vec4 e=fract(d*vec4(1.,255.,65025.,16581375.));e-=e.yzww*vec4(1./255.,1./255.,1./255.,0.);return e;}void main(){gl_FragColor=pack(gl_FragCoord.z);}`;
@@ -1208,6 +1271,12 @@ const m4={mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;
  ortho(l,r,b,t,n,f){const o=new Float32Array(16);o[0]=2/(r-l);o[5]=2/(t-b);o[10]=-2/(f-n);o[12]=-(r+l)/(r-l);o[13]=-(t+b)/(t-b);o[14]=-(f+n)/(f-n);o[15]=1;return o},
  look(e,c,u){let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]],n=Math.hypot(...z);z=z.map(v=>v/n);let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]];n=Math.hypot(...x);x=x.map(v=>v/n);const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
   const o=new Float32Array(16);o[0]=x[0];o[1]=y[0];o[2]=z[0];o[4]=x[1];o[5]=y[1];o[6]=z[1];o[8]=x[2];o[9]=y[2];o[10]=z[2];o[12]=-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]);o[13]=-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]);o[14]=-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]);o[15]=1;return o}};
+/* ambientes de luz: sol (direção/cor), céu, exposição, fundo e força das luzes de dentro */
+const PL_AMB={
+ dia:{ld:[-.45,.7,-.55],sun:[1.12,1.04,.918],hb:[.80,.66,.50],ht:[.80,.82,.88],fill:[.16,.147,.128],exp:1.28,bg:null,lg:.55,em:.7,dark:false},
+ tarde:{ld:[-.85,.30,-.35],sun:[1.38,.80,.40],hb:[.62,.42,.30],ht:[.58,.56,.68],fill:[.14,.09,.06],exp:1.24,bg:[.91,.80,.66],lg:.95,em:.9,dark:false},
+ noite:{ld:[-.3,.6,-.5],sun:[.03,.045,.10],hb:[.009,.010,.022],ht:[.014,.019,.042],fill:[.003,.004,.010],exp:1.3,bg:[.05,.058,.082],lg:1.0,em:1.3,dark:true}};
+const PL_TEMP={quente:[1,.70,.40],neutra:[1,.88,.74],fria:[.78,.90,1]};
 const glLin=h=>[1,3,5].map(i=>Math.pow(parseInt(h.slice(i,i+2),16)/255,2.2));
 const GL_MAT={'#a97b4f':4,'#c79f70':4,'#d9c7a8':4,'#d9c9ae':4,'#e8e1d5':5,'#34302c':6,'#b9bfc2':6,'#dcdfdf':6,'#efefef':6,'#e4e6e8':6,'#f4f2ee':6,'#c98c63':0};
 /* caixa: coordenadas do plano (x, y) e altura z -> GL (x, altura, y). fc = cores por face; mt = material dos lados; tm = material do topo */
@@ -1226,23 +1295,27 @@ function plGlInit(cv){if(!cv||window.__noGL)return null;try{const gl=cv.getConte
  const G={gl,cv,main:glCompile(gl,GL_V,GL_F),shad:glCompile(gl,GL_SV,GL_SF),dec:glCompile(gl,GL_DV,GL_DF),bs:gl.createBuffer(),bw:gl.createBuffer(),bd:gl.createBuffer(),ns:0,nw:0,nd:0,key:'',wh:new Map(),dead:false};
  const SZ=Math.min(2048,gl.getParameter(gl.MAX_TEXTURE_SIZE)||1024);G.SZ=SZ;G.tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,SZ,SZ,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+ G.lm=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,G.lm);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array(4));for(const [a,v] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,a,v);G.lmKey='';G.lmR=[0,0,1,1];
  G.fb=gl.createFramebuffer();G.rb=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,G.rb);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,SZ,SZ);gl.bindFramebuffer(gl.FRAMEBUFFER,G.fb);
  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,G.tex,0);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,G.rb);
  if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('fbo');gl.bindFramebuffer(gl.FRAMEBUFFER,null);
  cv.addEventListener('webglcontextlost',e=>{e.preventDefault();G.dead=true;if(U.pl&&U.pl.gl===G){U.pl.gl=null;planDraw()}});return G}catch(e){console.warn('3D realista indisponível:',e&&e.message);return null}}
 function plGlDispose(P){const G=P&&P.gl;if(!G)return;G.dead=true;try{const x=G.gl.getExtension('WEBGL_lose_context');if(x)x.loseContext()}catch(e){}P.gl=null}
 /* geometria que não muda com a câmera (pisos, base, móveis, plantas, tapetes) e as sombras de contato */
-function glBuild(G,sc,rs,b){const A=[],D=[],t=PL3.t,x0=b.x0-.45,x1=b.x1+.45,y0=b.y0-.45,y1=b.y1+.45,sl=.3;
+function glBuild(G,sc,rs,b,O){O=O||PLOPT0;const A=[],D=[],t=PL3.t,x0=b.x0-.45,x1=b.x1+.45,y0=b.y0-.45,y1=b.y1+.45,sl=.3;
  const cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2,Rg=Math.max(x1-x0,y1-y0);
  glQuadUp(A,cx-Rg*3,cy-Rg*3,Rg*6,Rg*6,-sl-.002,'#ece2d2',10);
  const LG=sc.lot;
  if(LG){glBox(A,LG.x0,LG.y0,-sl,LG.x1-LG.x0,LG.y1-LG.y0,sl,'#b8a98f','#d3c8b3',null,0,0);glDecal(D,(LG.x0+LG.x1)/2,(LG.y0+LG.y1)/2,(LG.x1-LG.x0)/2+.2,(LG.y1-LG.y0)/2+.2,.6,.3,-sl+.004);
   const r=LG.rua;glQuadUp(A,r[0],r[1],r[2],r[3],-.03,'#77746f',3);if(LG.cal){const c=LG.cal;glBox(A,c[0],c[1],-sl,c[2],c[3],sl+.07,'#c9c2b4','#d9d2c5',null,0,2)}}
  else rs.forEach(o=>{glBox(A,o.x-.3,o.y-.3,-sl,o.w+.6,o.l+.6,sl,'#cbbca4','#ebe0cd',null,0,0);glDecal(D,o.x+o.w/2,o.y+o.l/2,o.w/2+.3,o.l/2+.3,.55,.34,-sl+.004)});
- rs.forEach(o=>{const k=rkind(o.r),col=plK3(o.r)[0];glQuadUp(A,o.x,o.y,o.w,o.l,.012,col,PLWOOD.has(k)?1:PLTILE.has(k)?2:0)});
+ rs.forEach(o=>{const fm=plFloorOf(o.r,O);glQuadUp(A,o.x,o.y,o.w,o.l,.012,fm[0],fm[1])});
  sc.fur.forEach(F=>{F.RG.forEach(r=>{glBox(A,r.x,r.y,.012,r.w,r.l,.012,r.c,r.c,null,3,3);glDecal(D,r.x+r.w/2,r.y+r.l/2,r.w/2,r.l/2,.1,.18,.03)});
   F.B.forEach(B=>{const m=B.m!=null?B.m:(GL_MAT[B.c]!=null?GL_MAT[B.c]:3),tm=B.tm!=null?B.tm:m;glBox(A,B.x,B.y,B.z||0,B.w,B.l,B.h,B.c,B.tc,null,m,tm);if(!B.z&&B.h>.15)glDecal(D,B.x+B.w/2,B.y+B.l/2,B.w/2,B.l/2,.2+Math.min(.2,B.h*.12),.34,.03)});
   F.P.forEach(p=>{glBox(A,p.x-.13,p.y-.13,0,.26,.26,.26,'#c98c63','#c98c63',null,0,0);const r=p.r;glSphere(A,p.x,p.y,.62,r,'#5f7f45',9);glSphere(A,p.x-r*.35,p.y-r*.2,.78,r*.68,'#7c9c58',9);glSphere(A,p.x+r*.4,p.y+r*.25,.58,r*.55,'#6a8b4c',9);glDecal(D,p.x,p.y,.13,.13,.3,.3,.03)})});
+ /* luzes que aparecem: pendentes (um por ambiente) e fita de LED no pé das paredes */
+ if(O.pend)rs.forEach(o=>{if(o.none||o.sub||rkind(o.r)==='varanda')return;const px=o.x+o.w/2,py=o.y+o.l/2,hh=Math.min(o.h,3);glBox(A,px-.005,py-.005,hh-.7,.01,.01,.7,'#2b2724','#2b2724',null,3,3);glSphere(A,px,py,hh-.78,.13,'#ffffff',12)});
+ if(O.fita){const e=t/2,s0=.012;sc.walls.forEach(w=>{const a=w.s+e,f=w.f-e;if(f-a<.15)return;w.ins.forEach(i=>{const off=i.n*(t/2+s0+.008);if(w.axis==='h')glBox(A,a,w.c+off-.011,.09,f-a,.022,.03,'#ffffff','#ffffff',null,12,12);else glBox(A,w.c+off-.011,a,.09,.022,f-a,.03,'#ffffff','#ffffff',null,12,12)})})}
  /* oclusão ao pé das paredes: uma por trecho contínuo de parede */
  const runs=new Map();sc.walls.forEach(w=>{const k=w.axis+Math.round(w.c*10);(runs.get(k)||runs.set(k,[]).get(k)).push(w)});
  runs.forEach(a=>{a.sort((p,q)=>p.s-q.s);let cur=null;const fl=()=>{if(!cur)return;const hz=cur.axis==='h',len=cur.f-cur.s;if(hz)glDecal(D,cur.s+len/2,cur.c,len/2,t/2,.42,.4,.03);else glDecal(D,cur.c,cur.s+len/2,t/2,len/2,.42,.4,.03)};
@@ -1252,22 +1325,35 @@ function glBuild(G,sc,rs,b){const A=[],D=[],t=PL3.t,x0=b.x0-.45,x1=b.x1+.45,y0=b
  let H=2.7;rs.forEach(o=>{H=Math.max(H,o.h*PL3.k)});G.H=H;
  const U_=plLotUnion(LG,b),ex0=U_.x0,ey0=U_.y0,ex1=U_.x1,ey1=U_.y1;
  G.E=[ex0,ey0,ex1,ey1];G.cx=(ex0+ex1)/2;G.cy=(ey0+ey1)/2;let R=2;[[ex0,ey0],[ex1,ey0],[ex1,ey1],[ex0,ey1]].forEach(([x,y])=>{R=Math.max(R,Math.hypot(x-G.cx,y-G.cy))});G.R=R+.55}
-function glWalls(G,sc,sa,ca){const A=[],sw=PL3.t;let changed=false;
+function glWalls(G,sc,sa,ca,O){O=O||PLOPT0;const A=[],sw=PL3.t;let changed=false;
  sc.walls.forEach(w=>{const id=w.axis+w.c+'|'+w.s;let far=false,hh=0,mn=9;w.ins.forEach(i=>{const nx=w.axis==='v'?i.n:0,ny=w.axis==='h'?i.n:0;if(nx*sa+ny*ca>-1e-6)far=true;hh=Math.max(hh,i.o.h);mn=Math.min(mn,i.o.h)});
   const tg=far?hh*PL3.k:Math.min(PL3.curb,mn);let cur=G.wh.get(id);if(cur==null)cur=tg;else if(Math.abs(cur-tg)>.004)cur+=(tg-cur)*.2;else cur=tg;if(G.wh.get(id)!==cur){changed=true;G.wh.set(id,cur)}
   w._h=cur});
  const dyn=plLotDyn(sc.lot,sa,ca);dyn.forEach(p=>{const id='L'+p.id;let cur=G.wh.get(id);if(cur==null)cur=p.th;else if(Math.abs(cur-p.th)>.004)cur+=(p.th-cur)*.2;else cur=p.th;if(G.wh.get(id)!==cur){changed=true;G.wh.set(id,cur)}p._h=cur});
  if(!changed&&G.nw)return;
- sc.walls.forEach(w=>{const hz=w.axis==='h',pos={},neg={};w.ins.forEach(i=>{(i.n>0?pos:neg).c=plK3(i.o.r)[1]});const fc={px:PL3.ext,nx:PL3.ext,py:PL3.ext,ny:PL3.ext};if(hz){fc.py=neg.c||PL3.ext;fc.ny=pos.c||PL3.ext}else{fc.px=neg.c||PL3.ext;fc.nx=pos.c||PL3.ext}
+ sc.walls.forEach(w=>{const hz=w.axis==='h',pos={},neg={};w.ins.forEach(i=>{(i.n>0?pos:neg).c=plWallOf(i.o.r,O)});const fc={px:PL3.ext,nx:PL3.ext,py:PL3.ext,ny:PL3.ext};if(hz){fc.py=neg.c||PL3.ext;fc.ny=pos.c||PL3.ext}else{fc.px=neg.c||PL3.ext;fc.nx=pos.c||PL3.ext}
   if(hz)glBox(A,w.s,w.c-sw/2,0,w.f-w.s,sw,w._h,PL3.ext,PL3.topW,fc,7,0);else glBox(A,w.c-sw/2,w.s,0,sw,w.f-w.s,w._h,PL3.ext,PL3.topW,fc,7,0)});
  dyn.forEach(p=>glBox(A,p.x,p.y,0,p.w,p.l,p._h,p.c,p.tc,null,p.m,0));
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.bw);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(A),gl.DYNAMIC_DRAW);G.nw=A.length/10}
+/* mapa de luz (vista de cima, 1 pixel ≈ 5 cm): canal R = spots, G = pendentes, B = fita de LED. Só vale dentro de cada ambiente, então a luz não atravessa parede. */
+function glLightMap(G,rs,b){const gl=G.gl,x0=b.x0-.3,z0=b.y0-.3,bw=b.x1-b.x0+.6,bh=b.y1-b.y0+.6,cell=Math.max(.05,Math.max(bw,bh)/384),W=Math.max(2,Math.ceil(bw/cell)),H=Math.max(2,Math.ceil(bh/cell)),D=new Uint8Array(W*H*4),items=rs.filter(o=>!o.none),g=(d2,s)=>Math.exp(-d2/(2*s*s));
+ items.forEach(o=>{const k=rkind(o.r),sib=items.filter(p=>p!==o&&p.r.id===o.r.id),sp=[],nx=Math.max(1,Math.round(o.w/1.35)),ny=Math.max(1,Math.round(o.l/1.35));
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)sp.push([o.x+(i+.5)*o.w/nx,o.y+(j+.5)*o.l/ny]);
+  const pe=(!o.sub&&k!=='varanda')?[o.x+o.w/2,o.y+o.l/2]:null,ed=[[o.x,o.y,o.x+o.w,o.y],[o.x,o.y+o.l,o.x+o.w,o.y+o.l],[o.x,o.y,o.x,o.y+o.l],[o.x+o.w,o.y,o.x+o.w,o.y+o.l]];
+  const i0=Math.max(0,Math.floor((o.x-x0)/cell)),i1=Math.min(W-1,Math.ceil((o.x+o.w-x0)/cell)),j0=Math.max(0,Math.floor((o.y-z0)/cell)),j1=Math.min(H-1,Math.ceil((o.y+o.l-z0)/cell));
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const x=x0+(i+.5)*cell,z=z0+(j+.5)*cell;if(x<o.x||x>o.x+o.w||z<o.y||z>o.y+o.l)continue;
+   let s=0;for(const [px,pz] of sp){const d2=(x-px)*(x-px)+(z-pz)*(z-pz);s+=.95*g(d2,.42)+.2*g(d2,1.0)}
+   let p=0;if(pe){const d2=(x-pe[0])*(x-pe[0])+(z-pe[1])*(z-pe[1]);p=.95*g(d2,.9)+.22*g(d2,1.8)}
+   let dm=9;for(const [ax,ay,bx,by] of ed){const dx=bx-ax,dy=by-ay,tt=Math.max(0,Math.min(1,((x-ax)*dx+(z-ay)*dy)/(dx*dx+dy*dy))),qx=ax+tt*dx,qy=ay+tt*dy;if(sib.some(c=>qx>c.x-.02&&qx<c.x+c.w+.02&&qy>c.y-.02&&qy<c.y+c.l+.02))continue;const d=Math.hypot(x-qx,z-qy);if(d<dm)dm=d}
+   const f=dm<9?(.95*g(dm*dm,.26)+.22*g(dm*dm,.8)):0,q=(j*W+i)*4;D[q]=Math.min(255,s*190);D[q+1]=Math.min(255,p*230);D[q+2]=Math.min(255,f*230);D[q+3]=255}});
+ gl.bindTexture(gl.TEXTURE_2D,G.lm);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,W,H,0,gl.RGBA,gl.UNSIGNED_BYTE,D);G.lmR=[x0,z0,1/(W*cell),1/(H*cell)]}
 function glBg(){try{const c=getComputedStyle(document.documentElement).getPropertyValue('--sand').trim();if(/^#[0-9a-f]{6}$/i.test(c))return[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)/255)}catch(e){}return[.92,.89,.84]}
 function plGlDraw(P,svg){const G=P.gl;if(!G||G.dead)return false;const gl=G.gl,cv=G.cv,dpr=Math.min(2,window.devicePixelRatio||1),W=Math.max(1,cv.clientWidth),H=Math.max(1,cv.clientHeight);
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
- const rs=plItems(),b=planBounds(S.rooms),sc=plScene(rs),key=PLC.key;
- if(G.key!==key){glBuild(G,sc,rs,b);G.key=key;G.wh.clear();G.nw=0}
- const ca=Math.cos(P.az),sa=Math.sin(P.az),se=Math.sin(P.el),ce=Math.cos(P.el);glWalls(G,sc,sa,ca);
+ const rs=plItems(),b=planBounds(S.rooms),sc=plScene(rs),O=plOpt(),AM=PL_AMB[O.amb]||PL_AMB.dia,key=PLC.key+'|'+O.floor+'|'+O.wall+'|'+(O.pend?1:0)+(O.fita?1:0);
+ if(G.key!==key){glBuild(G,sc,rs,b,O);G.key=key;G.wh.clear();G.nw=0}
+ const lon=O.spots||O.pend||O.fita;if(lon&&G.lmKey!==PLC.key){glLightMap(G,rs,b);G.lmKey=PLC.key}
+ const ca=Math.cos(P.az),sa=Math.sin(P.az),se=Math.sin(P.el),ce=Math.cos(P.el);glWalls(G,sc,sa,ca,O);
  const cx=G.cx,cy=G.cy,fov=26*Math.PI/180,asp=W/H,Rb=Math.hypot(G.R,G.H*.5)*1.02,pts=[];
  let tgt,R0;{let E=G.E,hh=G.H;const fo=P.foc&&sc.rs.find(o=>o.r.id===P.foc&&!o.sub);if(fo){const B=fo.bb;E=[B.x,B.y,B.x+B.w,B.y+B.l];hh=Math.max(fo.h*PL3.k,1.5)}[[E[0],E[1]],[E[2],E[1]],[E[2],E[3]],[E[0],E[3]]].forEach(([x,y])=>{pts.push([x,0,y],[x,hh,y])});tgt=[(E[0]+E[2])/2,hh*.3,(E[1]+E[3])/2];R0=fo?Math.hypot(E[2]-E[0],E[3]-E[1])/2+.4:G.R}
  let dist=Math.hypot(R0,G.H*.5)*1.02/Math.sin((asp<1?2*Math.atan(Math.tan(fov/2)*asp):fov)/2),eye;
@@ -1280,10 +1366,18 @@ function plGlDraw(P,svg){const G=P.gl;if(!G||G.dead)return false;const gl=G.gl,c
   const up=[rt[1]*fw[2]-rt[2]*fw[1],rt[2]*fw[0]-rt[0]*fw[2],rt[0]*fw[1]-rt[1]*fw[0]];
   const th=Math.tan(fov/2)*dist,tw=th*asp;
   tgt=[tgt[0]+rt[0]*mx*tw+up[0]*my*th,tgt[1]+rt[1]*mx*tw+up[1]*my*th,tgt[2]+rt[2]*mx*tw+up[2]*my*th];
-  dist=dist*Math.max(hx,hy)/.9}
+  dist=dist*Math.max(hx,hy)/.94}
  dist/=Math.max(1,Math.min(5,P.zoom||1));eye=mkE();
- const VP=m4.mul(m4.persp(fov,asp,dist*.1,dist*4),m4.look(eye,tgt,[0,1,0]));
- const Ld=[-.45,.7,-.55],ln=Math.hypot(...Ld),Lu=Ld.map(v=>v/ln),Rs=Math.hypot(G.R,G.H)*1.08,lp=[cx+Lu[0]*Rs*2.2,Lu[1]*Rs*2.2,cy+Lu[2]*Rs*2.2],LVP=m4.mul(m4.ortho(-Rs,Rs,-Rs,Rs,Rs*.4,Rs*4.2),m4.look(lp,[cx,0,cy],[0,1,0]));
+ let VP=m4.mul(m4.persp(fov,asp,dist*.1,dist*4),m4.look(eye,tgt,[0,1,0]));
+ /* painel de luz aberto: a casa se ajusta e se centraliza na parte da tela que continua livre */
+ {const d=document.getElementById('pldr');if(P.dr&&d&&getComputedStyle(d).display!=='none'){const r=d.getBoundingClientRect(),c=cv.getBoundingClientRect();
+  if(c.width>0&&c.height>0){let a=9,b=-9,e=9,h=-9;pts.forEach(q=>{const o=[0,0,0,0];for(let i=0;i<4;i++)o[i]=VP[i]*q[0]+VP[4+i]*q[1]+VP[8+i]*q[2]+VP[12+i];const x=o[0]/o[3],y=o[1]/o[3];a=Math.min(a,x);b=Math.max(b,x);e=Math.min(e,y);h=Math.max(h,y)});
+   const ww=b-a,hh=h-e,xm=(a+b)/2,ym=(e+h)/2;let k,sx,sy;
+   if(r.width>=c.width*.95){const f=Math.min(.7,r.height/c.height);k=Math.min(1,.94*2*(1-f)/hh,.94*2/ww);sx=-k*xm;sy=f-k*ym}
+   else{const f=Math.min(.6,r.width/c.width);k=Math.min(1,.94*2*(1-f)/ww,.94*2/hh);sx=-f-k*xm;sy=-k*ym}
+   VP=m4.mul(new Float32Array([k,0,0,0,0,k,0,0,0,0,1,0,sx,sy,0,1]),VP)}}}
+ {let a=9,b=-9,e=9,h=-9;pts.forEach(q=>{const o=[0,0,0,0];for(let i=0;i<4;i++)o[i]=VP[i]*q[0]+VP[4+i]*q[1]+VP[8+i]*q[2]+VP[12+i];const x=o[0]/o[3],y=o[1]/o[3];a=Math.min(a,x);b=Math.max(b,x);e=Math.min(e,y);h=Math.max(h,y)});G.box=[a,b,e,h]} /* caixa da casa na tela (-1..1), usada nos testes */
+ const Ld=AM.ld,ln=Math.hypot(...Ld),Lu=Ld.map(v=>v/ln),Rs=Math.hypot(G.R,G.H)*1.08,lp=[cx+Lu[0]*Rs*2.2,Lu[1]*Rs*2.2,cy+Lu[2]*Rs*2.2],LVP=m4.mul(m4.ortho(-Rs,Rs,-Rs,Rs,Rs*.4,Rs*4.2),m4.look(lp,[cx,0,cy],[0,1,0]));
  const attr=(p,buf,defs,stride)=>{gl.bindBuffer(gl.ARRAY_BUFFER,buf);for(const [n,sz,off] of defs){const l=gl.getAttribLocation(p,n);if(l<0)continue;gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,stride*4,off*4)}};
  const off=p=>{for(let i=0;i<8;i++)gl.disableVertexAttribArray(i)};
  /* 1) sombras */
@@ -1291,20 +1385,25 @@ function plGlDraw(P,svg){const G=P.gl;if(!G||G.dead)return false;const gl=G.gl,c
  gl.useProgram(G.shad);gl.uniformMatrix4fv(gl.getUniformLocation(G.shad,'uLVP'),false,LVP);
  for(const [buf,n] of [[G.bs,G.ns],[G.bw,G.nw]]){off();attr(G.shad,buf,[['aPos',3,0]],10);gl.drawArrays(gl.TRIANGLES,0,n)}
  /* 2) cena */
- gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);const bg=glBg();gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,cv.width,cv.height);const bg=AM.bg||glBg();gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  gl.useProgram(G.main);const U_=n=>gl.getUniformLocation(G.main,n);gl.uniformMatrix4fv(U_('uVP'),false,VP);gl.uniformMatrix4fv(U_('uLVP'),false,LVP);gl.uniform3f(U_('uLd'),Lu[0],Lu[1],Lu[2]);gl.uniform3f(U_('uEye'),eye[0],eye[1],eye[2]);gl.uniform3f(U_('uBg'),bg[0],bg[1],bg[2]);gl.uniform1f(U_('uTexel'),1/G.SZ);gl.uniform2f(U_('uCenter'),cx,cy);gl.uniform1f(U_('uFade'),G.R*2.4);
+ const tc=PL_TEMP[O.temp]||PL_TEMP.quente,kk=AM.lg*(O.lum/70),v3=(n,a,s)=>gl.uniform3f(U_(n),a[0]*s,a[1]*s,a[2]*s);
+ v3('uSun',AM.sun,1);v3('uHT',AM.ht,1);v3('uHB',AM.hb,1);v3('uFill',AM.fill,1);gl.uniform1f(U_('uExp'),AM.exp);
+ v3('uEmC',tc,1);gl.uniform1f(U_('uEm'),AM.em*(O.lum/70)*2.2);gl.uniform1f(U_('uLon'),lon?1:0);
+ v3('uCs',tc,O.spots?kk*1.5:0);v3('uCp',tc,O.pend?kk*1.7:0);v3('uCf',tc,O.fita?kk*1.35:0);gl.uniform4f(U_('uLR'),G.lmR[0],G.lmR[1],G.lmR[2],G.lmR[3]);
+ gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,G.lm);gl.uniform1i(U_('uLM'),1);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.uniform1i(U_('uSh'),0);
  for(const [buf,n] of [[G.bs,G.ns],[G.bw,G.nw]]){off();attr(G.main,buf,[['aPos',3,0],['aNor',3,3],['aCol',3,6],['aMat',1,9]],10);gl.drawArrays(gl.TRIANGLES,0,n)}
  gl.useProgram(G.dec);gl.uniformMatrix4fv(gl.getUniformLocation(G.dec,'uVP'),false,VP);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(-1,-1);
  off();attr(G.dec,G.bd,[['aPos',3,0],['aRect',4,3],['aPar',2,7]],9);gl.drawArrays(gl.TRIANGLES,0,G.nd);gl.disable(gl.POLYGON_OFFSET_FILL);gl.depthMask(true);gl.disable(gl.BLEND);off();
  /* 3) rótulos (por cima, em SVG) */
  if(svg){const f=n=>n.toFixed(1),prj=(x,y,z)=>{const v=[x,z,y,1],o=[0,0,0,0];for(let r=0;r<4;r++)o[r]=VP[r]*v[0]+VP[4+r]*v[1]+VP[8+r]*v[2]+VP[12+r]*v[3];return[(o[0]/o[3]*.5+.5)*W,(1-(o[1]/o[3]*.5+.5))*H]};
-  svg.setAttribute('viewBox','0 0 '+f(W)+' '+f(H));svg.setAttribute('preserveAspectRatio','none');let g='';const fs=Math.max(11,Math.min(14,W/30));
+  svg.setAttribute('viewBox','0 0 '+f(W)+' '+f(H));svg.setAttribute('preserveAspectRatio','none');let g='';const fs=P.dr?9:Math.max(11,Math.min(14,W/30));
   if(sc.lot){const r=sc.lot.rua,c=prj(r[0]+r[2]/2,r[1]+r[3]/2,0);g+=`<text x="${f(c[0])}" y="${f(c[1])}" text-anchor="middle" font-size="${f(fs*.9)}" font-family="Figtree,sans-serif" font-weight="600" fill="#f3eee4" stroke="#5f5c58" stroke-width="${f(fs*.25)}" paint-order="stroke" pointer-events="none">Rua</text>`}
   rs.forEach(o=>{if(o.sub)return;const c=prj(o.x+o.w/2,o.y+o.l/2,.05),q=[prj(o.x,o.y,.05),prj(o.x+o.w,o.y,.05),prj(o.x+o.w,o.y+o.l,.05),prj(o.x,o.y+o.l,.05)],xs=q.map(v=>v[0]),ys=q.map(v=>v[1]),bw=Math.max(...xs)-Math.min(...xs),bh=Math.max(...ys)-Math.min(...ys);
    const cap=Math.max(6,Math.floor(bw*.92/(fs*.6))),ln=[];String(o.r.name).split(' ').forEach(w=>{const l=ln[ln.length-1];if(l!=null&&(l+' '+w).length<=cap)ln[ln.length-1]=l+' '+w;else ln.push(w)});
-   const fr=Math.max(8.5,Math.min(fs,bw*.92/(Math.max(4,...ln.map(l=>l.length))*.6))),area=o.none?'sem medidas':o.area.toFixed(1).replace('.',',')+' m²',show=bh>=fr*(ln.length+1.5)||bw>fr*7,y0=c[1]-(ln.length-1)*fr*.55;
-   g+=`<text x="${f(c[0])}" y="${f(y0)}" text-anchor="middle" font-size="${f(fr)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" stroke="#f8f2e7" stroke-width="${f(fr*.3)}" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${ln.map((l,i)=>`<tspan x="${f(c[0])}" dy="${i?f(fr*1.08):0}">${esc(l)}</tspan>`).join('')}${show?`<tspan x="${f(c[0])}" dy="${f(fr*1.15)}" font-weight="500" font-size="${f(fr*.82)}">${area}</tspan>`:''}</text>`});svg.innerHTML=g}
+   const raw=bw*.92/(Math.max(4,...ln.map(l=>l.length))*.6),fmin=P.dr?6:8.5;if(P.dr&&raw<fmin*.8)return;const fr=Math.max(fmin,Math.min(fs,raw)),area=o.none?'sem medidas':o.area.toFixed(1).replace('.',',')+' m²',show=bh>=fr*(ln.length+1.5)||bw>fr*7,y0=c[1]-(ln.length-1)*fr*.55;
+   g+=`<text x="${f(c[0])}" y="${f(y0)}" text-anchor="middle" font-size="${f(fr)}" font-family="Figtree,sans-serif" font-weight="700" fill="${AM.dark?'#f6ecd9':'#3b2a20'}" stroke="${AM.dark?'#14161c':'#f8f2e7'}" stroke-width="${f(fr*(AM.dark?.2:.3))}" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${ln.map((l,i)=>`<tspan x="${f(c[0])}" dy="${i?f(fr*1.08):0}">${esc(l)}</tspan>`).join('')}${show?`<tspan x="${f(c[0])}" dy="${f(fr*1.15)}" font-weight="500" font-size="${f(fr*.82)}">${area}</tspan>`:''}</text>`});svg.innerHTML=g}
  return true}
 
 const roomsOf=k=>roomsOfKind(S.rooms,k);
@@ -1601,10 +1700,10 @@ function lbOpenItem(id,from){const i=item(id);if(i&&i.img&&i.img.length)lbOpenLi
 document.addEventListener('keydown',e=>{if(LB){if(e.key==='Escape'){lbClose();e.preventDefault()}else if(e.key==='ArrowRight'){lbShow(LB.n+1);e.preventDefault()}else if(e.key==='ArrowLeft'){lbShow(LB.n-1);e.preventDefault()}else if(e.key==='Tab'){e.preventDefault();LB.el.querySelector('.lbx').focus()}return}if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.hero > img')){e.preventDefault();lbOpen(e.target)}});
 document.addEventListener('click',e=>{if(LB){const nb=e.target.closest('.lbn');if(nb){lbShow(LB.n+(nb.classList.contains('lbs')?1:-1));return}lbClose();return}const q=s=>e.target.closest(s),was=U.arm;U.arm=null;let b;if(q('.hero > img')){lbOpen(e.target.closest('.hero > img'));return}if(b=q('[data-lbi]')){lbOpenItem(b.dataset.lbi,b);return}
  if(b=q('[data-cl]')){cloudAct(b.dataset.cl);return}
- else if(b=q('#nv button')){if(U.pl)cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;U.qz=null;U.gd=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
+ else if(b=q('#nv button')){if(U.pl)cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;document.body.classList.remove('plwide','plfs');U.qz=null;U.gd=null;U.czm=null;U.q='';U.rf=null;U.orc=false;U.wipe=false;U.wipeErr='';U.tab=b.dataset.t;U.open=null;U.room=null;U.msg='';U.bmsg='';U.imp=null;scrollTo(0,0)}
  else if(b=q('[data-flt]'))U.flt=b.dataset.flt;
  else if(b=q('[data-view]'))U.view=b.dataset.view;
- else if(b=q('[data-room]')){if(U.pl){cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;U.tab='rooms'}U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
+ else if(b=q('[data-room]')){if(U.pl){cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;document.body.classList.remove('plwide','plfs');U.tab='rooms'}U.room=b.dataset.room;U.ri=0;scrollTo(0,0)}
  else if(q('[data-back]'))U.room=null;
  else if(b=q('[data-ri]'))U.ri=+b.dataset.ri;
  else if(b=q('[data-pickcov]')){U.cfg=true;coverFrom(b.dataset.pickcov).then(ok=>{U.msg=ok?'Capa da casa atualizada.':'Não foi possível usar esta foto como capa.';save();render()});return}
@@ -1661,9 +1760,14 @@ document.addEventListener('click',e=>{if(LB){const nb=e.target.closest('.lbn');i
  else if(b=q('[data-arc]'))U.arc=U.arc===b.dataset.arc?null:b.dataset.arc;
  else if(b=q('[data-tp]'))togglePay(b.dataset.tp);
  else if(b=q('[data-dp]')){const id=b.dataset.dp;if(was==='dp:'+id)delPay(id);else U.arm='dp:'+id}
- else if(q('[data-plopen]')){U.gd=null;U.pl={mode:'3d',az:.7,el:.85,zoom:1,foc:null,spin:!plReduced(),sel:null,imp:null,txt:''};if(planAuto(S.rooms,true))save();scrollTo(0,0)}
- else if(q('[data-plx]')){if(U.pl)cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;scrollTo(0,0)}
+ else if(q('[data-plopen]')){U.gd=null;U.pl={mode:'3d',az:.7,el:.85,zoom:1,foc:null,spin:!plReduced(),sel:null,imp:null,txt:'',opt:plOptLoad(),dr:false,full:false};if(planAuto(S.rooms,true))save();scrollTo(0,0)}
+ else if(q('[data-plx]')){if(U.pl)cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl=null;document.body.classList.remove('plwide','plfs');scrollTo(0,0)}
+ else if(q('[data-plfull]')){if(U.pl){U.pl.full=!U.pl.full;plApplyFull();return}}
+ else if(q('[data-pldr]')){if(U.pl){U.pl.dr=!U.pl.dr;const d=document.getElementById('pldr');if(d)d.classList.toggle('open',!!U.pl.dr);const bx=document.querySelector('.plbox');if(bx)bx.classList.toggle('dropen',!!U.pl.dr);planDraw();return}}
+ else if(b=q('[data-plo]')){if(U.pl){plOptSet(b.dataset.plo);return}}
+ else if(b=q('[data-plot]')){if(U.pl){plOptSet('tog:'+b.dataset.plot);return}}
  else if(b=q('[data-plmode]')){if(U.pl){cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl.mode=b.dataset.plmode;if(U.pl.mode==='3d'&&!plReduced())U.pl.spin=U.pl.spin}}
+ else if(q('[data-plfit]')){if(U.pl){plFitView();return}}
  else if(b=q('[data-plzoom]')){if(U.pl){U.pl.zoom=Math.max(1,Math.min(5,(U.pl.zoom||1)*(b.dataset.plzoom==='+'?1.4:1/1.4)));if(U.pl.zoom<1.02)U.pl.zoom=1;planDraw();return}}
  else if(q('[data-plspin]')){if(U.pl){U.pl.spin=!U.pl.spin;const b2=document.querySelector('[data-plspin]');if(b2)b2.textContent=U.pl.spin?'Pausar giro':'Girar sozinha';return}}
  else if(q('[data-plauto]')){if(was==='plauto'){planAuto(S.rooms,false);U.pl.sel=null}else U.arm='plauto'}
