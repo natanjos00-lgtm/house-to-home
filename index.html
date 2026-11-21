@@ -194,7 +194,7 @@ details.gonebox>summary::before,details.gonebox[open]>summary::before{display:no
 .sb{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin:6px 0}.sb .bar{margin:0}.chips2{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.stip{background:var(--sand);border-radius:var(--rs);padding:8px 12px;margin:6px 0 10px}.stip p{margin:4px 0}
 .seg{display:flex;gap:0;margin:8px 0}.seg button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}.seg button:first-child{border-radius:12px 0 0 12px}.seg button:last-child{border-radius:0 12px 12px 0;border-left:0}.seg button[aria-pressed=true]{background:var(--brown);color:var(--off);border-color:var(--brown)}
 .plbox{position:relative;background:radial-gradient(120% 90% at 50% 0,var(--card),var(--sand));border:1px solid var(--line);border-radius:var(--rc);overflow:hidden;touch-action:none;margin:8px 0}.plbox canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}.plbox svg{position:relative;display:block;width:100%;height:min(64vh,430px);height:clamp(380px,calc(100dvh - 290px),900px);user-select:none;-webkit-user-select:none}
-.plzm{display:flex;gap:8px;align-items:flex-end;margin:8px 0 4px}.plzo{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}.plzo .plfit{font-size:22px}.plzo button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:26px;line-height:1;font-weight:600;box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}.plfoc{flex:1;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute)}.plfoc select{min-height:44px}.plbox{touch-action:pan-y}
+.plzm{display:flex;gap:8px;align-items:flex-end;margin:8px 0 4px}.plzo{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:3}.plzo .plfit{font-size:22px}.opc{border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0;background:var(--card)}.ophd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.oprg{display:block;margin-top:8px;font-size:13px;color:var(--mute)}.oprg input{width:100%}.opadd{margin:8px 0}.plzo button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--brown);font-size:26px;line-height:1;font-weight:600;box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}.plfoc{flex:1;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute)}.plfoc select{min-height:44px}.plbox{touch-action:pan-y}
 /* planta 3D: mais espaço, tela cheia e painel de luz */
 .plwrap{display:block}.plbar{position:absolute;left:10px;top:10px;display:flex;gap:8px;z-index:6;flex-wrap:wrap;max-width:calc(100% - 76px)}
 .plpill{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--brown);font:600 14px var(--bf);box-shadow:0 2px 6px rgba(40,25,10,.2);cursor:pointer}
@@ -442,20 +442,35 @@ function cleanParts(a){if(!Array.isArray(a)||a.length<2||a.length>8)return null;
  if(Math.min(...out.map(p=>p.x))>.005||Math.min(...out.map(p=>p.y))>.005)return null;
  for(let i=0;i<out.length;i++)for(let j=i+1;j<out.length;j++){const a=out[i],b=out[j];if(Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>.01&&Math.min(a.y+a.l,b.y+b.l)-Math.max(a.y,b.y)>.01)return null}
  return out}
-function fixParts(o){if(o&&o.parts!==undefined){const c=cleanParts(o.parts);if(c){const b=partsBox(c);o.parts=c;o.w=b.w;o.l=b.l}else delete o.parts}return o}
+/* Portas e janelas: r.ops = [{id,t,side,off,w,h,sill,dir,hg}] — side: n (topo), s (base), w (esquerda), e (direita) da caixa do ambiente; off = distância do canto (esquerdo ou de cima) até o começo do vão; sill = altura do chão até a base do vão */
+const OPT={porta:{n:'Porta',w:.8,h:2.1,s:0,min:.5,max:1.6},correr:{n:'Porta de correr',w:1.6,h:2.1,s:0,min:.8,max:5},janela:{n:'Janela',w:1.2,h:1,s:1,min:.4,max:5},basculante:{n:'Basculante',w:.6,h:.5,s:1.6,min:.3,max:1.6}};
+function cleanOps(a){if(!Array.isArray(a))return[];const out=[],q=v=>Math.round(v*1000)/1000;
+ for(const p of a.slice(0,24)){if(!p||typeof p!=='object'||!OPT[p.t]||!'nswe'.includes(String(p.side))||String(p.side).length!==1)continue;const off=plNum(p.off),w=plNum(p.w),h=plNum(p.h),s=plNum(p.sill);
+  if(off==null||w==null||h==null||s==null||off<0||off>80||!(w>=.2&&w<=8)||!(h>=.2&&h<=4)||s<0||s>3)continue;
+  out.push({id:String(p.id||uid()).slice(0,40),t:p.t,side:p.side,off:q(off),w:q(w),h:q(h),sill:q(s),dir:p.dir==='f'?'f':'d',hg:p.hg?1:0})}return out}
+/* vãos já em coordenadas do plano: axis h (parede ao longo de x, em y=c) ou v (ao longo de y, em x=c); nrm = lado de dentro do ambiente */
+function roomOps(r){if(!r||!Array.isArray(r.ops)||!r.ops.length||!(r.w>0&&r.l>0)||!hasPos(r))return[];const x=r.px,y=r.py,w=r.w,l=r.l,hz=s=>s==='n'||s==='s';
+ return r.ops.map(o=>{const len=hz(o.side)?w:l,wd=Math.min(o.w,len),off=Math.max(0,Math.min(o.off,len-wd)),base=hz(o.side)?x:y,c=o.side==='n'?y:o.side==='s'?y+l:o.side==='w'?x:x+w;
+  return{id:o.id,t:o.t,side:o.side,axis:hz(o.side)?'h':'v',c,a0:base+off,a1:base+off+wd,z0:o.sill,z1:o.sill+o.h,nrm:(o.side==='n'||o.side==='w')?1:-1,dir:o.dir,hg:o.hg,r}})}
+function newOp(r,t){const T0=OPT[t],len=(t==='janela'||t==='basculante')?r.w:r.w,side=(t==='janela'||t==='basculante')?'n':'s',L=side==='n'||side==='s'?r.w:r.l,w=Math.min(T0.w,L);return{id:uid(),t,side,off:Math.round((L-w)/2*100)/100,w,h:T0.h,sill:T0.s,dir:'d',hg:0}}
+function fixParts(o){if(o&&o.parts!==undefined){const c=cleanParts(o.parts);if(c){const b=partsBox(c);o.parts=c;o.w=b.w;o.l=b.l}else delete o.parts}
+ if(o&&o.ops!==undefined){const c=cleanOps(o.ops);if(c.length)o.ops=c;else delete o.ops}return o}
 function planAuto(rooms,keep){const todo=rooms.filter(r=>!keep||!hasPos(r));if(!todo.length)return 0;
  const tot=todo.reduce((a,r)=>{const d=rdim(r);return a+d.w*d.l},0),maxW=Math.max(8,Math.sqrt(tot)*1.5,...todo.map(r=>rdim(r).w));let y0=0;
  if(keep)rooms.filter(hasPos).forEach(r=>{y0=Math.max(y0,r.py+rdim(r).l)});
  let x=0,y=y0,rh=0;todo.forEach(r=>{const d=rdim(r);if(x>0&&x+d.w>maxW){x=0;y+=rh;rh=0}r.px=r1(x);r.py=r1(y);x+=d.w;rh=Math.max(rh,d.l)});return todo.length}
 function planBounds(rooms){const rs=rooms.filter(hasPos);if(!rs.length)return{x0:0,y0:0,x1:6,y1:6};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;rs.forEach(r=>{rParts(r).forEach(p=>{x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x+p.w);y1=Math.max(y1,p.y+p.l)})});return{x0,y0,x1,y1}}
 function planStats(rooms){const m=rooms.filter(r=>r.w>0&&r.l>0);return{n:m.length,sem:rooms.filter(r=>!(r.w>0&&r.l>0)),area:m.reduce((a,r)=>a+rArea(r),0),paredes:m.reduce((a,r)=>a+rPerim(r)*(r.h>0?r.h:PL_H),0)}}
+function planOpsIn(a){if(!Array.isArray(a))return[];const tp={porta:'porta',correr:'correr','porta de correr':'correr',janela:'janela',basculante:'basculante'},sd={topo:'n',cima:'n',n:'n',base:'s',baixo:'s',s:'s',esquerda:'w',w:'w',direita:'e',e:'e'};
+ return cleanOps(a.map(p=>{p=p||{};const t=tp[String(p.tipo!=null?p.tipo:p.t||'').toLowerCase()],s=sd[String(p.parede!=null?p.parede:p.side||'').toLowerCase()],D=OPT[t]||{};
+  return{id:p.id,t,side:s,off:p.posicao!=null?p.posicao:p.off,w:p.largura!=null?p.largura:p.w!=null?p.w:D.w,h:p.altura!=null?p.altura:p.h!=null?p.h:D.h,sill:p.peitoril!=null?p.peitoril:p.sill!=null?p.sill:D.s,dir:String(p.abre||p.dir||'dentro').toLowerCase().startsWith('f')?'f':'d',hg:/fim|^1$|^true$/i.test(String(p.dobradica!=null?p.dobradica:p.hg))?1:0}}))}
 function planOverlaps(rooms){const rs=rooms.filter(hasPos),o=[];for(let i=0;i<rs.length;i++)for(let j=i+1;j<rs.length;j++){const A=rParts(rs[i]),B=rParts(rs[j]);if(A.some(a=>B.some(b=>Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>.05&&Math.min(a.y+a.l,b.y+b.l)-Math.max(a.y,b.y)>.05)))o.push([rs[i].id,rs[j].id])}return o}
 const plNum=v=>{if(v==null||v==='')return null;const n=typeof v==='number'?v:parseFloat(String(v).replace(/[^0-9,.\-]/g,'').replace(',','.'));return Number.isFinite(n)?n:null};
 function planParse(txt){let t=String(txt==null?'':txt).trim();if(!t)return{ok:false,err:'Cole aqui o texto da planta.'};t=t.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();let j;try{j=JSON.parse(t)}catch(e){return{ok:false,err:'Não consegui ler o texto. Cole exatamente o que o Claude enviou, do primeiro { ao último }.'}}
  const a=j&&(j.ambientes||j.rooms);if(!Array.isArray(a)||!a.length)return{ok:false,err:'Não encontrei a lista de ambientes.'};if(a.length>40)return{ok:false,err:'São ambientes demais (o máximo é 40).'};
- const out=[],bad=[];a.forEach((o,i)=>{if(!o||typeof o!=='object'){bad.push('item '+(i+1));return}const name=String(o.nome!=null?o.nome:o.name!=null?o.name:'').replace(/\s+/g,' ').trim().slice(0,60),pa=o.partes!=null?o.partes:o.parts,parts=pa!=null?cleanParts(pa):null,bx=parts?partsBox(parts):null,w=bx?bx.w:plNum(o.largura!=null?o.largura:o.w),l=bx?bx.l:plNum(o.comprimento!=null?o.comprimento:o.l),h=plNum(o.pe_direito!=null?o.pe_direito:o.h),x=plNum(o.x),y=plNum(o.y);
+ const out=[],bad=[];a.forEach((o,i)=>{if(!o||typeof o!=='object'){bad.push('item '+(i+1));return}const name=String(o.nome!=null?o.nome:o.name!=null?o.name:'').replace(/\s+/g,' ').trim().slice(0,60),pa=o.partes!=null?o.partes:o.parts,parts=pa!=null?cleanParts(pa):null,ab=o.aberturas!=null?o.aberturas:o.ops,bx=parts?partsBox(parts):null,w=bx?bx.w:plNum(o.largura!=null?o.largura:o.w),l=bx?bx.l:plNum(o.comprimento!=null?o.comprimento:o.l),h=plNum(o.pe_direito!=null?o.pe_direito:o.h),x=plNum(o.x),y=plNum(o.y);
   if(!name||(pa!=null&&!parts)||!(w>=PL_MIN&&w<=PL_MAX)||!(l>=PL_MIN&&l<=PL_MAX)||(h!=null&&!(h>=2&&h<=6))||(x!=null&&!(x>=-100&&x<=300))||(y!=null&&!(y>=-100&&y<=300))){bad.push(name||'item '+(i+1));return}
-  out.push({name,w:r1(w*100)/100,l:r1(l*100)/100,h:h==null?null:r1(h*100)/100,x:x==null?null:r1(x*100)/100,y:y==null?null:r1(y*100)/100,parts:parts||undefined})});
+  out.push({name,w:r1(w*100)/100,l:r1(l*100)/100,h:h==null?null:r1(h*100)/100,x:x==null?null:r1(x*100)/100,y:y==null?null:r1(y*100)/100,parts:parts||undefined,ops:ab!=null?planOpsIn(ab):undefined})});
  if(bad.length)return{ok:false,err:'Medidas inválidas em: '+bad.slice(0,6).join(', ')+'. Largura e comprimento devem ficar entre 0,5 e 40 metros; nas partes de um ambiente em L, x e y começam em 0 e as partes não podem se sobrepor.'};
  const seen=new Set();for(const o of out){const k=_nm(o.name).trim();if(seen.has(k))return{ok:false,err:'O ambiente “'+o.name+'” aparece duas vezes.'};seen.add(k)}
  return{ok:true,rooms:out}}
@@ -468,7 +483,7 @@ function aiToPlan(txt){let j=null;try{j=JSON.parse(String(txt==null?'':txt).trim
 function aiText(resp){if(!resp||typeof resp!=='object')return{ok:false,err:'A IA não respondeu.'};if(resp.promptFeedback&&resp.promptFeedback.blockReason)return{ok:false,err:'A IA não aceitou analisar esta imagem. Tente outra foto.'};
  const c=Array.isArray(resp.candidates)?resp.candidates[0]:null,p=c&&c.content&&Array.isArray(c.content.parts)?c.content.parts:[],t=p.map(x=>x&&typeof x.text==='string'?x.text:'').join('').trim();return t?{ok:true,text:t}:{ok:false,err:'A IA não devolveu nada. Tente de novo.'}}
 function planPreview(list){return list.map(o=>({o,r:S.rooms.find(r=>_nm(r.name).trim()===_nm(o.name).trim())||null}))}
-function planApply(list){let upd=0,nw=0;planPreview(list).forEach(({o,r})=>{if(r)upd++;else{r=mkRoom(o.name,[],null,roomKinds(o.name)[0]||null);nw++}r.w=o.w;r.l=o.l;if(o.parts)r.parts=o.parts.map(p=>Object.assign({},p));else delete r.parts;if(o.h!=null)r.h=o.h;if(o.x!=null&&o.y!=null){r.px=o.x;r.py=o.y}else{delete r.px;delete r.py}});planAuto(S.rooms,true);return{upd,nw}}
+function planApply(list){let upd=0,nw=0;planPreview(list).forEach(({o,r})=>{if(r)upd++;else{r=mkRoom(o.name,[],null,roomKinds(o.name)[0]||null);nw++}r.w=o.w;r.l=o.l;if(o.parts)r.parts=o.parts.map(p=>Object.assign({},p));else delete r.parts;if(o.ops&&o.ops.length)r.ops=o.ops.map(p=>Object.assign({},p));else if(o.ops&&!o.ops.length)delete r.ops;if(o.h!=null)r.h=o.h;if(o.x!=null&&o.y!=null){r.px=o.x;r.py=o.y}else{delete r.px;delete r.py}});planAuto(S.rooms,true);return{upd,nw}}
 function setHouseName(n){n=String(n==null?'':n).replace(/\s+/g,' ').trim().slice(0,60);S.house.name=n;S.house.done=true;return n}
 function pstat(i){if(i.qtyBought>=i.qtyNeed)return'bought';if(i.qtyBought>0)return'partial';return i.researching?'researching':'pending'}
 function syncStatus(i){const s=pstat(i);i.status=s==='bought'?'done':s==='pending'?'todo':'doing'}
@@ -705,7 +720,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261120-2218';
+const APP_VER='20261120-2237';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -993,6 +1008,29 @@ function plSeams(ps){const o=[];for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.l
  if(Math.abs(a.y+a.l-b.y)<.005||Math.abs(b.y+b.l-a.y)<.005){const y=Math.abs(a.y+a.l-b.y)<.005?b.y:a.y,s=Math.max(a.x,b.x),f=Math.min(a.x+a.w,b.x+b.w);if(f-s>.01)o.push([s,y,f,y])}}return o}
 /* ---- Vista 3D em corte (como uma maquete): paredes grossas, pisos por tipo de cômodo, móveis ilustrativos, luz do alto à esquerda e sombras.
    Os móveis são só ilustração (não vêm da sua lista de itens). Medidas e posições dos ambientes vêm do app. ---- */
+/* vãos na vista de cima (coordenadas relativas ao canto do ambiente) */
+function plOps2d(ops,bb,fl,f){let g='';ops.forEach(p=>{const hz=p.axis==='h',X=(a,c)=>hz?[a-bb.x,c-bb.y]:[c-bb.x,a-bb.y],P0=X(p.a0,p.c),P1=X(p.a1,p.c),ln=`M${f(P0[0])} ${f(P0[1])}L${f(P1[0])} ${f(P1[1])}`,nv=hz?[0,1]:[1,0];
+  g+=`<path d="${ln}" stroke="${fl}" stroke-width="5.5" vector-effect="non-scaling-stroke" pointer-events="none"/>`;
+  const off=(d)=>{const a=X(p.a0,p.c),b=X(p.a1,p.c);return`M${f(a[0]+nv[0]*d)} ${f(a[1]+nv[1]*d)}L${f(b[0]+nv[0]*d)} ${f(b[1]+nv[1]*d)}`};
+  if(p.t==='porta'){const L=Math.max(.3,p.a1-p.a0-.04),d=(p.dir==='f'?-p.nrm:p.nrm),hA=p.hg?p.a1-.02:p.a0+.02,cA=p.hg?p.a1-.02-L:p.a0+.02+L,H=X(hA,p.c),E=hz?[H[0],H[1]+d*L]:[H[0]+d*L,H[1]],C=X(cA,p.c),v1=[E[0]-H[0],E[1]-H[1]],v2=[C[0]-H[0],C[1]-H[1]],sw=(v1[0]*v2[1]-v1[1]*v2[0])>0?1:0;
+   g+=`<path d="M${f(H[0])} ${f(H[1])}L${f(E[0])} ${f(E[1])}" stroke="#6b4b2c" stroke-width="2.4" vector-effect="non-scaling-stroke" pointer-events="none"/><path d="M${f(E[0])} ${f(E[1])}A${f(L)} ${f(L)} 0 0 ${sw} ${f(C[0])} ${f(C[1])}" fill="none" stroke="#8d7358" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" pointer-events="none"/>`}
+  else if(p.t==='correr')g+=`<path d="${off(-.035)}" stroke="#6b5646" stroke-width="2" vector-effect="non-scaling-stroke" pointer-events="none"/><path d="${off(.035)}" stroke="#6b5646" stroke-width="2" vector-effect="non-scaling-stroke" pointer-events="none"/>`;
+  else if(p.t==='janela')g+=`<path d="${off(-.03)}" stroke="#3f7893" stroke-width="2" vector-effect="non-scaling-stroke" pointer-events="none"/><path d="${off(.03)}" stroke="#3f7893" stroke-width="2" vector-effect="non-scaling-stroke" pointer-events="none"/>`;
+  else g+=`<path d="${ln}" stroke="#3f7893" stroke-width="3.4" stroke-dasharray="3 2" vector-effect="non-scaling-stroke" pointer-events="none"/>`});return g}
+/* bloco de edição: portas e janelas de um ambiente */
+function plOpsBlock(P){const rs=S.rooms.filter(r=>r.w>0&&r.l>0&&hasPos(r));if(!rs.length)return'';const r=rs.find(x=>x.id===(P.sel||P.opr))||rs.find(x=>x.id===P.opr)||rs[0];P.opr=r.id;const ops=r.ops||[],E=s=>esc(String(s));
+ const sides=[['n','Topo (em cima)'],['s','Base (embaixo)'],['w','Esquerda'],['e','Direita']],opt=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${String(k)===String(v)?'selected':''}>${l}</option>`).join('');
+ const card=(o,i)=>{const hz=o.side==='n'||o.side==='s',len=hz?r.w:r.l,mx=Math.max(0,Math.round((len-Math.min(o.w,len))*100)/100),isP=o.t==='porta';return`<div class="opc"><div class="ophd"><b>${OPT[o.t].n} ${i+1}</b><button class="lk" data-plopdel="${o.id}">${U.arm==='opdel:'+o.id?'Toque de novo para remover':'Remover'}</button></div>
+  <div class="five"><label>Tipo<select data-plop="${o.id}:t">${opt(Object.keys(OPT).map(k=>[k,OPT[k].n]),o.t)}</select></label><label>Parede<select data-plop="${o.id}:side">${opt(sides,o.side)}</select></label>
+  <label>Distância do canto ${hz?'esquerdo':'de cima'} (m)<input inputmode="decimal" value="${fvm(o.off)}" data-plop="${o.id}:off"></label><label>Largura (m)<input inputmode="decimal" value="${fvm(o.w)}" data-plop="${o.id}:w"></label>
+  <label>Altura (m)<input inputmode="decimal" value="${fvm(o.h)}" data-plop="${o.id}:h"></label><label>Do chão até a base (m)<input inputmode="decimal" value="${fvm(o.sill)}" data-plop="${o.id}:sill"></label>
+  ${isP?`<label>Abre para<select data-plop="${o.id}:dir">${opt([['d','Dentro do ambiente'],['f','Fora do ambiente']],o.dir)}</select></label><label>Dobradiça<select data-plop="${o.id}:hg">${opt([['0','No começo da parede'],['1','No fim da parede']],String(o.hg))}</select></label>`:''}</div>
+  <label class="oprg">Posição na parede<input type="range" min="0" max="${mx}" step="0.01" value="${Math.min(o.off,mx)}" data-plop="${o.id}:off" aria-label="Posição na parede"></label></div>`};
+ return `<details class="addbox" data-addbox="plops" ${U.addOpen.plops?'open':''}><summary>Portas e janelas${ops.length?' ('+ops.length+')':''}</summary>
+ <p class="note">Escolha o ambiente, o tipo e a parede. A distância é medida a partir do canto esquerdo (paredes de cima e de baixo) ou do canto de cima (paredes dos lados). Se a parede for compartilhada com outro ambiente, o vão aparece nos dois.</p>
+ <label>Ambiente<select data-plopr aria-label="Ambiente">${rs.map(x=>`<option value="${x.id}" ${x.id===r.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+ <div class="plcs opadd">${Object.keys(OPT).map(k=>`<button class="plc" data-plopadd="${k}">+ ${OPT[k].n}</button>`).join('')}</div>
+ ${ops.map(card).join('')||'<p class="note">Nenhuma porta ou janela neste ambiente ainda.</p>'}</details>`}
 /* ---- Aparência e luz da planta 3D (escolhas só deste aparelho; não entram em backup nem na sincronização) ---- */
 const PLOPT0={floor:'auto',wall:'auto',amb:'dia',spots:false,pend:false,fita:false,temp:'quente',lum:70};
 const PLFLOORS=[['auto','Como está hoje'],['claro','Madeira clara'],['escuro','Madeira escura'],['porc','Porcelanato claro'],['cim','Cimento queimado']];
@@ -1087,7 +1125,7 @@ function plLotDyn(G,sa,ca){const out=[];if(!G)return out;const L=G.L,t=PL3.t;
  G.edges.forEach(e=>{const near=e.n[0]*sa+e.n[1]*ca>1e-6;
   if(L.muro>0){const r=G.ring(e.n,0,t,t);out.push({id:'m'+e.k,x:r[0],y:r[1],w:r[2],l:r[3],th:near?Math.min(PL3.curb,L.muro):L.muro*PL3.k,c:'#e2d6c3',tc:PL3.topW,m:7})}
   if(L.viz[e.k]){const r=G.ring(e.n,t,t+NB_D,e.k==='fu'?NB_D+t:0);out.push({id:'v'+e.k,x:r[0],y:r[1],w:r[2],l:r[3],th:near?PL3.curb:2.8*PL3.k,c:'#bfb3a1',tc:'#8c8479',m:7})}});return out}
-function plScene(rs){const lot=plLotGeo(),key=rs.map(o=>[o.r.id,o.x,o.y,o.w,o.l,o.h,rkind(o.r),o.none?1:0,o.sub?1:0].join(',')).join('|')+(lot?'#'+lot.key:'');if(PLC.key===key)return PLC.sc;
+function plScene(rs){const lot=plLotGeo(),key=rs.map(o=>[o.r.id,o.x,o.y,o.w,o.l,o.h,rkind(o.r),o.none?1:0,o.sub?1:0].join(',')).join('|')+(lot?'#'+lot.key:'')+'#'+rs.map(o=>o.r.ops&&!o.sub?o.r.id+JSON.stringify(o.r.ops):'').join('');if(PLC.key===key)return PLC.sc;
  const walls=new Map(),t=PL3.t,e=t/2,cell=PL3.cell,add=(axis,c,a0,a1,n,o)=>{a0-=e;a1+=e;for(let k=Math.floor(a0/cell);k<Math.ceil(a1/cell);k++){const s=Math.max(a0,k*cell),f=Math.min(a1,(k+1)*cell);if(f-s<.01)continue;const id=axis+Math.round(c*10)+'|'+k;let w=walls.get(id);if(!w){w={axis,c,s,f,ins:[]};walls.set(id,w)}else{w.s=Math.min(w.s,s);w.f=Math.max(w.f,f)}w.ins.push({n,o})}};
  const by=new Map();rs.forEach(o=>{(by.get(o.r.id)||by.set(o.r.id,[]).get(o.r.id)).push(o)});
  rs.forEach(o=>{const sib=by.get(o.r.id).filter(p=>p!==o),seg=(axis,c,a0,a1,n)=>{let iv=[[a0,a1]];
@@ -1135,6 +1173,7 @@ function plView3(){const P=U.pl,rs=plItems(),b=planBounds(S.rooms),E=plExtent(),
  if(sh.length)g+=`<g fill="#3a2614" opacity=".17">${sh.map(p=>`<polygon points="${p.map(pt).join(' ')}"/>`).join('')}</g>`;
  items.sort((a,b)=>a.d-b.d||a.z-b.z).forEach(i=>g+=i.s);
  const fs0=Math.max(.18,Math.min(.4,R*.055));
+ S.rooms.forEach(r=>roomOps(r).forEach(p=>{const a=p.axis==='h'?[[p.a0,p.c],[p.a1,p.c]]:[[p.c,p.a0],[p.c,p.a1]],col=p.t==='porta'||p.t==='correr'?'#8a5a2b':'#3f7893';g+=`<path d="M${pt(pr(a[0][0],a[0][1],.05))}L${pt(pr(a[1][0],a[1][1],.05))}" stroke="${col}" stroke-width="4" stroke-linecap="round" fill="none" pointer-events="none"/>`}));
  rs.forEach(o=>{if(o.sub)return;const c=pr(o.x+o.w/2,o.y+o.l/2,0),fs=Math.min(fs0,Math.max(o.w,o.l)/(Math.max(o.r.name.length,7)*.5));g+=`<text x="${f(c[0])}" y="${f(c[1])}" text-anchor="middle" font-size="${f(fs)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" stroke="#f8f2e7" stroke-width="${f(fs*.3)}" paint-order="stroke" stroke-linejoin="round" pointer-events="none">${esc(o.r.name)}<tspan x="${f(c[0])}" dy="${f(fs*1.15)}" font-weight="500" font-size="${f(fs*.82)}">${o.none?'sem medidas':o.area.toFixed(1).replace('.',',')+' m²'}</tspan></text>`});
  return{vb:vb.map(f).join(' '),g}}
 function plView2(){const rs=plItems(),b=plExtent(),m=1.2,x0=b.x0-m,y0=b.y0-m,W=b.x1-b.x0+2*m,H=b.y1-b.y0+2*m,f=n=>n.toFixed(2),ov=new Set(planOverlaps(S.rooms).flat());
@@ -1151,6 +1190,7 @@ function plView2(){const rs=plItems(),b=plExtent(),m=1.2,x0=b.x0-m,y0=b.y0-m,W=b
  by2.forEach(arr=>{const o=arr.find(a=>!a.sub)||arr[0],bb=o.bb,sel=U.pl.sel===o.r.id,bad=ov.has(o.r.id),fs2=Math.min(fs,o.w/(Math.max(o.r.name.length,7)*.56)),mp=arr.length>1,fl=plFloor(o.r),stc=bad?'#b4452f':sel?'#c9a25e':'#6b5646',sw=sel||bad?2.6:1.4;
   g+=`<g data-plr="${o.r.id}" transform="translate(${f(bb.x)} ${f(bb.y)})" style="cursor:grab">`+arr.map(p=>`<rect x="${f(p.x-bb.x)}" y="${f(p.y-bb.y)}" width="${f(p.w)}" height="${f(p.l)}" fill="${fl}" fill-opacity="${mp?1:.92}" stroke="${stc}" stroke-width="${sw}" ${o.none?'stroke-dasharray="5 4"':''} vector-effect="non-scaling-stroke"/>`).join('');
   if(mp)plSeams(arr).forEach(s=>{g+=`<path d="M${f(s[0]-bb.x)} ${f(s[1]-bb.y)}L${f(s[2]-bb.x)} ${f(s[3]-bb.y)}" stroke="${fl}" stroke-width="${sw+2.6}" vector-effect="non-scaling-stroke" pointer-events="none"/>`});
+  g+=plOps2d(roomOps(o.r),bb,fl,f);
   const cx=o.x-bb.x+o.w/2,cy=o.y-bb.y+o.l/2;
   g+=`<text x="${f(cx)}" y="${f(cy-fs2*.1)}" text-anchor="middle" font-size="${f(fs2)}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" pointer-events="none">${esc(o.r.name)}<tspan x="${f(cx)}" dy="${f(fs2*1.2)}" font-weight="500" font-size="${f(fs2*.85)}">${o.none?'sem medidas':mp?o.area.toFixed(2).replace('.',',')+' m²':fvm(o.w)+' × '+fvm(o.l)+' m'}</tspan></text></g>`});
  return{vb:[x0,y0,W,H].map(f).join(' '),g}}
@@ -1225,6 +1265,7 @@ function planPage(){const P=U.pl;if(!P.opt)P.opt=plOptLoad();const back='<button
  ${ov.length?`<p class="warn">Há ambientes sobrepostos: ${ov.slice(0,3).map(([a,b])=>nm(a)+' e '+nm(b)).join('; ')}. Arraste um deles.</p>`:''}
  <button class="btn alt" data-plauto style="width:100%">${U.arm==='plauto'?'Toque de novo para reorganizar tudo':'Organizar automaticamente'}</button>`}
 <div class="rsum"><b>Resumo</b><p class="fin" style="margin:6px 0 0">Piso: <b>${st.area.toFixed(1).replace('.',',')} m²</b> em ${st.n} ambiente(s). Paredes: <b>${st.paredes.toFixed(0)} m²</b> (sem descontar portas e janelas; útil para estimar tinta).</p>${st.sem.length?`<p class="note">Sem medidas (desenhados como 3 × 3 m): ${st.sem.slice(0,8).map(r=>`<button class="lk" data-room="${r.id}">${esc(r.name)}</button>`).join(', ')}.</p>`:''}</div>
+${plOpsBlock(P)}
 ${lotBlock()}
 <details class="addbox" data-addbox="plimp" ${U.addOpen.plimp?'open':''}><summary>Tenho um rascunho no papel</summary>
 ${aiBlock(P)}<p class="cap">Ou peça para o Claude converter no chat</p>
@@ -1325,14 +1366,26 @@ function glBuild(G,sc,rs,b,O){O=O||PLOPT0;const A=[],D=[],t=PL3.t,x0=b.x0-.45,x1
  let H=2.7;rs.forEach(o=>{H=Math.max(H,o.h*PL3.k)});G.H=H;
  const U_=plLotUnion(LG,b),ex0=U_.x0,ey0=U_.y0,ex1=U_.x1,ey1=U_.y1;
  G.E=[ex0,ey0,ex1,ey1];G.cx=(ex0+ex1)/2;G.cy=(ey0+ey1)/2;let R=2;[[ex0,ey0],[ex1,ey0],[ex1,ey1],[ex0,ey1]].forEach(([x,y])=>{R=Math.max(R,Math.hypot(x-G.cx,y-G.cy))});G.R=R+.55}
-function glWalls(G,sc,sa,ca,O){O=O||PLOPT0;const A=[],sw=PL3.t;let changed=false;
+/* esquadrias: porta (batente + folha aberta), janela/basculante (moldura + vidro), porta de correr (dois vidros) */
+function glOpening(A,p,H,sw){const hz=p.axis==='h',c=p.c,a0=p.a0,a1=p.a1,z0=p.z0,fw=.05,zt=Math.min(p.z1,H),wh='#f6f3ee';
+ const box=(a,b,za,zb,tk,col,m,off)=>{if(b-a<.003||zb-za<.003)return;const o=c+(off||0)-tk/2;if(hz)glBox(A,a,o,za,b-a,tk,zb-za,col,col,null,m,m);else glBox(A,o,a,za,tk,b-a,zb-za,col,col,null,m,m)};
+ if(p.t==='porta'){const th=sw+.02;box(a0,a0+fw,0,zt,th,wh,5);box(a1-fw,a1,0,zt,th,wh,5);if(p.z1<=H+.001)box(a0,a1,zt-fw,zt,th,wh,5);
+  const L=a1-a0-2*fw,d=p.dir==='f'?-p.nrm:p.nrm,lt=.04,hA=p.hg?a1-fw-lt:a0+fw,s0=c+d*sw/2,e0=s0+d*L,q0=Math.min(s0,e0),q1=Math.max(s0,e0);
+  if(hz)glBox(A,hA,q0,0,lt,q1-q0,Math.min(zt,H),'#b58a5c','#b58a5c',null,4,4);else glBox(A,q0,hA,0,q1-q0,lt,Math.min(zt,H),'#b58a5c','#b58a5c',null,4,4)}
+ else{if(H<p.z1-.001||H<=z0+.02)return;const th=.07;box(a0,a1,zt-fw,zt,th,wh,5);box(a0,a1,z0,z0+fw,th,wh,5);box(a0,a0+fw,z0,zt,th,wh,5);box(a1-fw,a1,z0,zt,th,wh,5);
+  const gv='#bcd8e4',g0=z0+fw,g1=zt-fw;
+  if(p.t==='correr'){const mid=(a0+a1)/2;box(a0+fw,mid+.03,g0,g1,.02,gv,6,-.03);box(mid-.03,a1-fw,g0,g1,.02,gv,6,.02);box(mid-.03,mid+.03,g0,g1,.06,wh,5)}
+  else{box(a0+fw,a1-fw,g0,g1,.02,gv,6);if(a1-a0>1.4)box((a0+a1)/2-.02,(a0+a1)/2+.02,g0,g1,.05,wh,5)}}}
+function glWalls(G,sc,sa,ca,O){O=O||PLOPT0;const A=[],sw=PL3.t,OPS=S.rooms.flatMap(roomOps);let changed=false;
  sc.walls.forEach(w=>{const id=w.axis+w.c+'|'+w.s;let far=false,hh=0,mn=9;w.ins.forEach(i=>{const nx=w.axis==='v'?i.n:0,ny=w.axis==='h'?i.n:0;if(nx*sa+ny*ca>-1e-6)far=true;hh=Math.max(hh,i.o.h);mn=Math.min(mn,i.o.h)});
   const tg=far?hh*PL3.k:Math.min(PL3.curb,mn);let cur=G.wh.get(id);if(cur==null)cur=tg;else if(Math.abs(cur-tg)>.004)cur+=(tg-cur)*.2;else cur=tg;if(G.wh.get(id)!==cur){changed=true;G.wh.set(id,cur)}
   w._h=cur});
  const dyn=plLotDyn(sc.lot,sa,ca);dyn.forEach(p=>{const id='L'+p.id;let cur=G.wh.get(id);if(cur==null)cur=p.th;else if(Math.abs(cur-p.th)>.004)cur+=(p.th-cur)*.2;else cur=p.th;if(G.wh.get(id)!==cur){changed=true;G.wh.set(id,cur)}p._h=cur});
  if(!changed&&G.nw)return;
  sc.walls.forEach(w=>{const hz=w.axis==='h',pos={},neg={};w.ins.forEach(i=>{(i.n>0?pos:neg).c=plWallOf(i.o.r,O)});const fc={px:PL3.ext,nx:PL3.ext,py:PL3.ext,ny:PL3.ext};if(hz){fc.py=neg.c||PL3.ext;fc.ny=pos.c||PL3.ext}else{fc.px=neg.c||PL3.ext;fc.nx=pos.c||PL3.ext}
-  if(hz)glBox(A,w.s,w.c-sw/2,0,w.f-w.s,sw,w._h,PL3.ext,PL3.topW,fc,7,0);else glBox(A,w.c-sw/2,w.s,0,sw,w.f-w.s,w._h,PL3.ext,PL3.topW,fc,7,0)});
+  const H=w._h,bx=(a,b,z0,z1)=>{if(b-a<.005||z1-z0<.005)return;if(hz)glBox(A,a,w.c-sw/2,z0,b-a,sw,z1-z0,PL3.ext,PL3.topW,fc,7,0);else glBox(A,w.c-sw/2,a,z0,sw,b-a,z1-z0,PL3.ext,PL3.topW,fc,7,0)};
+  let x=w.s;OPS.filter(p=>p.axis===w.axis&&Math.abs(p.c-w.c)<.03&&p.a1>w.s+.005&&p.a0<w.f-.005).sort((a,b)=>a.a0-b.a0).forEach(p=>{const a0=Math.max(p.a0,x),a1=Math.min(p.a1,w.f);if(a1-a0<.005||p.z0>=H-.01)return;bx(x,a0,0,H);bx(a0,a1,0,Math.min(p.z0,H));bx(a0,a1,p.z1,H);x=Math.max(x,a1)});bx(x,w.f,0,H)});
+ OPS.forEach(p=>{let H=0;sc.walls.forEach(w=>{if(w.axis===p.axis&&Math.abs(w.c-p.c)<.03&&w.f>p.a0&&w.s<p.a1)H=Math.max(H,w._h)});if(H>0)glOpening(A,p,H,sw)});
  dyn.forEach(p=>glBox(A,p.x,p.y,0,p.w,p.l,p._h,p.c,p.tc,null,p.m,0));
  const gl=G.gl;gl.bindBuffer(gl.ARRAY_BUFFER,G.bw);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(A),gl.DYNAMIC_DRAW);G.nw=A.length/10}
 /* mapa de luz (vista de cima, 1 pixel ≈ 5 cm): canal R = spots, G = pendentes, B = fita de LED. Só vale dentro de cada ambiente, então a luz não atravessa parede. */
@@ -1767,13 +1820,15 @@ document.addEventListener('click',e=>{if(LB){const nb=e.target.closest('.lbn');i
  else if(b=q('[data-plo]')){if(U.pl){plOptSet(b.dataset.plo);return}}
  else if(b=q('[data-plot]')){if(U.pl){plOptSet('tog:'+b.dataset.plot);return}}
  else if(b=q('[data-plmode]')){if(U.pl){cancelAnimationFrame(U.pl.raf);plGlDispose(U.pl);U.pl.mode=b.dataset.plmode;if(U.pl.mode==='3d'&&!plReduced())U.pl.spin=U.pl.spin}}
+ else if(b=q('[data-plopadd]')){const r=S.rooms.find(x=>x.id===(U.pl&&U.pl.opr));if(r&&hasPos(r)&&r.w>0&&r.l>0){r.ops=cleanOps((r.ops||[]).concat([newOp(r,b.dataset.plopadd)]));U.addOpen.plops=true}}
+ else if(b=q('[data-plopdel]')){const id=b.dataset.plopdel,r=S.rooms.find(x=>x.id===(U.pl&&U.pl.opr));if(was==='opdel:'+id){if(r){r.ops=(r.ops||[]).filter(o=>o.id!==id);if(!r.ops.length)delete r.ops}}else U.arm='opdel:'+id}
  else if(q('[data-plfit]')){if(U.pl){plFitView();return}}
  else if(b=q('[data-plzoom]')){if(U.pl){U.pl.zoom=Math.max(1,Math.min(5,(U.pl.zoom||1)*(b.dataset.plzoom==='+'?1.4:1/1.4)));if(U.pl.zoom<1.02)U.pl.zoom=1;planDraw();return}}
  else if(q('[data-plspin]')){if(U.pl){U.pl.spin=!U.pl.spin;const b2=document.querySelector('[data-plspin]');if(b2)b2.textContent=U.pl.spin?'Pausar giro':'Girar sozinha';return}}
  else if(q('[data-plauto]')){if(was==='plauto'){planAuto(S.rooms,false);U.pl.sel=null}else U.arm='plauto'}
  else if(q('[data-lotdel]')){if(was==='lotdel')delete S.house.lot;else U.arm='lotdel'}
  else if(b=q('[data-partsdel]')){if(was==='partsdel'){const r=S.rooms.find(x=>x.id===b.dataset.partsdel);if(r)delete r.parts}else U.arm='partsdel'}
- else if(q('[data-plrot]')){const r=U.pl&&S.rooms.find(x=>x.id===U.pl.sel);if(r&&r.w>0&&r.l>0){const t=r.w;r.w=r.l;r.l=t;if(r.parts)r.parts=r.parts.map(p=>({x:p.y,y:p.x,w:p.l,l:p.w}))}}
+ else if(q('[data-plrot]')){const r=U.pl&&S.rooms.find(x=>x.id===U.pl.sel);if(r&&r.w>0&&r.l>0){const t=r.w;r.w=r.l;r.l=t;if(r.parts)r.parts=r.parts.map(p=>({x:p.y,y:p.x,w:p.l,l:p.w}));if(r.ops)r.ops=r.ops.map(o=>Object.assign({},o,{side:{n:'w',w:'n',s:'e',e:'s'}[o.side]}))}}
  else if(q('[data-aidel]')){if(was==='aidel')aiSet('');else U.arm='aidel'}
  else if(q('[data-plprev]')){const ta=document.getElementById('plimp');U.pl.txt=ta?ta.value:'';U.pl.imp=planParse(U.pl.txt);U.addOpen.plimp=true}
  else if(q('[data-plapply]')){const im=U.pl.imp;if(im&&im.ok){const r=planApply(im.rooms);U.pl.imp=null;U.pl.txt='';U.pl.sel=null;U.msg=r.upd+' ambiente(s) atualizado(s) e '+r.nw+' criado(s).'}}
@@ -1889,6 +1944,11 @@ document.addEventListener('change',async e=>{const el=e.target,d=el.dataset,rm=(
   else if(k==='frente'||k==='fundo'){const v=v0(el.value);cur[k]=v!=null&&v>=1&&v<=300?v:null}
   else{const v=v0(el.value);const mx={muro:6,cal:6,recF:100,recE:100}[k];if(mx&&v!=null&&v<=mx)cur[k]=v}
   S.house.lot=cleanLot(cur)}
+ else if(d.plopr!==undefined){if(U.pl){U.pl.opr=el.value;U.pl.sel=el.value}}
+ else if(d.plop){const [id,f]=d.plop.split(':'),r=S.rooms.find(x=>x.id===(U.pl&&U.pl.opr)),o=r&&(r.ops||[]).find(x=>x.id===id);if(o){const v=plNum(el.value),c=Object.assign({},o);
+  if(f==='t'){if(OPT[el.value]){const D=OPT[el.value];c.t=el.value;c.w=D.w;c.h=D.h;c.sill=D.s}}else if(f==='side'){if(el.value.length===1&&'nswe'.includes(el.value))c.side=el.value}else if(f==='dir')c.dir=el.value==='f'?'f':'d';else if(f==='hg')c.hg=el.value==='1'?1:0
+  else if(v!=null&&['off','w','h','sill'].includes(f))c[f]=v;
+  if(cleanOps([c]).length===1)Object.assign(o,c)}}
  else if(d.plf){const r=U.pl&&S.rooms.find(x=>x.id===U.pl.sel);if(!r)return;if(r.parts&&(d.plf==='w'||d.plf==='l'))return;const v=num(el.value);if(d.plf==='px'||d.plf==='py'){if(v!=null&&v>=-100&&v<=300)r[d.plf]=Math.round(v*100)/100}else if(v==null)r[d.plf]=null;else if(d.plf==='h'?(v>=2&&v<=6):(v>=PL_MIN&&v<=PL_MAX))r[d.plf]=v}
  else if(d.rd!==undefined)rm().decor=el.value;
  else if(d.rn!==undefined){const n=el.value.trim();if(n)rm().name=n}
