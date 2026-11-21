@@ -735,7 +735,7 @@ async function coverFrom(ref){const d=(typeof IMG!=='undefined'&&IMG[ref])||awai
 const imgEl=(ref,alt,cls)=>{const c=cls?`class="${cls}" `:'',src=IMG[ref]||PC[ref];return src?`<img ${c}src="${src}" alt="${alt}">`:`<img ${c}data-pid="${ref}" alt="${alt}">`};
 
 /* ---------- Interface ---------- */
-const APP_VER='20261120-2251';
+const APP_VER='20261121-0958';
 const verTxt=v=>{const m=/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(v||'');return m?`${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}`:'em desenvolvimento'};
 const canUpd=()=>'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
 const U={flt:'all',view:'room',tab:'home',room:null,ri:0,open:null,arm:null,msg:'',bmsg:'',imp:null,arc:null,pw:null,ob:0,cfg:false,scr:false,pur:null,wipe:false,wipeErr:'',qerr:null,more:null,addOpen:{},pv:null,rf:null,upd:null,q:'',pe:null,dpa:null,gop:{},czi:0,czm:null,dm:'',dmk:'',scw:false,orc:false,sco:false,obErr:''};
@@ -1273,8 +1273,8 @@ function planPage(){const P=U.pl;if(!P.opt)P.opt=plOptLoad();const back='<button
  const F=(k,l,v)=>`<label>${l}<input inputmode="decimal" value="${fvm(v)}" data-plf="${k}" aria-label="${l}"></label>`;
  const imp=P.imp;
  return back+`<h2 class="pt">Planta da casa</h2>
-<p class="note">${P.mode==='3d'?'Arraste para girar a casa; use + e − ou dois dedos para ampliar. Os ambientes e as medidas vêm da página de cada ambiente. Os móveis são ilustração: para colocar os seus, use o modo Móveis.':P.mode==='mob'?'Escolha um ambiente e arrume os móveis nele: mova, aumente, diminua, gire, exclua ou adicione.':'Arraste os ambientes para montar a planta. Toque num ambiente para ajustar as medidas.'}</p>
-<div class="seg" role="group" aria-label="Modo"><button data-plmode="3d" aria-pressed="${P.mode==='3d'}">Ver em 3D</button><button data-plmode="2d" aria-pressed="${P.mode==='2d'}">Montar (de cima)</button><button data-plmode="mob" aria-pressed="${P.mode==='mob'}">Móveis</button></div>
+<p class="note">${P.mode==='3d'?'Arraste para girar a casa; use + e − ou dois dedos para ampliar. Os ambientes e as medidas vêm da página de cada ambiente. Os móveis são ilustração: para colocar os seus, use o modo Móveis.':P.mode==='mob'?'Escolha um ambiente e arrume nele com o dedo: móveis, portas e janelas (mova, aumente, diminua, gire, exclua ou adicione).':'Arraste os ambientes para montar a planta. Toque num ambiente para ajustar as medidas.'}</p>
+<div class="seg" role="group" aria-label="Modo"><button data-plmode="3d" aria-pressed="${P.mode==='3d'}">Ver em 3D</button><button data-plmode="2d" aria-pressed="${P.mode==='2d'}">Montar (de cima)</button><button data-plmode="mob" aria-pressed="${P.mode==='mob'}">Móveis e portas</button></div>
  <div class="plwrap"><div class="plmain">
  <div class="plbox${P.full?' full':''}${P.dr?' dropen':''}">${P.mode==='3d'?'<canvas id="plgl" aria-hidden="true"></canvas>':''}<svg id="plsvg" role="img" aria-label="Planta da casa com ${S.rooms.length} ambientes" viewBox="0 0 10 10" preserveAspectRatio="xMidYMid meet"></svg>${P.mode==='3d'?'<div class="plzo" role="group" aria-label="Ampliar"><button data-plzoom="+" aria-label="Ampliar">+</button><button data-plzoom="-" aria-label="Diminuir">−</button><button data-plfit aria-label="Encaixar na tela" class="plfit">⤢</button></div>':''}<div class="plbar"><button class="plpill" data-plfull>${P.full?'Sair da tela cheia':'Tela cheia'}</button>${P.mode==='3d'?'<button class="plpill" data-pldr id="pldrbtn">Luz e acabamento</button>':''}</div>${P.mode==='3d'?plDrawer(P):''}</div>
  ${P.mode==='3d'?`<div class="plzm" role="group" aria-label="Ampliar"><label class="plfoc">Ampliar<select data-plfoc aria-label="Ampliar um ambiente"><option value="">A casa toda</option>${sc0().map(o=>`<option value="${o.r.id}" ${P.foc===o.r.id?'selected':''}>${esc(o.r.name)}</option>`).join('')}</select></label></div>
@@ -1372,25 +1372,45 @@ function plViewMob(){const P=U.pl,r=mobRoom(),f=n=>n.toFixed(3);if(!r)return{vb:
     ar=`<path d="M${f(ex-dir[0]*s*1.5+px*s)} ${f(ey-dir[1]*s*1.5+py*s)}L${f(ex-dir[0]*.01)} ${f(ey-dir[1]*.01)}L${f(ex-dir[0]*s*1.5-px*s)} ${f(ey-dir[1]*s*1.5-py*s)}" fill="none" stroke="rgba(40,25,10,.55)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" pointer-events="none"/>`}
    g+=`<g data-mob="${m.id}" style="cursor:grab">${mobTop(F,f)}<rect x="${f(m.x)}" y="${f(m.y)}" width="${f(fd.w)}" height="${f(fd.l)}" fill="rgba(255,255,255,0)" stroke="${sel?'#c9a25e':'rgba(60,40,30,.3)'}" stroke-width="${sel?2.8:1}" ${sel?'stroke-dasharray="6 4"':''} vector-effect="non-scaling-stroke"/>${ar}${fs>=.07?`<text x="${f(cx)}" y="${f(cy+fs*.3)}" text-anchor="middle" font-size="${f(fs)}" font-family="Figtree,sans-serif" font-weight="600" fill="#2f2118" stroke="rgba(255,255,255,.75)" stroke-width="${f(fs*.25)}" paint-order="stroke" pointer-events="none">${esc(mobT(m))}</text>`:''}</g>`;
    if(sel)hs=`<g data-mobh="${m.id}" style="cursor:nwse-resize"><circle cx="${f(m.x+fd.w)}" cy="${f(m.y+fd.l)}" r="${f(hr*2)}" fill="rgba(255,255,255,0)"/><circle cx="${f(m.x+fd.w)}" cy="${f(m.y+fd.l)}" r="${f(hr)}" fill="#c9a25e" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/></g>`});g+=hs}
+ g+=mobOpsSvg(r,W,hr,f);
  g+=`<text x="${f(d.w/2)}" y="${f(-.25)}" text-anchor="middle" font-size="${f(Math.max(.2,Math.min(.4,W*.04)))}" font-family="Figtree,sans-serif" font-weight="700" fill="#3b2a20" pointer-events="none">${esc(r.name)} · ${fvm(d.w)} × ${fvm(d.l)} m</text></g>`;
  return{vb:[x0,y0,W,H].map(f).join(' '),g}}
 /* arrastar para mover; bolinha dourada para aumentar/diminuir */
 function plMobBind(svg){const P=U.pl,pt=e=>{const m=svg.getScreenCTM().inverse(),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(m)};let d=null;
- svg.addEventListener('pointerdown',e=>{const r=mobRoom();if(!r||!Array.isArray(r.mob))return;const h=e.target.closest('[data-mobh]'),g=e.target.closest('[data-mob]');
-  if(!h&&!g){if(P.mobs){P.mobs=null;render()}return}
-  const id=h?h.dataset.mobh:g.dataset.mob,m=r.mob.find(x=>x.id===id);if(!m)return;const p=pt(e);P.mobs=id;
+ svg.addEventListener('pointerdown',e=>{const r=mobRoom();if(!r)return;const oh=e.target.closest('[data-oph]'),om=e.target.closest('[data-opm]');
+  if((oh||om)&&hasPos(r)){const id=oh?oh.dataset.oph.split(':')[0]:om.dataset.opm,o=(r.ops||[]).find(x=>x.id===id);if(!o)return;const p=pt(e),dm=rdim(r),hz=o.side==='n'||o.side==='s',c0=hz?p.x-(r.px||0):p.y-(r.py||0);
+   P.opsel=id;P.mobs=null;P.opr=r.id;d={op:o,r,k:oh?oh.dataset.oph.split(':')[1]:'m',sx:p.x,sy:p.y,off0:o.off,w0:Math.min(o.w,hz?dm.w:dm.l),grab:c0-Math.max(0,Math.min(o.off,(hz?dm.w:dm.l)-Math.min(o.w,hz?dm.w:dm.l))),moved:false};try{svg.setPointerCapture(e.pointerId)}catch(x){}return}
+  const h=e.target.closest('[data-mobh]'),g=e.target.closest('[data-mob]');
+  if(!h&&!g||!Array.isArray(r.mob)){if(P.mobs||P.opsel){P.mobs=null;P.opsel=null;render()}return}
+  const id=h?h.dataset.mobh:g.dataset.mob,m=r.mob.find(x=>x.id===id);if(!m)return;const p=pt(e);P.mobs=id;P.opsel=null;
   d={m,r,h:!!h,sx:p.x,sy:p.y,x0:m.x,y0:m.y,w0:m.w,l0:m.l,h0:m.h,moved:false};try{svg.setPointerCapture(e.pointerId)}catch(x){}});
- svg.addEventListener('pointermove',e=>{if(!d)return;const p=pt(e),dx=p.x-d.sx,dy=p.y-d.sy;if(!d.moved&&Math.hypot(dx,dy)<.08)return;d.moved=true;const m=d.m,r=d.r,dm=rdim(r);
+ svg.addEventListener('pointermove',e=>{if(!d)return;const p=pt(e),dx=p.x-d.sx,dy=p.y-d.sy;if(!d.moved&&Math.hypot(dx,dy)<.08)return;d.moved=true;if(d.op){mobOpDrag(d,p);planDraw();return}const m=d.m,r=d.r,dm=rdim(r);
   if(!d.h){m.x=d.x0+dx;m.y=d.y0+dy;m.x=Math.round(m.x*20)/20;m.y=Math.round(m.y*20)/20;mobClampPos(m,r)}
   else{const f0=mobDim({w:d.w0,l:d.l0,rot:m.rot}),ox=r.px||0,oy=r.py||0,hx0=d.x0+f0.w,hy0=d.y0+f0.l,ax=d.x0,ay=d.y0,den=Math.hypot(hx0-ax,hy0-ay)||1;
    let k=Math.hypot(p.x-ox-ax,p.y-oy-ay)/den;const hmin=Math.max(.1/d.w0,.1/d.l0,m.t==='tapete'||m.t==='planta'?0:.05/d.h0),hmax=Math.min(8/d.w0,8/d.l0,m.t==='tapete'||m.t==='planta'?99:3.5/d.h0),fit=Math.min((dm.w-ax)/f0.w,(dm.l-ay)/f0.l);
    k=Math.max(hmin,Math.min(hmax,fit>=hmin?Math.min(k,fit):k));m.w=mq2(d.w0*k);m.l=mq2(d.l0*k);if(m.t!=='tapete'&&m.t!=='planta')m.h=mq2(Math.max(.05,d.h0*k))}
   planDraw()});
  const end=()=>{if(!d)return;const dd=d;d=null;if(dd.moved)save();render()};svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}
+/* arrastar porta/janela pela parede (e trocar de parede); alças nas pontas mudam a largura */
+function mobOpDrag(d,p){const r=d.r,o=d.op,dm=rdim(r),px=p.x-(r.px||0),py=p.y-(r.py||0),T=OPT[o.t],q=v=>Math.round(v*20)/20,sd=s=>s==='n'||s==='s',len=s=>sd(s)?dm.w:dm.l;
+ if(d.k==='m'){const ds={n:Math.abs(py),s:Math.abs(py-dm.l),w:Math.abs(px),e:Math.abs(px-dm.w)};let best=o.side;Object.keys(ds).forEach(k=>{if(ds[k]<ds[best]-.25)best=k});
+  if(best!==o.side){o.side=best;d.grab=Math.min(o.w,len(best))/2}
+  const wd=Math.min(o.w,len(o.side)),c=sd(o.side)?px:py;o.off=Math.max(0,Math.min(q(c-d.grab),len(o.side)-wd));o.off=mq2(o.off)}
+ else{const L=len(o.side),c=Math.max(0,Math.min(q(sd(o.side)?px:py),L));
+  if(d.k==='1'){const w=Math.max(T.min,Math.min(T.max,L-d.off0,c-d.off0));o.off=d.off0;o.w=mq2(w)}
+  else{const e1=d.off0+d.w0,w=Math.max(T.min,Math.min(T.max,e1,e1-c));o.off=mq2(Math.max(0,e1-w));o.w=mq2(w)}}}
+function mobOpSel(){const P=U.pl,r=mobRoom();return r&&P&&Array.isArray(r.ops)?r.ops.find(x=>x.id===P.opsel)||null:null}
+/* sobreposição para tocar/arrastar os vãos de um ambiente (vista "Móveis") */
+function mobOpsSvg(r,W,hr,f){if(!hasPos(r)||!Array.isArray(r.ops))return'';const d=rdim(r),th=Math.max(.4,W*.05),P=U.pl;let g='',hs='';
+ r.ops.forEach(o=>{const hz=o.side==='n'||o.side==='s',L=hz?d.w:d.l,wd=Math.min(o.w,L),off=Math.max(0,Math.min(o.off,L-wd)),c=o.side==='n'||o.side==='w'?0:hz?d.l:d.w,sel=P.opsel===o.id,
+  x=hz?off:c-th/2,y=hz?c-th/2:off,w=hz?wd:th,l=hz?th:wd,col=OPT[o.t]&&(o.t==='porta'||o.t==='correr')?'#6b4b2c':'#3f7893';
+  g+=`<g data-opm="${o.id}" style="cursor:grab"><rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(l)}" rx="${f(th*.2)}" fill="${sel?'rgba(201,162,94,.28)':'rgba(255,255,255,0)'}" stroke="${sel?'#c9a25e':col}" stroke-width="${sel?2.6:1.2}" stroke-opacity="${sel?1:.55}" ${sel?'':'stroke-dasharray="4 3"'} vector-effect="non-scaling-stroke"/></g>`;
+  if(sel)[0,1].forEach(k=>{const ex=hz?(k?off+wd:off):c,ey=hz?c:(k?off+wd:off);hs+=`<g data-oph="${o.id}:${k}" style="cursor:${hz?'ew-resize':'ns-resize'}"><circle cx="${f(ex)}" cy="${f(ey)}" r="${f(hr*2)}" fill="rgba(255,255,255,0)"/><circle cx="${f(ex)}" cy="${f(ey)}" r="${f(hr)}" fill="#c9a25e" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/></g>`})});
+ return g+hs}
 /* ---- painel lateral ---- */
 function mobPanel(P){const r=mobRoom();if(!r)return '<p class="note">Cadastre as medidas de um ambiente (largura e comprimento) para colocar móveis nele.</p>';
  const has=Array.isArray(r.mob),opts=S.rooms.filter(x=>x.w>0&&x.l>0).map(x=>`<option value="${x.id}" ${x.id===r.id?'selected':''}>${esc(x.name)}</option>`).join('');
- let h=`<div class="rsum"><label class="plfoc">Ambiente<select data-mobroom aria-label="Ambiente">${opts}</select></label>`;
+ P.opr=r.id;let h=mobOpCard(r,P)+`<div class="rsum"><label class="plfoc">Ambiente<select data-mobroom aria-label="Ambiente">${opts}</select></label>`;
  if(!has){h+=`<p class="note">Este ambiente está com móveis de exemplo (só ilustração). Para mexer neles ou colocar os seus, comece a editar.</p><div class="acts"><button class="btn" data-mobstart="ex">Editar a partir do exemplo</button><button class="btn alt" data-mobstart="vazio">Começar vazio</button></div></div>`}
  else{const m=mobSel(),mf=(k,l,v)=>`<label>${l}<input inputmode="decimal" value="${fvm(v)}" data-mobf="${k}" aria-label="${l}"></label>`;
   h+=`<p class="note">${r.mob.length?r.mob.length+' móvel(is) neste ambiente. Arraste um móvel para mover; arraste a bolinha dourada para aumentar ou diminuir. A setinha mostra a frente do móvel.':'Nenhum móvel aqui ainda. Escolha um abaixo ou coloque do seu inventário.'}</p></div>`;
@@ -1402,7 +1422,15 @@ function mobPanel(P){const r=mobRoom();if(!r)return '<p class="note">Cadastre as
    <div class="acts"><button class="lk" data-mobdup>Duplicar</button><button class="lk" data-mobsave>Guardar no inventário</button><button class="lk" data-mobdel="${m.id}">${U.arm==='mobdel:'+m.id?'Toque de novo para excluir':'Excluir'}</button></div></div>`}
   h+=`<div class="rsum"><b>Adicionar um móvel</b><div class="mobcat">${Object.keys(MOBT).map(t=>`<button class="plc" data-mobadd="${t}">${esc(MOBT[t].n)}</button>`).join('')}</div></div>`;
   h+=`<button class="lk" data-mobreset>${U.arm==='mobreset'?'Toque de novo para voltar ao exemplo':'Voltar aos móveis de exemplo deste ambiente'}</button>`}
- return h+mobInv(P,has)}
+ return h+mobOpAdd(r,P)+mobInv(P,has)}
+/* cartão do vão selecionado e botões de adicionar */
+function mobOpCard(r,P){const o=mobOpSel();if(!o)return'';const isP=o.t==='porta',mf=(k,l,v)=>`<label>${l}<input inputmode="decimal" value="${fvm(v)}" data-plop="${o.id}:${k}" aria-label="${l}"></label>`,sn={n:'parede de cima',s:'parede de baixo',w:'parede da esquerda',e:'parede da direita'};
+ return `<div class="rsum mobsel"><b>${OPT[o.t].n}</b> <span class="note">na ${sn[o.side]}</span><p class="note">Arraste pela parede para mover (também vai para outra parede). Arraste as bolinhas douradas das pontas para mudar a largura.</p>
+ <div class="five">${mf('w','Largura (m)',o.w)}${mf('h','Altura (m)',o.h)}${mf('sill','Do chão à base (m)',o.sill)}</div>
+ <div class="acts">${isP?`<button class="lk" data-opflip>${o.dir==='f'?'Abre para fora → dentro':'Abre para dentro → fora'}</button><button class="lk" data-ophg>Trocar dobradiça</button>`:''}<button class="lk" data-plopdel="${o.id}">${U.arm==='opdel:'+o.id?'Toque de novo para remover':'Remover'}</button></div></div>`}
+function mobOpAdd(r,P){if(!hasPos(r))return'';const n=(r.ops||[]).length;return `<div class="rsum"><b>Portas e janelas${n?' ('+n+')':''}</b><p class="note">${n?'Toque numa porta ou janela (a faixa tracejada na parede) para mexer nela.':'Adicione e depois arraste para o lugar certo na parede.'}</p><div class="mobcat">${Object.keys(OPT).map(k=>`<button class="plc" data-mopadd="${k}">+ ${OPT[k].n}</button>`).join('')}</div></div>`}
+
+
 function mobInv(P,has){const inv=cleanInv(S.house.inv)||[],D=P.invd,tt=Object.keys(MOBT),mf=(k,l,v)=>`<label>${l}<input inputmode="decimal" value="${fvm(v)}" data-invf="${k}" aria-label="${l}"></label>`;
  let h=`<details class="addbox" data-addbox="mobinv" ${U.addOpen.mobinv||D?'open':''}><summary>Meu inventário (${inv.length})</summary>`;
  h+=inv.length?inv.map(i=>`<div class="invc">${mobMini(i)}<div class="invt"><b>${esc(mobT(i))}</b><span class="note">${esc(MOBT[i.t].n)} · ${fvm(i.w)} × ${fvm(i.l)}${i.t==='tapete'||i.t==='planta'?'':' × '+fvm(i.h)} m</span>${i.ph?imgEl(i.ph,'Foto de '+mobT(i),'invph'):''}<div class="acts">${has?`<button class="lk" data-invput="${i.id}">Colocar na planta</button>`:''}<button class="lk" data-invedit="${i.id}">Editar</button><button class="lk" data-invdel="${i.id}">${U.arm==='invdel:'+i.id?'Toque de novo':'Excluir'}</button></div></div></div>`).join(''):'<p class="note">Ainda não há móveis guardados. Tire uma foto do móvel, informe as medidas e ele vira uma miniatura 3D aqui.</p>';
@@ -1421,11 +1449,16 @@ function mobInv(P,has){const inv=cleanInv(S.house.inv)||[],D=P.invd,tt=Object.ke
  return h+'</details>'}
 /* ---- ações (cliques) ---- */
 function mobFitNew(m,r){const d=rdim(r),k=Math.min(1,(d.w-.2)/mobDim(m).w,(d.l-.2)/mobDim(m).l);if(k<1&&k>.1){m.w=mq2(m.w*k);m.l=mq2(m.l*k);if(m.t!=='tapete'&&m.t!=='planta')m.h=mq2(Math.max(.05,m.h*k))}const fd=mobDim(m),n=(r.mob||[]).length%5;m.x=(d.w-fd.w)/2+.1*n;m.y=(d.l-fd.l)/2+.1*n;return mobClampPos(m,r)}
-function mobAddTo(r,t,from){if(!Array.isArray(r.mob)||r.mob.length>=60)return null;const T=MOBT[t],src=from||{},m=Object.assign({id:uid(),t,x:0,y:0,rot:0,w:T.w,l:T.l,h:T.h,c:T.c},src.w?{w:src.w,l:src.l,h:src.h,c:src.c}:{},src.n?{n:src.n}:{},src.inv?{inv:src.inv}:{});mobFitNew(m,r);const c=cleanMobItem(m,false);if(!c)return null;r.mob.push(c);U.pl.mobs=c.id;return c}
+function mobAddTo(r,t,from){if(!Array.isArray(r.mob)||r.mob.length>=60)return null;const T=MOBT[t],src=from||{},m=Object.assign({id:uid(),t,x:0,y:0,rot:0,w:T.w,l:T.l,h:T.h,c:T.c},src.w?{w:src.w,l:src.l,h:src.h,c:src.c}:{},src.n?{n:src.n}:{},src.inv?{inv:src.inv}:{});mobFitNew(m,r);const c=cleanMobItem(m,false);if(!c)return null;r.mob.push(c);U.pl.mobs=c.id;U.pl.opsel=null;return c}
+/* depois de adicionar algo pelo painel (que fica abaixo do mapa), leva o mapa de volta à tela para a pessoa já arrastar */
+function mobShowMap(){setTimeout(()=>{const b=document.querySelector('.plbox');if(!b)return;const r=b.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)b.scrollIntoView({block:'center'})},60)}
 function mobClick(q,was){const P=U.pl;if(!P)return false;let b;const r=mobRoom(),m=mobSel(),invs=()=>cleanInv(S.house.inv)||[],invSet=a=>{const c=cleanInv(a);if(c)S.house.inv=c;else delete S.house.inv};
+ if(b=q('[data-mopadd]')){if(r&&hasPos(r)&&(r.ops||[]).length<24){const o=newOp(r,b.dataset.mopadd);r.ops=cleanOps((r.ops||[]).concat([o]));P.opsel=o.id;P.mobs=null;P.opr=r.id;mobShowMap()}return true}
+ if(q('[data-opflip]')){const o=mobOpSel();if(o)o.dir=o.dir==='f'?'d':'f';return true}
+ if(q('[data-ophg]')){const o=mobOpSel();if(o)o.hg=o.hg?0:1;return true}
  if(b=q('[data-mobstart]')){if(r){r.mob=b.dataset.mobstart==='ex'?plExampleMob(r):[];P.mobs=null}return true}
  if(b=q('[data-mobreset]')){if(r){if(was==='mobreset'){delete r.mob;P.mobs=null}else U.arm='mobreset'}return true}
- if(b=q('[data-mobadd]')){if(r)mobAddTo(r,b.dataset.mobadd);return true}
+ if(b=q('[data-mobadd]')){if(r){mobAddTo(r,b.dataset.mobadd);mobShowMap()}return true}
  if(b=q('[data-mobsc]')){if(m&&r){const k=b.dataset.mobsc==='1'?1.1:1/1.1,n=Object.assign({},m,{w:mq2(m.w*k),l:mq2(m.l*k),h:m.t==='tapete'||m.t==='planta'?m.h:mq2(m.h*k)});if(cleanMobItem(n,false)){const o=mobDim(m),c=mobDim(n);n.x=m.x+(o.w-c.w)/2;n.y=m.y+(o.l-c.l)/2;mobClampPos(n,r);Object.assign(m,n)}}return true}
  if(q('[data-mobrot]')){if(m&&r){const o=mobDim(m);m.rot=((m.rot||0)+90)%360;const c=mobDim(m);m.x+=(o.w-c.w)/2;m.y+=(o.l-c.l)/2;mobClampPos(m,r)}return true}
  if(q('[data-mobdup]')){if(m&&r&&r.mob.length<60){const n=Object.assign({},m,{id:uid(),x:m.x+.25,y:m.y+.25});mobClampPos(n,r);r.mob.push(n);P.mobs=n.id}return true}
@@ -1437,12 +1470,12 @@ function mobClick(q,was){const P=U.pl;if(!P)return false;let b;const r=mobRoom()
  if(b=q('[data-invc]')){if(P.invd){P.invd.c=b.dataset.invc;P.invd.cph=false}return true}
  if(q('[data-invcancel]')){const D=P.invd;P.invd=null;if(D&&D.ph){const old=invs().find(x=>x.id===D.id);if(!old||old.ph!==D.ph)setTimeout(()=>gc(D.ph),0)}return true}
  if(q('[data-invsave]')){const D=P.invd;if(D){const c=cleanMobItem(Object.assign({},D,{id:D.id||uid()}),true);if(c){if(D.ph)c.ph=D.ph;const a=invs(),i=a.findIndex(x=>x.id===c.id),old=i>=0?a[i].ph:null;if(i>=0)a[i]=c;else if(a.length<60)a.push(c);invSet(a);P.invd=null;U.addOpen.mobinv=true;if(old&&old!==c.ph)setTimeout(()=>gc(old),0)}else U.msg='Confira as medidas: largura e profundidade entre 0,1 e 8 m.'}return true}
- if(b=q('[data-invput]')){const i=invs().find(x=>x.id===b.dataset.invput);if(i&&r&&Array.isArray(r.mob))mobAddTo(r,i.t,{w:i.w,l:i.l,h:i.h,c:i.c,n:i.n,inv:i.id});return true}
+ if(b=q('[data-invput]')){const i=invs().find(x=>x.id===b.dataset.invput);if(i&&r&&Array.isArray(r.mob)){mobAddTo(r,i.t,{w:i.w,l:i.l,h:i.h,c:i.c,n:i.n,inv:i.id});mobShowMap()}return true}
  if(b=q('[data-invdel]')){const id=b.dataset.invdel;if(was==='invdel:'+id){const a=invs(),o=a.find(x=>x.id===id);invSet(a.filter(x=>x.id!==id));if(o&&o.ph)setTimeout(()=>gc(o.ph),0)}else U.arm='invdel:'+id;return true}
  return false}
 /* ---- campos (change) ---- */
 async function mobChange(el){const P=U.pl,d=el.dataset;if(!P)return false;const r=mobRoom(),m=mobSel();
- if(d.mobroom!==undefined){P.mobr=el.value;P.mobs=null;return true}
+ if(d.mobroom!==undefined){P.mobr=el.value;P.mobs=null;P.opsel=null;P.opr=el.value;return true}
  if(d.mobf!==undefined){if(!m||!r)return true;const k=d.mobf;if(k==='n'){const v=String(el.value||'').replace(/\s+/g,' ').trim().slice(0,40);if(v)m.n=v;else delete m.n}
   else if(k==='c'){if(/^#[0-9a-fA-F]{6}$/.test(el.value))m.c=el.value.toLowerCase()}
   else{const v=plNum(el.value),n=Object.assign({},m,{[k]:v});if(v!=null&&cleanMobItem(n,false)){const o=mobDim(m),c=mobDim(n);n.x=m.x+(o.w-c.w)/2;n.y=m.y+(o.l-c.l)/2;mobClampPos(n,r);Object.assign(m,n)}}return true}
